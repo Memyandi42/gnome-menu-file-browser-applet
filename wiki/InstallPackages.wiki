@@ -1,5 +1,4 @@
 Here are some install packages committed by users.
 
 ====gentoo===
-[http://bugs.gentoo.org/attachment.cgi?id=114402]
-
+version 0.3.0 [http://bugs.gentoo.org/attachment.cgi?id=114402]

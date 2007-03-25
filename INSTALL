@@ -1,0 +1,29 @@
+Installation Instructions
+*************************
+
+Requirements
+************
+You will need to have the binary and development files (and all their
+dependencies) for the following packages installed to compile this program:
+
+gtk-2.0
+libgnomevfs-2.0
+libpanel-applet-2.0
+
+You will also need the following packages installed to compile this program:
+pkg-config
+cmake
+
+Compiling
+*********
+At the project's root directory, execute:
+'cmake .'
+'make'
+
+Installation
+************
+At the project's root directory, with root privileges execute:
+'make install'
+
+Similarly, to uninstall...
+'make uninstall'

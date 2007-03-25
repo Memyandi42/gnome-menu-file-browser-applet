@@ -1,0 +1,48 @@
+Menu File Browser Applet 0.3.0
+******************************
+Menu File Browser Applet is an applet for the GNOME Panel. It lets you browse
+and open files in your home directory from the gnome panel, without having to
+open a file manager. It is _not_ intended as replacement to proper file
+managers like nautilus. Sometimes you (like me) just want to open a file and
+don't want to have to open a file manager, browse to and open the file, then
+close the file manager. This Applet just saves you couple of clicks.
+
+Features
+********
+	* Browse and open files in your home directory from the panel
+	* Respects Gnome mime type options and includes mime icon in menu
+	* Middle clicking in a directory header will open a terminal in that directory
+	* More to come. Maybe
+
+Installation
+************
+See the file INSTALL.
+
+To Do
+*****
+	* Drag-n-drop out of mfba
+	* add context menu (open with, delete, etc.) to files and dirs (possibly hook into nautilus context
+	  menu if possible)
+	* Some configuration options might be nice
+	* Documentation
+	* A better icon
+	* Translation (I haven't a clue how to do this)
+	* Generating distribution packages
+	* Code cleanup
+	* Suggestions anyone?
+	* Please keep in mind that I'd actually like to keep the number of
+	  features/options to a bare (and truly useful) minimum
+
+Bugs
+****
+	* There are none ;-)
+	* There are probably a few memory leaks here and there
+Send bugs to bertoldia@gmail.com for now.
+
+Hacking
+*******
+Contributions are welcome, but it might take a while for them to make it into a
+release as I (unfortunately) don't always have a lot of time to devote to this
+project (and other lame excuses). Send ideas/code to bertoldia@gmail.com for
+now.
+

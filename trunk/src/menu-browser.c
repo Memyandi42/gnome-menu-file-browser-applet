@@ -105,17 +105,17 @@ menu_file_browser_new (const gchar *label,
 	pair->file_browser = file_browser;
 	pair->path = g_strdup (file_browser->priv->root_path);
 
-	g_signal_connect (G_OBJECT (file_browser->menu_item),
+	g_signal_connect (GTK_MENU_ITEM (file_browser->menu_item),
 					  "activate",
 					  G_CALLBACK (menu_file_browser_populate_menu),
 					  pair);
 
-    g_signal_connect (G_OBJECT (file_browser->menu_item),
+    g_signal_connect (GTK_MENU_ITEM (file_browser->menu_item),
                 	  "deselect",
 					  G_CALLBACK (menu_file_browser_clear_menu),
 					  file_browser->priv->menu);
 
-    g_signal_connect (G_OBJECT (file_browser->menu_item),
+    g_signal_connect (GTK_MENU_ITEM (file_browser->menu_item),
                 	  "deselect",
 					  G_CALLBACK (menu_file_browser_clean_up),
 					  file_browser);
@@ -190,12 +190,12 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
 		this_pair->path = g_strdup (file_name_and_path);
 		g_ptr_array_add (pair->file_browser->priv->tmp_handle, this_pair);
 
-        g_signal_connect (G_OBJECT(menu_item),
+        g_signal_connect (GTK_MENU_ITEM (menu_item),
                 		  "activate",
 						  G_CALLBACK(menu_file_browser_populate_menu),
 						  this_pair);
         
-        g_signal_connect (G_OBJECT(menu_item),
+        g_signal_connect (GTK_MENU_ITEM (menu_item),
 						  "deselect",
 						  G_CALLBACK(menu_file_browser_clear_menu),
 						  child_menu);
@@ -249,7 +249,7 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
 		this_pair->path = g_strdup (file_name_and_path);
 		g_ptr_array_add (pair->file_browser->priv->tmp_handle, this_pair);
 		
-        g_signal_connect_swapped (G_OBJECT(menu_item),
+        g_signal_connect_swapped (GTK_WIDGET (menu_item),
                             	  "button_press_event",
 								  G_CALLBACK (menu_file_browser_on_file_item_activate),
 								  file_name_and_path);
@@ -287,7 +287,7 @@ menu_file_browser_add_menu_header (GtkWidget *current_menu,
     gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
                            menu_item);
     
-    g_signal_connect_swapped (G_OBJECT (menu_item),
+    g_signal_connect_swapped (GTK_WIDGET (menu_item),
                         	  "button_press_event",
 							  G_CALLBACK (menu_file_browser_on_directory_item_activate),
 							  (gpointer)file_name_and_path);
@@ -317,38 +317,45 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 										   pair->path,
 										   GNOME_VFS_FILE_INFO_GET_MIME_TYPE |
 										   GNOME_VFS_FILE_INFO_FOLLOW_LINKS);
-																
-	vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
-												vfs_file_info);
 
-    
-    /**********************while its not empty, keep reading items***************************/
-	while (vfs_result == GNOME_VFS_OK)
-    {	
-		/*var with file name and full path*/
-		file_name_and_path = g_strdup_printf ("%s/%s",
-											  pair->path,
-											  vfs_file_info->name);
-		
-        /*if it's not a hidden file...*/
-    	if (g_ascii_strncasecmp (vfs_file_info->name, ".", 1))
-	    {
-			if (vfs_file_info->type == GNOME_VFS_FILE_TYPE_DIRECTORY)
-            {	/*make an array that holds all the dirs in this dir*/
-				g_ptr_array_add (dirs, (gpointer)g_strdup (vfs_file_info->name));
-            }
-			if (vfs_file_info->type == GNOME_VFS_FILE_TYPE_REGULAR)
-            {	/*make an array that holds all the files in this dir*/
-				g_ptr_array_add (files, (gpointer)g_strdup (vfs_file_info->name));
-            }
-        }
-		
-        g_free (file_name_and_path);
-        /*get the next entry*/
-    	vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle, vfs_file_info);
-    }
-    /*close the dir*/
-	vfs_result = gnome_vfs_directory_close (vfs_dir_handle);
+  	/* make sure the dir was opened OK. This fixes bug #3 */
+	if (vfs_result == GNOME_VFS_OK)
+	{	/* get the first entry */
+    	vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
+													vfs_file_info);
+	    /* if it opened OK and while its not empty, keep reading items */
+		while (vfs_result == GNOME_VFS_OK)
+	    {	
+			/*var with file name and full path*/
+			file_name_and_path = g_strdup_printf ("%s/%s",
+												  pair->path,
+												  vfs_file_info->name);
+
+        	/*if it's not a hidden file...*/
+    		if (g_ascii_strncasecmp (vfs_file_info->name, ".", 1))
+		    {
+				if (vfs_file_info->type == GNOME_VFS_FILE_TYPE_DIRECTORY)
+        	    {	/*make an array that holds all the dirs in this dir*/
+					g_ptr_array_add (dirs, (gpointer)g_strdup (vfs_file_info->name));
+	            }
+				if (vfs_file_info->type == GNOME_VFS_FILE_TYPE_REGULAR)
+	            {	/*make an array that holds all the files in this dir*/
+					g_ptr_array_add (files, (gpointer)g_strdup (vfs_file_info->name));
+    	        }
+	        }
+        	g_free (file_name_and_path);
+        	/*get the next entry*/
+    		vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
+														vfs_file_info);
+    	}
+    	/*close the dir*/
+		vfs_result = gnome_vfs_directory_close (vfs_dir_handle);
+	}
+	else
+	{
+		g_printf ("Error opening directory. GNOME_VFS error: %s\n",
+				  gnome_vfs_result_to_string (vfs_result));
+	}
     /**************************** Finished reading dir contents ************************/
 	
 	/*sort the arrays containing the directory and file listings*/

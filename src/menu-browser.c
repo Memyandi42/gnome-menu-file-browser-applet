@@ -45,7 +45,7 @@ typedef struct
 /****************** "Private" functions ***************************************/
 gint	menu_file_browser_populate_menu			(GtkWidget *parent_menu_item, Pair *pair);
 gint	menu_file_browser_add_menu_header		(GtkWidget *current_menu, const gchar *file_name_and_path);
-gint	menu_file_browser_get_dir_contents		(GPtrArray *files, GPtrArray *dirs, Pair *pair);
+gchar*	menu_file_browser_get_dir_contents		(GPtrArray *files, GPtrArray *dirs, Pair *pair);
 gint	menu_file_browser_on_file_item_activate (const gchar *file_name_and_path, GdkEventButton *event);
 gint	menu_file_browser_on_directory_item_activate (gchar *file_name_and_path, GdkEventButton *event);
 gint	menu_file_browser_on_file_left_click	(const gchar *file_name_and_path);
@@ -129,6 +129,7 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
 {
     gchar 					*file_name_and_path = NULL;
 	gchar					*icon_name = NULL;
+	gchar					*error = NULL;
     GtkWidget 				*menu_item = NULL;
     GtkWidget 				*child_menu = NULL;
     GtkWidget 				*current_menu = NULL;
@@ -146,9 +147,9 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
 									   pair->path);
 
 	/* read the contents of the dir. */
-	menu_file_browser_get_dir_contents (files,
-										dirs,
-										pair);
+	error = menu_file_browser_get_dir_contents (files,
+												dirs,
+												pair);
 
     /************** for each dir in this dir, add the menu item and events *****************/
     for (i=0; i<dirs->len; i++)
@@ -258,6 +259,25 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
         g_free (icon_name);
     }
 	/*********************Finished adding the files to the menu******************/
+	if (error != NULL)
+	{	   
+	    menu_item = gtk_menu_item_new_with_label (error);
+		g_free (error);
+        gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
+                               menu_item);
+		gtk_widget_set_sensitive (GTK_WIDGET (menu_item),
+								  FALSE);
+	}
+	else if ((dirs->len == 0) & (files->len == 0))
+    {
+	  
+	    menu_item = gtk_menu_item_new_with_label ("(Empty)");        
+        gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
+                               menu_item);
+		gtk_widget_set_sensitive (GTK_WIDGET (menu_item),
+								  FALSE);
+    }
+	/****************************************************************************/
     
     gtk_widget_show_all (current_menu);
 
@@ -300,7 +320,7 @@ menu_file_browser_add_menu_header (GtkWidget *current_menu,
     return 0;
 }
 /******************************************************************************/
-gint
+gchar *
 menu_file_browser_get_dir_contents (GPtrArray *files,
 									GPtrArray *dirs,
 									Pair *pair)
@@ -309,6 +329,7 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 	GnomeVFSDirectoryHandle *vfs_dir_handle = NULL;
 	GnomeVFSResult    		vfs_result;
 	GnomeVFSFileInfo		*vfs_file_info = NULL;
+	gchar					*message = NULL;
 
 	/*make struct for getting file info, open the dir for reading and get the first entry*/
 	vfs_file_info = gnome_vfs_file_info_new();
@@ -353,15 +374,19 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 	}
 	else
 	{
+		message = g_strdup_printf ("(%s)",gnome_vfs_result_to_string (vfs_result));
 		g_printf ("Error opening directory. GNOME_VFS error: %s\n",
-				  gnome_vfs_result_to_string (vfs_result));
+				  message);
 	}
     /**************************** Finished reading dir contents ************************/
 	
 	/*sort the arrays containing the directory and file listings*/
 	g_ptr_array_sort (dirs, (GCompareFunc)&menu_file_browser_sort_alpha);
     g_ptr_array_sort (files, (GCompareFunc)&menu_file_browser_sort_alpha);
-	return 0;
+
+	gnome_vfs_file_info_clear (vfs_file_info);
+	g_free (vfs_file_info);
+	return message;
 }
 /******************************************************************************/
 gint

@@ -31,7 +31,6 @@ struct _MenuFileBrowserPrivate
 	gchar			*label;
 	gchar			*root_path;
 	gchar			*directory_mime_icon_name;
-	GtkWidget 		*menu_item_icon;
 	GtkWidget		*menu;
 	GtkIconTheme	*icon_theme;
 	GPtrArray 		*tmp_handle;
@@ -81,19 +80,14 @@ menu_file_browser_new (const gchar *label,
 
 	/*make the menu header, main menu item and icon*/
     file_browser->menu_item = gtk_image_menu_item_new_with_label (label);
-	file_browser->priv->menu_item_icon  = gtk_image_new_from_stock ("gtk-home",
-																	GTK_ICON_SIZE_MENU);	
+
 	/* get the mime icon name for directories */
 	file_browser->priv->directory_mime_icon_name = gnome_icon_lookup_sync (file_browser->priv->icon_theme,
     																	   NULL,
 																		   root_path,
 																		   NULL,
 																		   0,
-																		   NULL);		
-
-    /*add the image to the menu item and the menu item to the menu header and show it all*/
-    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (file_browser->menu_item),
-                                    					file_browser->priv->menu_item_icon);
+																		   NULL);
 
 	/*make the main menu*/	
 	file_browser->priv->menu = gtk_menu_new();

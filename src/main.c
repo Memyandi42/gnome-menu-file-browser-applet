@@ -160,6 +160,7 @@ file_browser_applet_create (PanelApplet *applet)
 {
 	MenuFileBrowser *file_browser;
 	GtkWidget *menu_bar;
+	GtkWidget *icon;
 
 	/* here or in the browser? */
     gnome_vfs_init();    
@@ -176,6 +177,12 @@ file_browser_applet_create (PanelApplet *applet)
 
  	file_browser = menu_file_browser_new ("Home",
 										  g_get_home_dir());
+
+    /* get the icon and add it to the menu item */
+	icon  = gtk_image_new_from_stock ("gtk-home",
+									  GTK_ICON_SIZE_MENU);	
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (file_browser->menu_item),
+                                    					icon);
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu_bar),
                            file_browser->menu_item);

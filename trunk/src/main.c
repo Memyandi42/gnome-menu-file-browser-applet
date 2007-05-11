@@ -39,11 +39,11 @@ static void file_browser_applet_display_help_dialog (GtkWidget *widget);
 static void file_browser_applet_hide_tooltip (GtkWidget *widget, GtkWidget *menu_bar);
 static void file_browser_applet_show_tooltip (GtkWidget *widget, GtkWidget *menu_bar);
 static gboolean file_browser_applet_create (PanelApplet *applet);
-static gboolean file_browser_applet_factory (PanelApplet *applet, const  char *iid, gpointer data);
+static gboolean file_browser_applet_factory (PanelApplet *applet, const  gchar *iid, gpointer data);
 /******************************************************************************/
 GtkTooltips *tooltip = NULL;
 /******************************************************************************/
-static const char file_browser_applet_menu_xml [] =
+static const gchar file_browser_applet_menu_xml [] =
 	"<popup name=\"button3\">\n"
 	"   <menuitem name=\"Preferences Item\" verb=\"Preferences\" _label=\"Preferences\"\n"
 	"             pixtype=\"stock\" pixname=\"gtk-properties\"/>\n"
@@ -97,19 +97,19 @@ static void
 file_browser_applet_display_about_dialog (GtkWidget *widget)
 {
 	GdkPixbuf  *pixbuf = NULL;
-	char       *file;
-	const char *authors[] =
+	gchar       *file;
+	const gchar *authors[] =
 	{
 		"Axel von Bertoldi <bertoldia@gmail.com>",
 		NULL
 	};
-	const char *documenters [] =
+	const gchar *documenters [] =
 	{
 /*		"Axel von Bertoldi", */
 		NULL,
 		NULL
 	};
-	const char *translator_credits = _("translator_credits");
+	const gchar *translator_credits = _("translator_credits");
 	
 	file = gnome_program_locate_file (NULL, GNOME_FILE_DOMAIN_PIXMAP, "menu-file-browser-applet.png", TRUE, NULL);
 	if (file != NULL)
@@ -184,8 +184,6 @@ file_browser_applet_create (PanelApplet *applet)
 					   menu_bar);	
 
 	panel_applet_set_flags (applet,
-/*							PANEL_APPLET_EXPAND_MAJOR |
-							PANEL_APPLET_EXPAND_MINOR | */
 							PANEL_APPLET_HAS_HANDLE);
 
 	g_signal_connect (G_OBJECT (file_browser->menu_item),
@@ -202,6 +200,13 @@ file_browser_applet_create (PanelApplet *applet)
 							 file_browser_applet_menu_xml,
 							 file_browser_applet_menu_verbs,
 							 NULL);
+	gtk_rc_parse_string (
+		"style \"panel-menubar-style\"\n"
+		"{\n"
+		"  GtkMenuBar::shadow-type = none\n"
+		"  GtkMenuBar::internal-padding = 0\n"
+		"}\n"
+		"class \"GtkMenuBar\" style \"panel-menubar-style\"");
 
 	gtk_widget_show_all (GTK_WIDGET(applet));
 	gtk_main();	
@@ -211,7 +216,7 @@ file_browser_applet_create (PanelApplet *applet)
 /******************************************************************************/
 static gboolean
 file_browser_applet_factory (PanelApplet *applet,
-					const  char *iid,
+					const  gchar *iid,
 					gpointer data)
 {
         if(strcmp(iid, APPLET_IID) == 0)

@@ -28,12 +28,14 @@
 /****************** "Private" data ********************************************/
 struct _MenuFileBrowserPrivate
 {
-	gchar			*label;
-	gchar			*root_path;
+	gchar			*label;						/* the label of the main menu item */
+	gchar			*root_path;					/* root path of the menu */
 	gchar			*directory_mime_icon_name;
-	GtkWidget		*menu;
+	GtkWidget		*menu;						/* main menu */
 	GtkIconTheme	*icon_theme;
-	GPtrArray 		*tmp_handle;
+	GPtrArray 		*tmp_handle;				/* ptr to array that holds all strings.
+												   used in menu_file_browser_free_structure
+												   to delete all string when the menu hides */
 };
 /******************************************************************************/
 typedef struct
@@ -43,10 +45,10 @@ typedef struct
 } Pair;
 /****************** "Private" functions ***************************************/
 gint	menu_file_browser_populate_menu			(GtkWidget *parent_menu_item, Pair *pair);
-gint	menu_file_browser_add_menu_header		(GtkWidget *current_menu, const gchar *file_name_and_path);
+gint	menu_file_browser_add_menu_header		(GtkWidget *current_menu, Pair *pair);
 gchar*	menu_file_browser_get_dir_contents		(GPtrArray *files, GPtrArray *dirs, Pair *pair);
-gint	menu_file_browser_on_file_item_activate (const gchar *file_name_and_path, GdkEventButton *event);
-gint	menu_file_browser_on_directory_item_activate (gchar *file_name_and_path, GdkEventButton *event);
+gint	menu_file_browser_on_file_item_activate (Pair *pair, GdkEventButton *event);
+gint	menu_file_browser_on_directory_item_activate (Pair *pair, GdkEventButton *event);
 gint	menu_file_browser_on_file_left_click	(const gchar *file_name_and_path);
 gint	menu_file_browser_on_file_middle_click	(const gchar *file_name_and_path);
 gint 	menu_file_browser_on_file_right_click	(const gchar *file_name_and_path);
@@ -54,12 +56,12 @@ gint 	menu_file_browser_on_dir_left_click		(const gchar *file_name_and_path);
 gint 	menu_file_browser_on_dir_middle_click	(const gchar *file_name_and_path);
 gint 	menu_file_browser_on_dir_right_click	(const gchar *file_name_and_path);
 gint	menu_file_browser_open_file				(const gchar *file_name_and_path);
-gchar *	menu_file_browser_get_mime_application	(const gchar *file_name_and_path);
+gchar*	menu_file_browser_get_mime_application	(const gchar *file_name_and_path);
 gint	menu_file_browser_launch_app			(gchar **args, const gchar *working_dir);
 gint	menu_file_browser_launch_terminal		(const gchar *file_name_and_path);
 gint	menu_file_browser_sort_alpha			(const gchar **s1, const gchar **s2);
-void	menu_file_browser_clear_menu			(GtkWidget *menu_item, GtkWidget *menu);
-gint	menu_file_browser_clean_up				(GtkWidget *menu_item, MenuFileBrowser *file_browser);
+void	menu_file_browser_clear_menu			(GtkWidget *menu_item);
+gint	menu_file_browser_clean_up				(MenuFileBrowser *file_browser);
 void	menu_file_browser_free_structure		(Pair *pair);
 void	menu_file_browser_show_dialog			(gchar * title, gchar *message, GtkMessageType type);
 /******************************************************************************/
@@ -97,19 +99,19 @@ menu_file_browser_new (const gchar *label,
 	Pair *pair;
 	pair = g_new0 (Pair, 1);
 	pair->file_browser = file_browser;
-	pair->path = g_strdup (file_browser->priv->root_path);
+	pair->path = file_browser->priv->root_path;
 
 	g_signal_connect (GTK_MENU_ITEM (file_browser->menu_item),
 					  "activate",
 					  G_CALLBACK (menu_file_browser_populate_menu),
-					  pair);
+					  (gpointer) pair);
 
     g_signal_connect (GTK_MENU_ITEM (file_browser->menu_item),
                 	  "deselect",
 					  G_CALLBACK (menu_file_browser_clear_menu),
-					  file_browser->priv->menu);
+					  NULL);
 
-    g_signal_connect (GTK_MENU_ITEM (file_browser->menu_item),
+    g_signal_connect_swapped (GTK_MENU_ITEM (file_browser->menu_item),
                 	  "deselect",
 					  G_CALLBACK (menu_file_browser_clean_up),
 					  file_browser);
@@ -134,11 +136,11 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
 	Pair					*this_pair = NULL;
 	
     /* get the menu widget to pack all the menu items for this dir into */
-    current_menu = gtk_menu_item_get_submenu ((GtkMenuItem *)parent_menu_item);
+    current_menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (parent_menu_item));
     
 	/* add the dir name and events */
 	menu_file_browser_add_menu_header (current_menu,
-									   pair->path);
+									   pair);
 
 	/* read the contents of the dir. */
 	error = menu_file_browser_get_dir_contents (files,
@@ -150,78 +152,62 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
     { 
         file_name_and_path = g_strdup_printf ("%s/%s",
                                               pair->path,
-											  (char *)g_ptr_array_index (dirs, i)),
-                           
+											  (gchar *)g_ptr_array_index (dirs, i)),
         /*make a menu item for this dir*/
 	    menu_item = gtk_image_menu_item_new_with_label ((gchar*)g_ptr_array_index (dirs, i));
 		
-        /*lookup the mime icon name for this file type (which is always a dir, can speed up here)*/
-        /*on second thought, its fast enough*/
-		icon_name = gnome_icon_lookup_sync (pair->file_browser->priv->icon_theme,
-    										NULL,
-											file_name_and_path,
-											NULL,
-											0,
-											NULL);		
-
         /*get the icon widget based on the returned icon name (always the same icon, can speed up here)*/
         menu_item_icon = gtk_image_new_from_icon_name (pair->file_browser->priv->directory_mime_icon_name,
             										   GTK_ICON_SIZE_MENU);
 
         /*stick the icon in the menu item, the menu item in the menu and show it all*/
-		gtk_image_menu_item_set_image ((GtkImageMenuItem *)menu_item,
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 										menu_item_icon);
 
        	gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
 							   menu_item);		
         
         /*make the sub menu to show all the files in this dir*/
-        child_menu = gtk_menu_new();
-        gtk_menu_item_set_submenu (GTK_MENU_ITEM(menu_item),
+        child_menu = gtk_menu_new ();
+        gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
 								   child_menu);
-		
+
 		this_pair = g_new0 (Pair, 1);
 		this_pair->file_browser = pair->file_browser;
-		this_pair->path = g_strdup (file_name_and_path);
+		this_pair->path = file_name_and_path;
 		g_ptr_array_add (pair->file_browser->priv->tmp_handle, this_pair);
 
         g_signal_connect (GTK_MENU_ITEM (menu_item),
                 		  "activate",
-						  G_CALLBACK(menu_file_browser_populate_menu),
-						  this_pair);
-        
+						  G_CALLBACK (menu_file_browser_populate_menu),
+						  (gpointer) this_pair);
+
         g_signal_connect (GTK_MENU_ITEM (menu_item),
 						  "deselect",
-						  G_CALLBACK(menu_file_browser_clear_menu),
-						  child_menu);
-    
-        g_free (g_ptr_array_index (dirs, i));
-        g_free (icon_name);
+						  G_CALLBACK (menu_file_browser_clear_menu),
+						  NULL);
     }	
 	/*********************Finished adding the dirs to the menu******************/
-
     
     if ((dirs->len > 0) & (files->len > 0))
     {
 	    /*add a separator between dirs and files*/
 	    menu_item = gtk_separator_menu_item_new();        
-        gtk_menu_shell_append   (GTK_MENU_SHELL (current_menu),
-                                menu_item);
+        gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
+                               menu_item);
     }
 	
     /********************for each file in this dir, add the menu item and events***************************/
     for (i=0; i<files->len; i++)
-    {   /*memory leak here, this string buff is never released. 
-          but i can't release it because it is used as callback data*/
+    {  
         file_name_and_path = g_strdup_printf ("%s/%s",
 											  pair->path,
-											  (char *)g_ptr_array_index (files, i)),
-        
+											  (gchar *)g_ptr_array_index (files, i)),
         /*make a menu item for this dir*/
 	    menu_item = gtk_image_menu_item_new_with_label ((gchar *)g_ptr_array_index (files, i));
         
         /*lookup the mime icon name for this file type */
-		icon_name = gnome_icon_lookup_sync  (pair->file_browser->priv->icon_theme,
+		icon_name = gnome_icon_lookup_sync (pair->file_browser->priv->icon_theme,
 									    	NULL,
                                             file_name_and_path,
                                             NULL,
@@ -233,7 +219,7 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
                                                 	   GTK_ICON_SIZE_MENU);
         
         /*stick the icon in the menu item, the menu item in the menu and show it all*/
-		gtk_image_menu_item_set_image ((GtkImageMenuItem *)menu_item,
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 										menu_item_icon);
         
        	gtk_menu_shell_append (GTK_MENU_SHELL(current_menu),
@@ -241,15 +227,13 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
 		
 		this_pair = g_new0 (Pair, 1);
 		this_pair->file_browser = pair->file_browser;
-		this_pair->path = g_strdup (file_name_and_path);
+		this_pair->path = file_name_and_path;
 		g_ptr_array_add (pair->file_browser->priv->tmp_handle, this_pair);
 		
         g_signal_connect_swapped (GTK_WIDGET (menu_item),
                             	  "button_press_event",
 								  G_CALLBACK (menu_file_browser_on_file_item_activate),
-								  file_name_and_path);
-        
-        g_free (g_ptr_array_index (files, i));
+								  (gpointer) this_pair);
         g_free (icon_name);
     }
 	/*********************Finished adding the files to the menu******************/
@@ -276,26 +260,30 @@ menu_file_browser_populate_menu (GtkWidget	*parent_menu_item,
     gtk_widget_show_all (current_menu);
 
 	/*clean up*/
-    g_ptr_array_free (dirs, FALSE);
-    g_ptr_array_free (files, FALSE);
+	g_ptr_array_foreach (dirs, (GFunc)g_free, NULL);
+	g_ptr_array_foreach (files, (GFunc)g_free, NULL);
+    g_ptr_array_free (dirs, TRUE);
+    g_ptr_array_free (files, TRUE);
 
     return 0;		
 }
 /******************************************************************************/
 gint
 menu_file_browser_add_menu_header (GtkWidget *current_menu,
-								   const gchar *file_name_and_path)
+								   Pair *pair)
 {
     GtkWidget *menu_item = NULL;
     GtkWidget *separator = NULL;
 	GtkWidget *menu_item_icon = NULL;    
+
+	const gchar *file_name_and_path = pair->path;
 
 	menu_item = gtk_image_menu_item_new_with_label (file_name_and_path);
     
     menu_item_icon = gtk_image_new_from_stock ("gtk-home",
                                                GTK_ICON_SIZE_MENU);
     
-    gtk_image_menu_item_set_image ((GtkImageMenuItem *)menu_item,
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                     menu_item_icon);
 
     gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
@@ -304,13 +292,13 @@ menu_file_browser_add_menu_header (GtkWidget *current_menu,
     g_signal_connect_swapped (GTK_WIDGET (menu_item),
                         	  "button_press_event",
 							  G_CALLBACK (menu_file_browser_on_directory_item_activate),
-							  (gpointer)file_name_and_path);
+							  (gpointer)pair);
 	
     separator = gtk_separator_menu_item_new();
     
     gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
                            separator);
-	
+
     return 0;
 }
 /******************************************************************************/
@@ -319,18 +307,17 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 									GPtrArray *dirs,
 									Pair *pair)
 {
-    gchar 					*file_name_and_path = NULL;
 	GnomeVFSDirectoryHandle *vfs_dir_handle = NULL;
 	GnomeVFSResult    		vfs_result;
 	GnomeVFSFileInfo		*vfs_file_info = NULL;
-	gchar					*message = NULL;
+	gchar					*error = NULL;
 
 	/*make struct for getting file info, open the dir for reading and get the first entry*/
 	vfs_file_info = gnome_vfs_file_info_new();
 	
     vfs_result = gnome_vfs_directory_open (&vfs_dir_handle,
 										   pair->path,
-										   GNOME_VFS_FILE_INFO_GET_MIME_TYPE |
+/*										   GNOME_VFS_FILE_INFO_GET_MIME_TYPE |*/
 										   GNOME_VFS_FILE_INFO_FOLLOW_LINKS);
 
   	/* make sure the dir was opened OK. This fixes bug #3 */
@@ -341,11 +328,6 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 	    /* if it opened OK and while its not empty, keep reading items */
 		while (vfs_result == GNOME_VFS_OK)
 	    {	
-			/*var with file name and full path*/
-			file_name_and_path = g_strdup_printf ("%s/%s",
-												  pair->path,
-												  vfs_file_info->name);
-
         	/*if it's not a hidden file...*/
     		if (g_ascii_strncasecmp (vfs_file_info->name, ".", 1))
 		    {
@@ -358,7 +340,6 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 					g_ptr_array_add (files, (gpointer)g_strdup (vfs_file_info->name));
     	        }
 	        }
-        	g_free (file_name_and_path);
         	/*get the next entry*/
     		vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
 														vfs_file_info);
@@ -368,9 +349,9 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 	}
 	else
 	{
-		message = g_strdup_printf ("(%s)",gnome_vfs_result_to_string (vfs_result));
+		error = g_strdup_printf ("(%s)",gnome_vfs_result_to_string (vfs_result));
 		g_printf ("Error opening directory. GNOME_VFS error: %s\n",
-				  message);
+				  error);
 	}
     /**************************** Finished reading dir contents ************************/
 	
@@ -380,13 +361,15 @@ menu_file_browser_get_dir_contents (GPtrArray *files,
 
 	gnome_vfs_file_info_clear (vfs_file_info);
 	g_free (vfs_file_info);
-	return message;
+	return error;
 }
 /******************************************************************************/
 gint
-menu_file_browser_on_file_item_activate (const gchar *file_name_and_path,
+menu_file_browser_on_file_item_activate (Pair *pair,
 										 GdkEventButton *event)
 {
+	const gchar *file_name_and_path = pair->path;
+
     if (g_file_test (file_name_and_path, G_FILE_TEST_EXISTS))
     {
 		if (event->button == 1)
@@ -404,15 +387,18 @@ menu_file_browser_on_file_item_activate (const gchar *file_name_and_path,
     }
     else
     {
-        g_printf ("Error: file or directory %s does not exist\n", file_name_and_path);
+        g_printf ("Error: file %s does not exist\n", file_name_and_path);
     }
+	/*menu_file_browser_clean_up (pair->file_browser);*/
     return 0;
 }
 /******************************************************************************/
 gint
-menu_file_browser_on_directory_item_activate (gchar *file_name_and_path,
+menu_file_browser_on_directory_item_activate (Pair *pair,
 											  GdkEventButton *event)
 {
+	const gchar *file_name_and_path = pair->path;
+
     if (g_file_test (file_name_and_path, G_FILE_TEST_EXISTS))
     {
     	if (event->button == 1)
@@ -430,8 +416,9 @@ menu_file_browser_on_directory_item_activate (gchar *file_name_and_path,
     }
     else
     {
-        g_printf ("Error: file or directory %s does not exist\n", file_name_and_path);
+        g_printf ("Error: directory %s does not exist\n", file_name_and_path);
     }
+	/*menu_file_browser_clean_up (pair->file_browser);*/
     return 0;
 }
 /******************************************************************************/
@@ -483,6 +470,7 @@ menu_file_browser_open_file (const gchar *file_name_and_path)
 	gchar *arg = NULL;
 	gchar *file_mime_app_exec = NULL;
 	gchar *working_dir = NULL;
+	int i;
 
 	working_dir = g_path_get_dirname (file_name_and_path);
 
@@ -521,6 +509,10 @@ menu_file_browser_open_file (const gchar *file_name_and_path)
 	menu_file_browser_launch_app (args, working_dir);
 	
 	g_free (arg);
+	for (i = 0; args[i]; i++)
+	{
+		g_free (args[i]);
+	}
 	g_free (args);
 	g_free (file_mime_app_exec);
 
@@ -539,7 +531,7 @@ menu_file_browser_get_mime_application (const gchar *file_name_and_path)
 
 	if (mime_application)
 	{
-		file_mime_app_exec = g_strdup ((char *)mime_application->command);	
+		file_mime_app_exec = g_strdup ((gchar *)mime_application->command);	
 	}
     
     g_free (mime_type);
@@ -604,32 +596,47 @@ menu_file_browser_sort_alpha (const gchar **s1,
 }
 /******************************************************************************/
 void
-menu_file_browser_clear_menu (GtkWidget *menu_item,
-							  GtkWidget *menu)
+menu_file_browser_clear_menu (GtkWidget *menu_item)
 {
-    gtk_container_foreach ((GtkContainer *)menu,
-                           (GtkCallback)gtk_widget_destroy,
+    GtkWidget *menu = NULL;
+	if (1)
+	{
+		menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
+		gtk_container_foreach (GTK_CONTAINER (menu),
+                           (GtkCallback) gtk_widget_destroy,
                            NULL);
+	}
+	else
+	{
+		GtkWidget *old_menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
+		gtk_menu_item_remove_submenu (GTK_MENU_ITEM (menu_item));
+		menu = gtk_menu_new ();
+		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
+								   menu);
+		gtk_widget_destroy (GTK_WIDGET (old_menu));
+	}
     return;
 }
 /******************************************************************************/
 gint
-menu_file_browser_clean_up (GtkWidget *menu_item,
-							MenuFileBrowser *file_browser)
+menu_file_browser_clean_up (MenuFileBrowser *file_browser)
 {
+	g_printf ("freeing temporary data...\n");
 	/* free the structure pointed to by each element */
 	g_ptr_array_foreach (file_browser->priv->tmp_handle,
 						 (GFunc)menu_file_browser_free_structure,
 						 NULL);
 	/* delete and recreate the array */
-    g_ptr_array_free (file_browser->priv->tmp_handle, FALSE);
+    g_ptr_array_free (file_browser->priv->tmp_handle, TRUE);
 	file_browser->priv->tmp_handle = g_ptr_array_new();
 	return 0;
 }
 /******************************************************************************/
 void
 menu_file_browser_free_structure (Pair *pair)
-{
+{	/* but don't ever delete ->file_browser as it is a ref to a global object
+	   shared by all*/
+/*printf ("deleting %s\n", pair->path);*/
 	g_free (pair->path);
 	g_free (pair);
 	return;

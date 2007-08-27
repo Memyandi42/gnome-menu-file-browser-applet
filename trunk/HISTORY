@@ -1,0 +1,19 @@
+Menu File Browser Applet 0.5.1
+******************************
+	* Fixed bug #3: Crash on opening folders without access permissions
+	* Added messages for empty directories or failure to open a directory
+	* Slightly improved appearance (removed border)
+	* Fixed bug #6: Executable files are now handled more intuitively: if the
+	  file is binary and executable it is launched on either left of middle
+	  click. If the file is text and executable (i.e. a script), left clicking
+	  opens it for editing, middle click runs it.
+	* Cleaner display: directory headers now only show current directory name
+	  (not the whole path). File and directories names also have max length
+	* Added Config options: Can select dirs to show (and label), select icon,
+	  show/hide icon, show hidden, select terminal More/better error checking.
+	  rc file has to be edited manually for now.
+	* Code cleanup
+
+Menu File Browser Applet 0.3.0
+******************************
+	* Initial release to the public

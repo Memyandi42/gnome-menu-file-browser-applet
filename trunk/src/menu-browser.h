@@ -2,7 +2,7 @@
  * File:				menu-browser.h
  * Created:				September 2005
  * Created by:			Axel von Bertoldi
- * Last Modified:		March 2007
+ * Last Modified:		August 2007
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005,2006,2007	Axel von Bertoldi
  *
@@ -32,16 +32,45 @@
 #include <libgnomevfs/gnome-vfs.h>
 #include <libgnomevfs/gnome-vfs-mime-handlers.h>
 
-typedef struct _MenuFileBrowser			MenuFileBrowser;
-typedef struct _MenuFileBrowserPrivate	MenuFileBrowserPrivate;
+#include "utils.h"
+
+#define MAX_FILE_NAME_LENGTH 30 /*What's a good value here???*/
+#define DEFAULT_TERMINAL "gnome-terminal"
+#define DEFAULT_SHOW_HIDDEN FALSE
+
+
+/******************************************************************************/
+typedef struct _MenuFileBrowser		   MenuFileBrowser;
+typedef struct _MenuFileBrowserPrivate MenuFileBrowserPrivate;
+typedef struct _BrowserPreferences	   BrowserPreferences;
+/******************************************************************************/
+
 /****************** "Public" data *********************************************/
+struct _BrowserPreferences
+{
+	gboolean show_hidden;
+	gchar	*terminal;
+};
+
 struct _MenuFileBrowser
 {
-	GtkWidget				*menu_item;	
-	MenuFileBrowserPrivate	*priv;
+	GtkWidget			   *menu_item;	
+	MenuFileBrowserPrivate *priv;
+	BrowserPreferences	   *prefs;
 };
+
+enum
+{
+	EXEC_OPEN,
+	EXEC_RUN
+};
+/******************************************************************************/
+
 /****************** "Public" functions ****************************************/
-MenuFileBrowser * menu_file_browser_new (const gchar *label, const gchar *root_path);
+MenuFileBrowser		*menu_browser_new (const gchar *label, const gchar *root_path, BrowserPreferences *cgf);
+gint				 menu_browser_open_file (const gchar *file_name_and_path, gint exec_action);
+BrowserPreferences	*menu_browser_get_default_prefs ();
+void				 menu_browser_delete (MenuFileBrowser *browser);
 /******************************************************************************/
 
 

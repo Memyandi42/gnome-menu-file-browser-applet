@@ -1,3 +1,7 @@
+Menu File Browser Applet 0.5.2
+******************************
+	* Added handling of changes in panel (size allocation, background and orientation).
+
 Menu File Browser Applet 0.5.1
 ******************************
 	* Fixed bug #3: Crash on opening folders without access permissions.

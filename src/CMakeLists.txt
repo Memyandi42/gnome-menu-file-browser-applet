@@ -8,6 +8,7 @@ PKGCONFIG (libpanelapplet-2.0	LIBPANEL_INCLUDE_DIR
 SET (SERVER GNOME_MenuFileBrowserApplet_Factory.server)
 SET (EXEC menu-file-browser-applet)
 SET (SRCS main.c
+	panel-menu-bar.c
 	menu-browser.c
 	utils.c
 	preferences.c)

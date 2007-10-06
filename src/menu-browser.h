@@ -34,7 +34,7 @@
 
 #include "utils.h"
 
-#define MAX_FILE_NAME_LENGTH 30 /*What's a good value here???*/
+#define MAX_FILE_NAME_LENGTH 30 /* What's a good value here??? */
 #define DEFAULT_TERMINAL "gnome-terminal"
 #define DEFAULT_SHOW_HIDDEN FALSE
 

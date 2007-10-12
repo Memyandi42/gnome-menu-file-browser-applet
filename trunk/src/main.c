@@ -45,16 +45,10 @@ static const gchar file_browser_applet_menu_xml [] =
 /******************************************************************************/
 static gboolean
 file_browser_applet_display_properties_dialog (GtkWidget *widget, gpointer *data) {
-/*
-	utils_show_dialog ("Preferences",
-					   "No preferences just yet...",
-					   GTK_MESSAGE_ERROR);
-*/
 
-	gchar *rc_file = g_strdup_printf ("%s/%s",
-									  g_get_home_dir (),
-									  MFBARC);
-	menu_browser_open_file (rc_file, EXEC_OPEN);
+	utils_show_dialog ("Preferences",
+					   "Use Gconf for now...",
+					   GTK_MESSAGE_ERROR);
 
 /*
 	PanelMenuBar* panel_menu_bar = (PanelMenuBar *)data; 

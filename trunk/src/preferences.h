@@ -28,29 +28,32 @@
 
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
+#include <panel-applet-gconf.h>
 
-#include "menu-browser.h"
 #include "utils.h"
 
-#define MFBARC ".mfbarc"
-#define DIR_GROUP "Dirs"
-#define PREF_GROUP "Preferences"
-
-#define KEY_DIR "dir"
-#define KEY_ICON_NAME "icon"
-#define KEY_ICON_SHOW "show_icon"
-#define KEY_HIDDEN_SHOW "show_hidden"
-#define KEY_TERMINAL "terminal"
+#define KEY_DIR			"dirs"
+#define KEY_LABELS		"labels"
+#define KEY_ICON_NAME	"icon"
+#define KEY_ICON_SHOW	"show_icon"
+#define KEY_HIDDEN_SHOW	"show_hidden"
+#define KEY_TERMINAL	"terminal"
 
 /* default options */
-#define DEFAULT_ICON "/usr/share/pixmaps/menu-file-browser-applet.png"
-#define DEFAULT_SHOW_ICON TRUE
-#define DEFAULT_LABEL "Home"
-#define DEFAULT_PATH g_get_home_dir ()
+#define DEFAULT_ICON		"/usr/share/pixmaps/menu-file-browser-applet.png"
+#define DEFAULT_SHOW_ICON	TRUE
+#define DEFAULT_LABEL		"Home"
+#define DEFAULT_PATH		g_get_home_dir ()
+#define DEFAULT_TERMINAL	"gnome-terminal"
+#define DEFAULT_SHOW_HIDDEN	FALSE
 
 /****************** "Public" data *********************************************/
-typedef struct
-{
+typedef struct {
+	gboolean show_hidden;
+	gchar	*terminal;
+} BrowserPreferences;
+
+typedef struct {
 	GPtrArray *dirs;
 	GPtrArray *labels;
 	gboolean  show_icon;
@@ -61,10 +64,9 @@ typedef struct
 /******************************************************************************/
 
 /****************** "Public" functions ****************************************/
-AppletPreferences *preferences_get  ();
-gboolean		   preferences_save (AppletPreferences *prefs);
-void			   preferences_delete (AppletPreferences *prefs);
-void			   preferences_make_window (AppletPreferences *prefs);
+AppletPreferences	*preferences_get  (PanelApplet *applet);
+BrowserPreferences	*preferences_browser_get_default ();
+void				preferences_make_window (AppletPreferences *prefs);
 /******************************************************************************/
 
 #endif

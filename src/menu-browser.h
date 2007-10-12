@@ -33,34 +33,24 @@
 #include <libgnomevfs/gnome-vfs-mime-handlers.h>
 
 #include "utils.h"
+#include "preferences.h"
 
 #define MAX_FILE_NAME_LENGTH 30 /* What's a good value here??? */
-#define DEFAULT_TERMINAL "gnome-terminal"
-#define DEFAULT_SHOW_HIDDEN FALSE
 
 
 /******************************************************************************/
-typedef struct _MenuFileBrowser		   MenuFileBrowser;
-typedef struct _MenuFileBrowserPrivate MenuFileBrowserPrivate;
-typedef struct _BrowserPreferences	   BrowserPreferences;
+typedef struct _MenuFileBrowser			MenuFileBrowser;
+typedef struct _MenuFileBrowserPrivate	MenuFileBrowserPrivate;
 /******************************************************************************/
 
 /****************** "Public" data *********************************************/
-struct _BrowserPreferences
-{
-	gboolean show_hidden;
-	gchar	*terminal;
-};
-
-struct _MenuFileBrowser
-{
+struct _MenuFileBrowser {
 	GtkWidget			   *menu_item;	
 	MenuFileBrowserPrivate *priv;
 	BrowserPreferences	   *prefs;
 };
 
-enum
-{
+enum {
 	EXEC_OPEN,
 	EXEC_RUN
 };
@@ -69,7 +59,6 @@ enum
 /****************** "Public" functions ****************************************/
 MenuFileBrowser		*menu_browser_new (const gchar *label, const gchar *root_path, BrowserPreferences *cgf);
 gint				 menu_browser_open_file (const gchar *file_name_and_path, gint exec_action);
-BrowserPreferences	*menu_browser_get_default_prefs ();
 void				 menu_browser_delete (MenuFileBrowser *browser);
 /******************************************************************************/
 

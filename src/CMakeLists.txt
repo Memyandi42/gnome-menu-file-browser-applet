@@ -6,6 +6,7 @@ PKGCONFIG (libpanelapplet-2.0	LIBPANEL_INCLUDE_DIR
 								LIBPANEL_CFLAGS)
 
 SET (SERVER GNOME_MenuFileBrowserApplet_Factory.server)
+SET (SCHEMA menu-file-browser-applet.schemas)
 SET (EXEC menu-file-browser-applet)
 SET (SRCS main.c
 	panel-menu-bar.c
@@ -18,4 +19,5 @@ ADD_EXECUTABLE (${EXEC} ${SRCS})
 TARGET_LINK_LIBRARIES (${EXEC} ${LIBPANEL_LINK_FLAGS})
 INSTALL (TARGETS ${EXEC} DESTINATION "/usr/lib/gnome-panel")
 INSTALL (FILES ${SERVER} DESTINATION "/usr/lib/bonobo/servers")
-
+INSTALL (FILES ${SCHEMA} DESTINATION "/usr/share/gconf/schemas")
+INSTALL (CODE "EXEC_PROGRAM (\"gconf-schemas --register ${SCHEMA}\")")

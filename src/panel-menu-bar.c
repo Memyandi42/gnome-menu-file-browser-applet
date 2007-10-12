@@ -256,11 +256,10 @@ PanelMenuBar* panel_menu_bar_new (PanelApplet* applet) {
 						  NULL);
 	
 	/* get the applet configuration */
-	self->priv->prefs = preferences_get ();
+	self->priv->prefs = preferences_get (applet);
 
 	/* for each path in the config, make a browser object */
-	for (i=0; i < self->priv->prefs->dirs->len; i++)
-	{	/* make it */
+	for (i=0; i < self->priv->prefs->dirs->len; i++) {	/* make it */
 		tmp_file_browser = menu_browser_new ((gchar*)(g_ptr_array_index (self->priv->prefs->labels, i)),
 				  								  (gchar*)(g_ptr_array_index (self->priv->prefs->dirs, i)),
 												  self->priv->prefs->browser_prefs);
@@ -278,8 +277,7 @@ PanelMenuBar* panel_menu_bar_new (PanelApplet* applet) {
 	}
 
     /* add the image to the menu item */
-	if (self->priv->prefs->show_icon)
-	{
+	if (self->priv->prefs->show_icon) {
 		tmp_file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
 
 		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (self->priv->prefs->icon ,NULL);

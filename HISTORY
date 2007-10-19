@@ -1,9 +1,14 @@
-Menu File Browser Applet 0.5.2
-******************************
+Version 0.5.3
+*************
+	* Re-implemented preferences back end to use GConf which means each
+	  instance of the applet can show different directories.
+
+Version 0.5.2
+*************
 	* Added handling of changes in panel (size allocation, background and orientation).
 
-Menu File Browser Applet 0.5.1
-******************************
+Version 0.5.1
+*************
 	* Fixed bug #3: Crash on opening folders without access permissions.
 	* Added messages for empty directories or failure to open a directory.
 	* Slightly improved appearance (removed border).
@@ -18,6 +23,6 @@ Menu File Browser Applet 0.5.1
 	  rc file has to be edited manually for now.
 	* Code cleanup/refactoring.
 
-Menu File Browser Applet 0.3.0
-******************************
-	* Initial release to the public
+Version 0.3.0
+*************
+	* Initial release to the public!

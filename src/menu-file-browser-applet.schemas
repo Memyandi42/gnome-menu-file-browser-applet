@@ -7,7 +7,7 @@
         <type>bool</type>
         <default>TRUE</default>
         <locale name="C">
-          <short>Show an icon in the menu bar</short>
+          <short>Show the icon in the menu bar</short>
           <long></long>
         </locale>
       </schema>
@@ -18,7 +18,7 @@
         <type>string</type>
         <default>/usr/share/pixmaps/menu-file-browser-applet.png</default>
         <locale name="C">
-          <short>The icon to show</short>
+          <short>Path to the icon to show in the menu bar</short>
           <long></long>
         </locale>
       </schema>
@@ -29,7 +29,7 @@
         <type>string</type>
         <default>gnome-terminal</default>
         <locale name="C">
-          <short>The terminal</short>
+          <short>The terminal to use when middle-clicking on a directory</short>
           <long></long>
         </locale>
       </schema>
@@ -52,7 +52,7 @@
 	<list_type>string</list_type>
         <default>[Home]</default>
         <locale name="C">
-          <short>Labels</short>
+          <short>The labels to use for the directories</short>
           <long></long>
         </locale>
       </schema>
@@ -64,7 +64,7 @@
 	<list_type>string</list_type>
         <default>[]</default>
         <locale name="C">
-          <short>Labels</short>
+          <short>The directories to show in the menu bar</short>
           <long></long>
         </locale>
       </schema>

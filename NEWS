@@ -1,3 +1,15 @@
+Version 0.5.3
+*************
+	* Re-implemented preferences back end to use GConf.
+
+Version 0.5.2
+*************
+	* Fixed behaviour/appearance. 
+
+Version 0.5.1
+*************
+	* Bug fixes and several preferences added.
+	
 Version 0.3.0
 *************
-	* First release to the world!
+	* Initial release to the public!

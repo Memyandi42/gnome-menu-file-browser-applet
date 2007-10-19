@@ -13,6 +13,7 @@ libpanel-applet-2.0
 You will also need the following packages installed to compile this program:
 pkg-config
 cmake
+g++ (see bugs)
 
 Compiling
 *********

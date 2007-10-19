@@ -2,7 +2,7 @@
  * File:				preferences.c
  * Created:				April 2006
  * Created by:			Axel von Bertoldi
- * Last Modified:		April 2007
+ * Last Modified:		October 2007
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005,2006,2007	Axel von Bertoldi
  *

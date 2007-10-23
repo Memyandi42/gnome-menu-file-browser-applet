@@ -40,4 +40,30 @@ SET (CPACK_SOURCE_IGNORE_FILES
 )
 INCLUDE (CPack)
 
-ADD_CUSTOM_TARGET (deb checkinstall -D --install=0 --deldoc=1 --backup=0 --pkglicense="GPLv2" --maintainer="bertoldia@gmail.com" --pkggroup="GNOME Desktop Environment" --requires="libpanel-applet2-0, libgnomevfs2-0")
+ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="menu-file-browser-applet"
+									   --pkgversion="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
+									   --install=0
+									   --deldoc=1
+									   --backup=0
+									   --pkglicense="GPLv2"
+									   --maintainer="bertoldia@gmail.com"
+									   --pkggroup="GNOME Desktop Environment"
+									   --requires="libpanel-applet2-0, libgnomevfs2-0")
+
+ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
+									   cmake_install.cmake
+									   CPackConfig.cmake
+									   cmake_uninstall.cmake
+									   CMakeFiles
+									   CPackSourceConfig.cmake
+									   *.deb
+									   install_manifest.txt
+									   Makefile
+									   pixmaps/CMakeFiles
+									   pixmaps/cmake_install.cmake
+									   pixmaps/Makefile
+									   src/menu-file-browser-applet
+									   src/cmake_install.cmake
+									   src/CMakeFiles
+									   src/Makefile)
+ 

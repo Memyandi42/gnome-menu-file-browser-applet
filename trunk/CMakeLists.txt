@@ -36,7 +36,8 @@ SET (CPACK_SOURCE_IGNORE_FILES
 	 "/*.tar.gz"
 	 ".svn"
 	 "install_manifest.txt"
+	 "install_manifest.txt"
 )
 INCLUDE (CPack)
 
-ADD_CUSTOM_TARGET (deb checkinstall -D --pkglicense GPLv2 --maintainer bertoldia@gmail.com --pkggroup "GNOME Desktop Environment" --requires "libpanel-applet2-0, libgnomevfs2-0")
+ADD_CUSTOM_TARGET (deb checkinstall -D --install=0 --deldoc=1 --backup=0 --pkglicense="GPLv2" --maintainer="bertoldia@gmail.com" --pkggroup="GNOME Desktop Environment" --requires="libpanel-applet2-0, libgnomevfs2-0")

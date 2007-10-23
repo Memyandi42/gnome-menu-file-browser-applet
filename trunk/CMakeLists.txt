@@ -38,3 +38,5 @@ SET (CPACK_SOURCE_IGNORE_FILES
 	 "install_manifest.txt"
 )
 INCLUDE (CPack)
+
+ADD_CUSTOM_TARGET (deb checkinstall -D --pkglicense GPLv2 --maintainer bertoldia@gmail.com --pkggroup "GNOME Desktop Environment" --requires "libpanel-applet2-0, libgnomevfs2-0")

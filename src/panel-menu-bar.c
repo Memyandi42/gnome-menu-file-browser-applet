@@ -54,6 +54,12 @@ enum {
 static gpointer panel_menu_bar_parent_class = NULL;
 static void panel_menu_bar_dispose (GObject * obj);
 /******************************************************************************/
+void
+panel_menu_bar_edit_prefs (PanelMenuBar *menu_bar) {
+	AppletPreferences *prefs = menu_bar->priv->prefs;
+	applet_preferences_make_window (prefs);
+}
+/******************************************************************************/
 static void
 file_browser_applet_hide_tooltip (GtkWidget *widget,
 								  GtkTooltips *tooltip) {
@@ -224,7 +230,13 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 	return;
 }
 /******************************************************************************/
-PanelMenuBar* panel_menu_bar_new (PanelApplet* applet) {
+static void
+on_preferences_changed (AppletPreferences *a_prefs) {
+	g_printf ("caught the signal!!!\n");
+}
+/******************************************************************************/
+PanelMenuBar*
+panel_menu_bar_new (PanelApplet* applet) {
 	PanelMenuBar * self;
 
 	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
@@ -256,13 +268,21 @@ PanelMenuBar* panel_menu_bar_new (PanelApplet* applet) {
 						  NULL);
 	
 	/* get the applet configuration */
-	self->priv->prefs = preferences_get (applet);
+	self->priv->prefs = applet_preferences_new (applet);
+	MenuBarPrefs *mb_prefs = self->priv->prefs->menu_bar_prefs;
+	g_signal_connect (G_OBJECT (self->priv->prefs), 
+			  "prefs_changed",
+			  G_CALLBACK (on_preferences_changed), 
+			  NULL);
+
+
+
 
 	/* for each path in the config, make a browser object */
-	for (i=0; i < self->priv->prefs->dirs->len; i++) {	/* make it */
-		tmp_file_browser = menu_browser_new ((gchar*)(g_ptr_array_index (self->priv->prefs->labels, i)),
-				  								  (gchar*)(g_ptr_array_index (self->priv->prefs->dirs, i)),
-												  self->priv->prefs->browser_prefs);
+	for (i=0; i < mb_prefs->dirs->len; i++) {	/* make it */
+		tmp_file_browser = menu_browser_new ((gchar*)(g_ptr_array_index (mb_prefs->labels, i)),
+				  								  (gchar*)(g_ptr_array_index (mb_prefs->dirs, i)),
+												  mb_prefs->browser_prefs);
 		/* add it to the list and to the menu bar*/
 		g_ptr_array_add (self->priv->file_browsers, tmp_file_browser);
 
@@ -277,10 +297,10 @@ PanelMenuBar* panel_menu_bar_new (PanelApplet* applet) {
 	}
 
     /* add the image to the menu item */
-	if (self->priv->prefs->show_icon) {
+	if (mb_prefs->show_icon) {
 		tmp_file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
 
-		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (self->priv->prefs->icon ,NULL);
+		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (mb_prefs->icon ,NULL);
 		/* FIXME look at gnome menu for icon size*/
 		GdkPixbuf *scaled = gdk_pixbuf_scale_simple (orig,
                                           			 ICON_SIZE,

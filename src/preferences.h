@@ -23,15 +23,25 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef PREFERENCES_H
-#define PREFERENCES_H
+#ifndef __PREFERENCES_H__
+#define __PREFERENCES_H__
 
-#include <gtk/gtk.h>
-#include <glib/gprintf.h>
+#include <glib.h>
+#include <glib-object.h>
 #include <panel-applet-gconf.h>
 
 #include "utils.h"
 
+G_BEGIN_DECLS
+
+/******************************************************************************/
+#define TYPE_APPLET_PREFERENCES (applet_preferences_get_type ())
+#define APPLET_PREFERENCES(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_APPLET_PREFERENCES, AppletPreferences))
+#define APPLET_PREFERENCES_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_APPLET_PREFERENCES, AppletPreferencesClass))
+#define IS_APPLET_PREFERENCES(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_APPLET_PREFERENCES))
+#define IS_APPLET_PREFERENCES_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_APPLET_PREFERENCES))
+#define APPLET_PREFERENCES_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_APPLET_PREFERENCES, AppletPreferencesClass))
+/******************************************************************************/
 #define KEY_DIR			"dirs"
 #define KEY_LABELS		"labels"
 #define KEY_ICON_NAME	"icon"
@@ -46,27 +56,38 @@
 #define DEFAULT_PATH		g_get_home_dir ()
 #define DEFAULT_TERMINAL	"gnome-terminal"
 #define DEFAULT_SHOW_HIDDEN	FALSE
-
-/****************** "Public" data *********************************************/
-typedef struct {
-	gboolean show_hidden;
-	gchar	*terminal;
-} BrowserPreferences;
-
-typedef struct {
-	GPtrArray *dirs;
-	GPtrArray *labels;
-	gboolean  show_icon;
-	gchar	  *icon;
-
-	BrowserPreferences *browser_prefs;
-} AppletPreferences;
+/******************************************************************************/
+typedef struct _BrowserPrefs BrowserPrefs;
+typedef struct _MenuBarPrefs MenuBarPrefs;
+typedef struct _AppletPreferences AppletPreferences;
+typedef struct _AppletPreferencesClass AppletPreferencesClass;
+typedef struct _AppletPreferencesPrivate AppletPreferencesPrivate;
+/******************************************************************************/
+struct _BrowserPrefs {
+	gchar		*terminal;
+	gboolean	show_hidden;
+};
+struct _MenuBarPrefs {
+	GPtrArray		*dirs;
+	GPtrArray		*labels;
+	gboolean 		show_icon;
+	gchar 			*icon;
+	BrowserPrefs	*browser_prefs;
+};
+struct _AppletPreferences {
+	GObject						parent;
+	MenuBarPrefs 				*menu_bar_prefs;
+	AppletPreferencesPrivate	*priv;
+};
+struct _AppletPreferencesClass {
+	GObjectClass parent;
+};
+/******************************************************************************/
+AppletPreferences* applet_preferences_new (PanelApplet *applet);
+void applet_preferences_make_window (AppletPreferences *preferences);
+GType applet_preferences_get_type (void);
 /******************************************************************************/
 
-/****************** "Public" functions ****************************************/
-AppletPreferences	*preferences_get  (PanelApplet *applet);
-BrowserPreferences	*preferences_browser_get_default ();
-void				preferences_make_window (AppletPreferences *prefs);
-/******************************************************************************/
+G_END_DECLS
 
 #endif

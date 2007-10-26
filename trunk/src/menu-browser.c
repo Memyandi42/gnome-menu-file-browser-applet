@@ -578,10 +578,10 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 MenuFileBrowser *
 menu_browser_new (const gchar *label,
 					   const gchar *root_path,
-					   BrowserPreferences *prefs) {
+					   BrowserPrefs *prefs) {
 	if (prefs == NULL) {
 		/* get the default config if none passed. */
-		prefs = preferences_browser_get_default ();
+	/*	prefs = preferences_browser_get_default ();*/
 	}
 
 	MenuFileBrowser *file_browser;

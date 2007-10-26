@@ -47,7 +47,7 @@ typedef struct _PanelMenuBarPrivate PanelMenuBarPrivate;
 
 struct _PanelMenuBar {
 	GtkMenuBar parent;
-	PanelMenuBarPrivate * priv;
+	PanelMenuBarPrivate *priv;
 };
 struct _PanelMenuBarClass {
 	GtkMenuBarClass parent;
@@ -55,6 +55,7 @@ struct _PanelMenuBarClass {
 
 PanelMenuBar* panel_menu_bar_new (PanelApplet* applet);
 GType panel_menu_bar_get_type (void);
+void panel_menu_bar_edit_prefs (PanelMenuBar *menu_bar);
 
 G_END_DECLS
 

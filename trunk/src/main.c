@@ -26,7 +26,6 @@
 #include <gtk/gtk.h>
 #include <panel-applet.h>
 #include "panel-menu-bar.h"
-#include "preferences.h"
 
 #define APPLET_IID			"OAFIID:GNOME_MenuFileBrowserApplet"
 #define APPLET_FACTORY_IID	"OAFIID:GNOME_MenuFileBrowserApplet_Factory"
@@ -46,14 +45,14 @@ static const gchar file_browser_applet_menu_xml [] =
 static gboolean
 file_browser_applet_display_properties_dialog (GtkWidget *widget, gpointer *data) {
 
+/*
 	utils_show_dialog ("Preferences",
 					   "Use Gconf for now...",
 					   GTK_MESSAGE_ERROR);
-
-/*
-	PanelMenuBar* panel_menu_bar = (PanelMenuBar *)data; 
-	preferences_make_window (panel_menu_bar);
 */
+
+	PanelMenuBar *menu_bar = (PanelMenuBar *)data; 
+	panel_menu_bar_edit_prefs (menu_bar);
 	return FALSE;
 }
 /******************************************************************************/
@@ -128,7 +127,7 @@ file_browser_applet_create (PanelApplet *applet) {
 	panel_applet_setup_menu (PANEL_APPLET (applet),
 							 file_browser_applet_menu_xml,
 							 file_browser_applet_menu_verbs,
-							 panel_menu_bar);
+							 (gpointer) panel_menu_bar);
 
 	gtk_widget_show_all (GTK_WIDGET(applet));
 	gtk_main ();	

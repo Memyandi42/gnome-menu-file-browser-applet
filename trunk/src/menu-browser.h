@@ -45,9 +45,9 @@ typedef struct _MenuFileBrowserPrivate	MenuFileBrowserPrivate;
 
 /****************** "Public" data *********************************************/
 struct _MenuFileBrowser {
-	GtkWidget			   *menu_item;	
-	MenuFileBrowserPrivate *priv;
-	BrowserPreferences	   *prefs;
+	GtkWidget				*menu_item;	
+	MenuFileBrowserPrivate	*priv;
+	BrowserPrefs			*prefs;
 };
 
 enum {
@@ -57,7 +57,7 @@ enum {
 /******************************************************************************/
 
 /****************** "Public" functions ****************************************/
-MenuFileBrowser		*menu_browser_new (const gchar *label, const gchar *root_path, BrowserPreferences *cgf);
+MenuFileBrowser		*menu_browser_new (const gchar *label, const gchar *root_path, BrowserPrefs *cgf);
 gint				 menu_browser_open_file (const gchar *file_name_and_path, gint exec_action);
 void				 menu_browser_delete (MenuFileBrowser *browser);
 /******************************************************************************/

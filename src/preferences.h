@@ -83,6 +83,14 @@ struct _AppletPreferencesClass {
 	GObjectClass parent;
 };
 /******************************************************************************/
+enum {
+	PREFS_SIGNAL_TERMINAL,
+	PREFS_SIGNAL_SHOW_HIDDEN,
+	PREFS_SIGNAL_SHOW_ICON,
+	PREFS_SIGNAL_ICON_CHANGED,
+	PREFS_SIGNAL_DIRS_CHANGED
+};
+/******************************************************************************/
 AppletPreferences* applet_preferences_new (PanelApplet *applet);
 void applet_preferences_make_window (AppletPreferences *preferences);
 GType applet_preferences_get_type (void);

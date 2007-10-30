@@ -54,6 +54,7 @@ enum {
 static gpointer panel_menu_bar_parent_class = NULL;
 static void panel_menu_bar_dispose (GObject * obj);
 /******************************************************************************/
+/******************************************************************************/
 void
 panel_menu_bar_edit_prefs (PanelMenuBar *menu_bar) {
 	AppletPreferences *prefs = menu_bar->priv->prefs;
@@ -231,8 +232,56 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 }
 /******************************************************************************/
 static void
-on_preferences_changed (AppletPreferences *a_prefs) {
-	g_printf ("caught the signal!!!\n");
+update_image (PanelMenuBar *menu_bar, int changed_pref) {
+	GtkWidget *image = NULL;
+	AppletPreferences *a_prefs = menu_bar->priv->prefs;
+	MenuFileBrowser *file_browser = (MenuFileBrowser *)(g_ptr_array_index (menu_bar->priv->file_browsers, 0));
+
+
+	image = gtk_image_menu_item_get_image ( GTK_IMAGE_MENU_ITEM (file_browser->menu_item));
+
+	if (image) {
+		gtk_widget_destroy (image);
+	}
+	else {
+		if (a_prefs->menu_bar_prefs->show_icon) {
+	
+			GdkPixbuf *orig   = gdk_pixbuf_new_from_file (a_prefs->menu_bar_prefs->icon ,NULL);
+			/* FIXME look at gnome menu for icon size*/
+			GdkPixbuf *scaled = gdk_pixbuf_scale_simple (orig,
+														 ICON_SIZE,
+														 ICON_SIZE,
+														 GDK_INTERP_HYPER);
+			GtkWidget *icon = gtk_image_new_from_pixbuf (scaled);
+			gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (file_browser->menu_item),
+																icon);
+			g_object_unref (orig);
+			g_object_unref (scaled);
+		}
+	}
+	return;
+}
+/******************************************************************************/
+static void
+on_preferences_changed (AppletPreferences *a_prefs, gint signal, gpointer data) {
+	GtkWidget *image = NULL;
+	PanelMenuBar *menu_bar = (PanelMenuBar *)data;
+	MenuFileBrowser *file_browser = NULL;
+
+
+	switch (signal) {
+		case PREFS_SIGNAL_TERMINAL :
+		case PREFS_SIGNAL_SHOW_HIDDEN :
+			break;
+		case PREFS_SIGNAL_SHOW_ICON :
+		case PREFS_SIGNAL_ICON_CHANGED :
+			update_image (menu_bar, signal);
+			break;
+		case PREFS_SIGNAL_DIRS_CHANGED :
+			break;
+	}
+	g_printf ("caught the signal %d!!!\n", signal);
+	return;
 }
 /******************************************************************************/
 PanelMenuBar*
@@ -273,7 +322,7 @@ panel_menu_bar_new (PanelApplet* applet) {
 	g_signal_connect (G_OBJECT (self->priv->prefs), 
 			  "prefs_changed",
 			  G_CALLBACK (on_preferences_changed), 
-			  NULL);
+			  self);
 
 
 

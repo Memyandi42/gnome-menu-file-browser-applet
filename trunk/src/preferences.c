@@ -172,7 +172,8 @@ on_show_icon_pressed (GtkWidget *widget, gpointer data) {
 
 	g_signal_emit (G_OBJECT (data),
 			applet_preferences_signals [PREFS_CHANGED],
-			0);
+			0,
+			PREFS_SIGNAL_SHOW_ICON);
 
 	return TRUE;
 }
@@ -182,11 +183,6 @@ on_show_hidden_pressed (GtkWidget *widget, gpointer data) {
 	AppletPreferences *a_prefs = (AppletPreferences *)data;
 
 	a_prefs->menu_bar_prefs->browser_prefs->show_hidden = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
-
-	g_signal_emit (G_OBJECT (data),
-			applet_preferences_signals [PREFS_CHANGED],
-			0);
-
 	return TRUE;
 }
 /******************************************************************************/
@@ -198,10 +194,6 @@ on_terminal_changed (GtkWidget *widget, gpointer data) {
 	tmp = a_prefs->menu_bar_prefs->browser_prefs->terminal;
 	g_free (tmp);
 	a_prefs->menu_bar_prefs->browser_prefs->terminal = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-
-	g_signal_emit (G_OBJECT (data),
-			applet_preferences_signals [PREFS_CHANGED],
-			0);
 
 	return FALSE;
 }	
@@ -298,9 +290,10 @@ applet_preferences_class_init (AppletPreferencesClass * klass) {
 					  0,
 					  NULL,
 					  NULL,
-				      g_cclosure_marshal_VOID__VOID,
+				      g_cclosure_marshal_VOID__INT,
 					  G_TYPE_NONE,
-					  0);
+					  1,
+					  G_TYPE_INT);
 }
 /******************************************************************************/
 static void

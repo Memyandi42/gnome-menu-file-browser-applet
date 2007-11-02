@@ -29,7 +29,7 @@
 
 #define PANEL_MENU_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PANEL_MENU_BAR, PanelMenuBarPrivate))
 #define TOOLTIP_TEXT		"Browse and open files in you home directory"
-#define ICON_SIZE			22 /* 22x22 pixels looks about right... */
+#define ICON_SIZE			24 /* 22x22 pixels looks about right... */
 
 /******************************************************************************/
 struct _PanelMenuBarPrivate {
@@ -58,7 +58,7 @@ static void panel_menu_bar_dispose (GObject * obj);
 void
 panel_menu_bar_edit_prefs (PanelMenuBar *menu_bar) {
 	AppletPreferences *prefs = menu_bar->priv->prefs;
-	applet_preferences_make_window (prefs);
+	applet_preferences_make_dialog (prefs);
 }
 /******************************************************************************/
 static void
@@ -237,37 +237,24 @@ update_image (PanelMenuBar *menu_bar, int changed_pref) {
 	AppletPreferences *a_prefs = menu_bar->priv->prefs;
 	MenuFileBrowser *file_browser = (MenuFileBrowser *)(g_ptr_array_index (menu_bar->priv->file_browsers, 0));
 
-
 	image = gtk_image_menu_item_get_image ( GTK_IMAGE_MENU_ITEM (file_browser->menu_item));
 
 	if (image) {
 		gtk_widget_destroy (image);
 	}
-	else {
-		if (a_prefs->menu_bar_prefs->show_icon) {
-	
-			GdkPixbuf *orig   = gdk_pixbuf_new_from_file (a_prefs->menu_bar_prefs->icon ,NULL);
-			/* FIXME look at gnome menu for icon size*/
-			GdkPixbuf *scaled = gdk_pixbuf_scale_simple (orig,
-														 ICON_SIZE,
-														 ICON_SIZE,
-														 GDK_INTERP_HYPER);
-			GtkWidget *icon = gtk_image_new_from_pixbuf (scaled);
-			gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (file_browser->menu_item),
-																icon);
-			g_object_unref (orig);
-			g_object_unref (scaled);
-		}
+
+	if (a_prefs->menu_bar_prefs->show_icon) {
+		GtkWidget *icon = utils_get_scaled_image_from_file (a_prefs->menu_bar_prefs->icon,
+															ICON_SIZE);
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (file_browser->menu_item),
+															icon);
 	}
 	return;
 }
 /******************************************************************************/
 static void
 on_preferences_changed (AppletPreferences *a_prefs, gint signal, gpointer data) {
-	GtkWidget *image = NULL;
 	PanelMenuBar *menu_bar = (PanelMenuBar *)data;
-	MenuFileBrowser *file_browser = NULL;
-
 
 	switch (signal) {
 		case PREFS_SIGNAL_TERMINAL :
@@ -349,17 +336,9 @@ panel_menu_bar_new (PanelApplet* applet) {
 	if (mb_prefs->show_icon) {
 		tmp_file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
 
-		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (mb_prefs->icon ,NULL);
-		/* FIXME look at gnome menu for icon size*/
-		GdkPixbuf *scaled = gdk_pixbuf_scale_simple (orig,
-                                          			 ICON_SIZE,
-										  			 ICON_SIZE,
-										  			 GDK_INTERP_HYPER);
-		GtkWidget *icon = gtk_image_new_from_pixbuf (scaled);
+		GtkWidget *icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_SIZE);
 	    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (tmp_file_browser->menu_item),
     	                                					icon);
-		g_object_unref (orig);
-		g_object_unref (scaled);
 	}
 
 	/* attach the signal to show the tooltip again when deselected*/
@@ -394,11 +373,13 @@ static void panel_menu_bar_class_init (PanelMenuBarClass * klass) {
 }
 /******************************************************************************/
 
-static void panel_menu_bar_init (PanelMenuBar * self) {
+static void
+panel_menu_bar_init (PanelMenuBar * self) {
 	self->priv = PANEL_MENU_BAR_GET_PRIVATE (self);
 }
 /******************************************************************************/
-static void panel_menu_bar_dispose (GObject * obj) {
+static void
+panel_menu_bar_dispose (GObject * obj) {
 	PanelMenuBar * self;
 	PanelMenuBarClass * klass;
 /*	GObjectClass * parent_class;*/
@@ -409,7 +390,8 @@ static void panel_menu_bar_dispose (GObject * obj) {
 	G_OBJECT_CLASS (panel_menu_bar_parent_class)->dispose (obj);
 }
 /******************************************************************************/
-GType panel_menu_bar_get_type (void) {
+GType
+panel_menu_bar_get_type (void) {
 	static GType panel_menu_bar_type_id = 0;
 	if (G_UNLIKELY (panel_menu_bar_type_id == 0)) {
 		static const GTypeInfo g_define_type_info = { sizeof (PanelMenuBarClass),
@@ -430,5 +412,3 @@ GType panel_menu_bar_get_type (void) {
 	return panel_menu_bar_type_id;
 }
 /******************************************************************************/
-
-

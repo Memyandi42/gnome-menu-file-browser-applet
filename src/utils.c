@@ -62,3 +62,17 @@ utils_show_dialog (gchar *title, gchar *message, GtkMessageType type)
 	return;
 }
 /******************************************************************************/
+GtkWidget*
+utils_get_scaled_image_from_file (gchar *file_name, int size) {
+		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (file_name ,NULL);
+
+		GdkPixbuf *scaled = gdk_pixbuf_scale_simple (orig,
+                                          			 size,
+										  			 size,
+										  			 GDK_INTERP_HYPER);
+		GtkWidget *icon = gtk_image_new_from_pixbuf (scaled);
+		g_object_unref (orig);
+		g_object_unref (scaled);
+		return icon;
+}
+/******************************************************************************/

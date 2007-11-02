@@ -91,9 +91,9 @@ enum {
 	PREFS_SIGNAL_DIRS_CHANGED
 };
 /******************************************************************************/
-AppletPreferences* applet_preferences_new (PanelApplet *applet);
-void applet_preferences_make_window (AppletPreferences *preferences);
-GType applet_preferences_get_type (void);
+AppletPreferences*	applet_preferences_new (PanelApplet *applet);
+void				applet_preferences_make_dialog (AppletPreferences *preferences);
+GType				applet_preferences_get_type (void);
 /******************************************************************************/
 
 G_END_DECLS

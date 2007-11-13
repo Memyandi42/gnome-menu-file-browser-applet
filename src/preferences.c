@@ -31,6 +31,7 @@
 struct _AppletPreferencesPrivate {
 	GtkWidget	*window;
 	PanelApplet *applet;
+	GtkWidget	*tree_view;
 };
 /******************************************************************************/
 #define APPLET_PREFERENCES_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_APPLET_PREFERENCES, AppletPreferencesPrivate))
@@ -57,7 +58,6 @@ static guint applet_preferences_signals[LAST_SIGNAL] = { 0 };
 /* this is bad, but I need to get at the button from all over the file to
  * update it's state. The other option is make it private member. */
 static GtkWidget *revert_button = NULL;
-static GtkWidget *tree_view;
 /******************************************************************************/
 static gpointer applet_preferences_parent_class = NULL;
 static void applet_preferences_dispose (GObject *obj);
@@ -223,10 +223,10 @@ applet_preferences_dialog_response (GtkWidget *window, gint response, gpointer d
 }
 /******************************************************************************/
 static void
-applet_preferences_label_cell_edited (GtkCellRenderer *cell,
-									  gchar *path_string,
-									  gchar *new_string,
-									  gpointer data){
+applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
+									  gchar				*path_string,
+									  gchar				*new_string,
+									  gpointer			data){
 
 	GtkListStore *store = (GtkListStore *) data;
 	GtkTreeIter iter;
@@ -246,10 +246,10 @@ applet_preferences_label_cell_edited (GtkCellRenderer *cell,
 }
 /******************************************************************************/
 static void
-applet_preferences_path_cell_activayed (GtkTreeView		*tree_view,
-					 GtkTreePath		*path,
-					 GtkTreeViewColumn	*col,
-					 gpointer			data) {
+applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
+										GtkTreePath		  *path,
+										GtkTreeViewColumn *col,
+										gpointer		   data) {
 
 	GtkListStore	*store = (GtkListStore *) data;
 	GtkTreeIter		iter;
@@ -260,7 +260,7 @@ applet_preferences_path_cell_activayed (GtkTreeView		*tree_view,
 	gtk_tree_model_get_iter (GTK_TREE_MODEL (store),
 							 &iter,
 							 path);
-	/* theh the path value for the active cell */
+	/* the "Path" value for the active cell */
 	gtk_tree_model_get (GTK_TREE_MODEL (store),
 						&iter,
 						PATH_COLUMN, &old_path,
@@ -289,10 +289,130 @@ applet_preferences_path_cell_activayed (GtkTreeView		*tree_view,
 								-1);
 			gtk_widget_set_sensitive (revert_button, TRUE);
 		}
-		g_free(new_path);
+		g_free (new_path);
 	}
 	gtk_widget_destroy (file_chooser_dialog);
 	/* signal the panel_menu bar to update itself */
+	return;
+}
+/******************************************************************************/
+static void
+applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
+	GtkTreeModel *model;
+	GtkTreeIter   iter;
+	GtkWidget *file_chooser_dialog;
+	AppletPreferences *a_prefs = (AppletPreferences *)data;
+	GtkWidget *tree_view = a_prefs->priv->tree_view;
+
+	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select Folder To Add",
+													   NULL,
+													   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+													   GTK_STOCK_CANCEL,
+													   GTK_RESPONSE_CANCEL,
+													   GTK_STOCK_OPEN,
+													   GTK_RESPONSE_ACCEPT,
+													   NULL);
+	/* Set the starting path */
+	gchar *start_path = g_strdup_printf ("%s/*", g_get_home_dir ());
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog),
+								   start_path);
+	g_free (start_path);
+
+	/* check the reply */
+	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
+		/* get the new path, and make the label from it */
+		gchar *dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
+		gchar *label = g_path_get_basename (dir);
+		/* get the view's model, add a row and set the values */
+		model = gtk_tree_view_get_model (GTK_TREE_VIEW(tree_view));
+		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
+		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
+							LABEL_COLUMN, label,
+							PATH_COLUMN, dir,
+							-1);
+		g_free (dir);
+		gtk_widget_set_sensitive (revert_button, TRUE);
+	}
+	gtk_widget_destroy (file_chooser_dialog);
+	return;
+}
+/******************************************************************************/
+static void
+applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
+	GtkTreeSelection	*selection;
+	GtkTreeModel		*model;
+	GtkTreeIter			selected_row;
+	AppletPreferences	*a_prefs = (AppletPreferences *)data;
+	GtkWidget			*tree_view = a_prefs->priv->tree_view;
+
+	/* get the current selection */
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(tree_view));
+
+	/* get the iterator for the current selection and remove the corresponding
+	 * row form the model */
+	if (gtk_tree_selection_get_selected (selection, &model, &selected_row)) {
+		gtk_list_store_remove (GTK_LIST_STORE(model), &selected_row);
+		gtk_widget_set_sensitive (revert_button, TRUE);
+	}
+
+	return;
+}
+/******************************************************************************/
+static void
+applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
+	GtkTreeSelection	*selection = NULL;
+	GtkTreeModel 		*model = NULL;
+	GtkTreeIter			iter, iter_next;
+	AppletPreferences	*a_prefs = (AppletPreferences *)data;
+	GtkWidget			*tree_view = a_prefs->priv->tree_view;
+
+	/* get the current selection */
+	selection =  gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_view));
+
+	/* get the iterator for the current selection */
+  	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+		/* is this dangerous? Time will tell... */
+		iter_next = iter;
+		/* get the next iterator and it it's valid, swap them */
+		if (gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter_next)){
+			gtk_list_store_swap (GTK_LIST_STORE (model),
+								 &iter,
+								 &iter_next);
+			gtk_widget_set_sensitive (revert_button, TRUE);
+		}
+	}
+	return;
+}
+/******************************************************************************/
+static void
+applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
+	GtkTreeSelection	*selection = NULL;
+	GtkTreeModel 		*model = NULL;
+	GtkTreeIter			iter, iter_prev;
+	GtkTreePath			*path;
+	AppletPreferences	*a_prefs = (AppletPreferences *)data;
+	GtkWidget			*tree_view = a_prefs->priv->tree_view;
+
+	/* get the current selection */
+	selection =  gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_view));
+
+	/* get the iterator for the current selection */
+  	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+		/* Sigh! gtk_tree_model_iter_prev does not exist, so have to get the
+		 * path for that iter and do a prev on it, then get the iter for the
+		 * new path. Shite!*/
+		path = gtk_tree_model_get_path (model, &iter);
+		/* if the previous path is valid */
+		if (gtk_tree_path_prev (path)) {
+			/* get the corresponding iter, and swap the store elements*/
+			gtk_tree_model_get_iter (model, &iter_prev, path);
+			gtk_list_store_swap (GTK_LIST_STORE (model),
+								 &iter,
+								 &iter_prev);
+			gtk_widget_set_sensitive (revert_button, TRUE);
+		}
+		gtk_tree_path_free (path);
+	}
 	return;
 }
 /******************************************************************************/
@@ -345,10 +465,11 @@ applet_preferences_create_list_view (AppletPreferences *a_prefs) {
 	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column);
 
 	/* Create a cell render for the path */
+	/* FIXME: pass the a_prefs here, not store */
 	renderer = gtk_cell_renderer_text_new ();
 	g_signal_connect (G_OBJECT (view),
 					  "row-activated",
-					  G_CALLBACK (applet_preferences_path_cell_activayed),
+					  G_CALLBACK (applet_preferences_path_cell_activated),
 					  (gpointer)store);
 	column = gtk_tree_view_column_new_with_attributes ("Path", renderer,
 													   "text", PATH_COLUMN,
@@ -356,78 +477,10 @@ applet_preferences_create_list_view (AppletPreferences *a_prefs) {
 	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column);
 
 	/*put the selection in SINGLE mode */
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
-	gtk_tree_selection_set_mode(selection, GTK_SELECTION_SINGLE);
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(view));
+	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
 
 	return view;
-}
-/******************************************************************************/
-static void
-applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
-	GtkTreeModel *model;
-	GtkTreeIter   iter;
-	GtkWidget *file_chooser_dialog;
-
-	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select Folder To Add",
-													   NULL,
-													   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-													   GTK_STOCK_CANCEL,
-													   GTK_RESPONSE_CANCEL,
-													   GTK_STOCK_OPEN,
-													   GTK_RESPONSE_ACCEPT,
-													   NULL);
-	/* Set the starting path */
-	gchar *start_path = g_strdup_printf ("%s/*", g_get_home_dir());
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog),
-								   start_path);
-	g_free (start_path);
-
-	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
-
-		gchar *dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
-		gchar *label = g_path_get_basename (dir);
-
-		model = gtk_tree_view_get_model(GTK_TREE_VIEW(tree_view));
-		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
-		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-							LABEL_COLUMN, label,
-							PATH_COLUMN, dir,
-							-1);
-		g_free(dir);
-		gtk_widget_set_sensitive (revert_button, TRUE);
-	}
-	gtk_widget_destroy (file_chooser_dialog);
-	return;
-}
-/******************************************************************************/
-static void
-on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
-	GtkTreeSelection *selection;
-	GtkTreeModel     *model;
-	GtkTreeIter       selected_row;
-
-	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree_view));
-
-	g_assert (gtk_tree_selection_get_mode(selection) == GTK_SELECTION_SINGLE);
-
-	if (gtk_tree_selection_get_selected(selection, &model, &selected_row)) {
-		gtk_list_store_remove(GTK_LIST_STORE(model), &selected_row);
-		gtk_widget_set_sensitive (revert_button, TRUE);
-	}
-
-	return;
-}
-/******************************************************************************/
-static void
-applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
-	g_printf ("move up\n");
-	return;
-}
-/******************************************************************************/
-static void
-applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
-	g_printf ("move down\n");
-	return;
 }
 /******************************************************************************/
 void
@@ -451,7 +504,6 @@ applet_preferences_make_dialog (AppletPreferences *a_prefs) {
 		
 		gtk_window_set_title (GTK_WINDOW (window), "Menu File Browser Applet Preferences");
 		gtk_window_set_icon_name (GTK_WINDOW (window), "menu-file-browser-applet");
-/*		gtk_window_set_resizable (GTK_WINDOW (window), FALSE);*/
 
 		revert_button = gtk_dialog_add_button (GTK_DIALOG (window),
 											   GTK_STOCK_REVERT_TO_SAVED,
@@ -482,13 +534,13 @@ applet_preferences_make_dialog (AppletPreferences *a_prefs) {
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_terminal_changed),
 						  (gpointer)a_prefs);
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   gtk_label_new ("terminal "),
 						   FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   terminal,
 						   FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX (vbox),
+		gtk_box_pack_start (GTK_BOX (vbox),
 						   hbox, 
 						   FALSE, FALSE, 0);
 		/***** show hidden *****/
@@ -499,7 +551,7 @@ applet_preferences_make_dialog (AppletPreferences *a_prefs) {
 						  "toggled",
 						  G_CALLBACK (applet_preferences_on_show_hidden_pressed),
 						  (gpointer)a_prefs);
-		gtk_box_pack_start(GTK_BOX (vbox),
+		gtk_box_pack_start (GTK_BOX (vbox),
 						   show_hidden, 
 						   FALSE, FALSE, 0);
 		/***** icon *****/
@@ -521,28 +573,34 @@ applet_preferences_make_dialog (AppletPreferences *a_prefs) {
 						  G_CALLBACK (applet_preferences_on_icon_select),
 						  (gpointer)a_prefs);
 
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   show_icon, 
 						   FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   icon_button, 
 						   FALSE, FALSE, 0);
-		gtk_box_pack_start(GTK_BOX (vbox),
+		gtk_box_pack_start (GTK_BOX (vbox),
 						   hbox, 
 						   FALSE, FALSE, 0);
 		/***** dirs/labels **/
-		GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
-		gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
-                                    		 GTK_SHADOW_ETCHED_IN);
-		gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-                                    	GTK_POLICY_AUTOMATIC,
-                                    	GTK_POLICY_AUTOMATIC);
+		GtkWidget *tree_view = applet_preferences_create_list_view (a_prefs);
 
-		tree_view = applet_preferences_create_list_view (a_prefs);
-		gtk_container_add (GTK_CONTAINER (sw), tree_view);
-
-		gtk_container_add (GTK_CONTAINER (GTK_DIALOG(window)->vbox), sw);
-/*		gtk_box_pack_start (GTK_BOX (vbox), sw, TRUE, TRUE, 0);*/
+		if (1) {
+			/* use a scrollable window */
+			GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
+			gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
+												 GTK_SHADOW_ETCHED_IN);
+			gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+											GTK_POLICY_NEVER,
+											GTK_POLICY_NEVER);
+			gtk_container_add (GTK_CONTAINER (sw), tree_view);
+			gtk_container_add (GTK_CONTAINER (vbox), sw);
+		}
+		else {
+			/* let the tree_view widget expand the window as needed */
+			gtk_container_add (GTK_CONTAINER (vbox), tree_view);
+		}
+		a_prefs->priv->tree_view = tree_view;
 		/***** more buttons ******/
 		hbox = gtk_hbox_new (TRUE, 0);
 
@@ -570,7 +628,7 @@ applet_preferences_make_dialog (AppletPreferences *a_prefs) {
 						  (gpointer) a_prefs);
 		g_signal_connect (G_OBJECT (rem_button),
 						  "released",
-						  G_CALLBACK (on_rem_dir_clicked),
+						  G_CALLBACK (applet_preferences_on_rem_dir_clicked),
 						  (gpointer) a_prefs);
 		g_signal_connect (G_OBJECT (up_button),
 						  "released",
@@ -581,19 +639,19 @@ applet_preferences_make_dialog (AppletPreferences *a_prefs) {
 						  G_CALLBACK (applet_preferences_on_down_dir_clicked),
 						  (gpointer) a_prefs);
 
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   add_button, 
 						   TRUE, TRUE, 0);
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   rem_button, 
 						   TRUE, TRUE, 0);
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   up_button, 
 						   TRUE, TRUE, 0);
-		gtk_box_pack_start(GTK_BOX (hbox),
+		gtk_box_pack_start (GTK_BOX (hbox),
 						   down_button, 
 						   TRUE, TRUE, 0);
-		gtk_box_pack_start(GTK_BOX (vbox),
+		gtk_box_pack_start (GTK_BOX (vbox),
 						   hbox, 
 						   FALSE, FALSE, 0);
 		/***** the end ******/
@@ -694,8 +752,8 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 									 &error);
 	}
 	/*===*/
-	mb_prefs->dirs = g_ptr_array_new();
-	mb_prefs->labels = g_ptr_array_new();
+	mb_prefs->dirs = g_ptr_array_new ();
+	mb_prefs->labels = g_ptr_array_new ();
 	GSList *dirs_head=dirs;
 	GSList *labels_head=labels;
 

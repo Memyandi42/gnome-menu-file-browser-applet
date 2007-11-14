@@ -43,16 +43,19 @@ typedef struct {
 } Pair;
 /******************************************************************************/
 gchar *
-clamp_file_name (const gchar *file_name) {
-	gchar *tmp, *ret;
+clamp_file_name (const gchar *file_name, gboolean *clamped) {
+/* *clamped is true if the string is actually clamped */
+  gchar *tmp, *ret;
 
 	if (strlen (file_name) > MAX_FILE_NAME_LENGTH) {
 		tmp = g_strndup (file_name, MAX_FILE_NAME_LENGTH - 3);
 		ret = g_strdup_printf ("%s...", tmp);
 		g_free (tmp);
+        if (clamped != NULL) *clamped = TRUE;
 		return ret;
 	}
 	else {
+        if (clamped != NULL) *clamped = FALSE;
 		return g_strdup (file_name);
 	}
 }
@@ -399,8 +402,14 @@ menu_browser_add_menu_header (GtkWidget *current_menu,
 	const gchar *file_name_and_path = pair->path;
 
 	gchar *dir = g_path_get_basename (file_name_and_path);
-	gchar *tmp = clamp_file_name (dir);
+	gchar *tmp;
+    gboolean clamped = TRUE;
+    
+    tmp = clamp_file_name(dir, &clamped);
 	menu_item = gtk_image_menu_item_new_with_label (tmp);
+    if (clamped == TRUE)
+        gtk_widget_set_tooltip_text (menu_item, dir);
+      
 	g_free(dir);
 	g_free(tmp);
     
@@ -441,7 +450,8 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
     guint		            i;
 	Pair					*this_pair = NULL;
 	gchar					*tmp = NULL;
-	
+    gboolean                clamped = TRUE;
+    
     /* get the menu widget to pack all the menu items for this dir into */
     current_menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (parent_menu_item));
 
@@ -461,8 +471,12 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 											  (gchar *)g_ptr_array_index (dirs, i)),
 
         /*make a menu item for this dir, limit the length of the text in the menu*/
-		tmp = clamp_file_name ((gchar*)g_ptr_array_index (dirs, i));
-	    menu_item = gtk_image_menu_item_new_with_label (tmp);
+        tmp = clamp_file_name ((gchar*)g_ptr_array_index (dirs, i), &clamped);
+        menu_item = gtk_image_menu_item_new_with_label (tmp);
+
+        if (clamped == TRUE)
+            gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (dirs, i));
+            
 		g_free(tmp);
 		
         /*get the icon widget based on the returned icon name (always the same icon, can speed up here)*/
@@ -510,9 +524,14 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
         file_name_and_path = g_strdup_printf ("%s/%s",
 											  pair->path,
 											  (gchar *)g_ptr_array_index (files, i)),
+
+        
         /*make a menu item for this dir*/
-		tmp = clamp_file_name ((gchar*)g_ptr_array_index (files, i));
+        tmp = clamp_file_name ((gchar*)g_ptr_array_index (files, i), &clamped);
 	    menu_item = gtk_image_menu_item_new_with_label (tmp);
+        if (clamped == TRUE)
+            gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (files, i));
+          
 		g_free (tmp);
         
         /*lookup the mime icon name for this file type */

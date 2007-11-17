@@ -26,6 +26,7 @@
 #include "preferences.h"
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
+#include <stdlib.h>
 
 /******************************************************************************/
 struct _AppletPreferencesPrivate {
@@ -65,13 +66,21 @@ static void applet_preferences_dispose (GObject *obj);
 static void
 applet_preferences_on_show_icon_pressed (GtkWidget *widget, gpointer data) {
 	AppletPreferences *a_prefs = (AppletPreferences *)data;
+
 	/* get the new state from the widget and update the prefs structure */
 	a_prefs->menu_bar_prefs->show_icon = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+
+	PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+	signal_data->signal_id = PREFS_SIGNAL_SHOW_ICON;
+	signal_data->instance  = -1;
+	signal_data->label 	  = NULL;
+	signal_data->path 	  = NULL;
+
 	/* emit the signal so the panel menu bar updates itself */
 	g_signal_emit (G_OBJECT (data),
 			applet_preferences_signals [PREFS_CHANGED],
 			0,
-			PREFS_SIGNAL_SHOW_ICON);
+			signal_data);
 
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
@@ -131,7 +140,6 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
 		gchar *new_icon;
 		new_icon = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
-		g_printf ("the new icon is %s\n", new_icon);
 		/* make sure the new icon is not the same as the old one */	
 		if (g_ascii_strcasecmp (new_icon, a_prefs->menu_bar_prefs->icon)) {
 			/* update the prefs structure */
@@ -145,11 +153,17 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 													 ICON_BUTTON_SIZE);
 			gtk_button_set_image (GTK_BUTTON (button), icon);
 
+			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			signal_data->signal_id = PREFS_SIGNAL_ICON_CHANGED;
+			signal_data->instance  = -1;
+			signal_data->label 	   = NULL;
+			signal_data->path 	   = NULL;
+
 			/* emit the signal so the panel menu bar updates itself */
 			g_signal_emit (G_OBJECT (data),
 						   applet_preferences_signals [PREFS_CHANGED],
 						   0,
-						   PREFS_SIGNAL_ICON_CHANGED);
+						   signal_data);
 			gtk_widget_set_sensitive (revert_button, TRUE);
 		}
 		else {
@@ -228,16 +242,43 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 									  gchar				*new_string,
 									  gpointer			data){
 
-	GtkListStore *store = (GtkListStore *) data;
-	GtkTreeIter iter;
+	AppletPreferences	*a_prefs	= (AppletPreferences *)data;
+	GtkWidget			*tree_view	= a_prefs->priv->tree_view;
+	GtkTreeModel		*model;
+	GtkTreeIter			iter;
+	gchar				*path		= NULL;
+
+	/* get the model where the actual data is stored */
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW (tree_view));
+
 	/* get an iterator to the model for the currently selected cell */
-	gtk_tree_model_get_iter_from_string (GTK_TREE_MODEL (store),
+	gtk_tree_model_get_iter_from_string (model,
 										 &iter,
 										 path_string);
 	/* update the model */
-	gtk_list_store_set (store, &iter,
+	gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 						LABEL_COLUMN, new_string,
 						-1);
+
+	/* the path associated with the selection */
+	gtk_tree_model_get (model,
+						&iter,
+						PATH_COLUMN, &path,
+						-1);
+
+	/* create the data structure with the event info to pass to panel_menu_bar */
+	PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+	signal_data->signal_id = PREFS_SIGNAL_DIR_CHANGED;
+	signal_data->instance  = atoi (path_string);
+	signal_data->label 	   = g_strdup (new_string);
+	signal_data->path 	   = path;
+
+	/* emit the signal so the panel menu bar updates itself */
+	g_signal_emit (G_OBJECT (data),
+			applet_preferences_signals [PREFS_CHANGED],
+			0,
+			signal_data);
+
 	/* update the revert button*/
 	gtk_widget_set_sensitive (revert_button, TRUE);
 
@@ -250,18 +291,19 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 										GtkTreePath		  *path,
 										GtkTreeViewColumn *col,
 										gpointer		   data) {
+	GtkTreeModel *model;
+	GtkTreeIter	 iter;
+	GtkWidget	 *file_chooser_dialog;
+	gchar		 *old_path = NULL;
 
-	GtkListStore	*store = (GtkListStore *) data;
-	GtkTreeIter		iter;
-	GtkWidget		*file_chooser_dialog;
-	gchar			*old_path = NULL;
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW (tree_view));
 
 	/* get an iterator to the model for the currently selected cell */
-	gtk_tree_model_get_iter (GTK_TREE_MODEL (store),
+	gtk_tree_model_get_iter (model,
 							 &iter,
 							 path);
 	/* the "Path" value for the active cell */
-	gtk_tree_model_get (GTK_TREE_MODEL (store),
+	gtk_tree_model_get (model,
 						&iter,
 						PATH_COLUMN, &old_path,
 						-1);
@@ -284,12 +326,38 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 		gchar *new_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
 		/* only update data if it's not the same as the old one */
 		if (g_ascii_strcasecmp (old_path, new_path)) {
-			gtk_list_store_set (store, &iter,
+			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 								PATH_COLUMN, new_path,
 								-1);
+
+
+			/* the label associated with the selection */
+			gchar *label = NULL;
+			gtk_tree_model_get (model,
+								&iter,
+								LABEL_COLUMN, &label,
+								-1);
+
+			/* get the instance from the iterator */
+			gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+
+			/* create the data structure with the event info to pass to panel_menu_bar */
+			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			signal_data->signal_id = PREFS_SIGNAL_DIR_CHANGED;
+			signal_data->instance  = atoi (instance);
+			signal_data->label 	   = label;
+			signal_data->path 	   = new_path;
+			g_free (instance);
+
+			/* emit the signal so the panel menu bar updates itself */
+			g_signal_emit (G_OBJECT (data),
+					applet_preferences_signals [PREFS_CHANGED],
+					0,
+					signal_data);
+
+			/* update the revert button*/
 			gtk_widget_set_sensitive (revert_button, TRUE);
 		}
-		g_free (new_path);
 	}
 	gtk_widget_destroy (file_chooser_dialog);
 	/* signal the panel_menu bar to update itself */
@@ -330,7 +398,21 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 							LABEL_COLUMN, label,
 							PATH_COLUMN, dir,
 							-1);
-		g_free (dir);
+
+		/* create the data structure with the event info to pass to panel_menu_bar */
+		PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+		signal_data->signal_id = PREFS_SIGNAL_DIR_ADD;
+		signal_data->instance  = -1;
+		signal_data->label 	   = label;
+		signal_data->path 	   = dir;
+
+		/* emit the signal so the panel menu bar updates itself */
+		g_signal_emit (G_OBJECT (data),
+				applet_preferences_signals [PREFS_CHANGED],
+				0,
+				signal_data);
+
+		/* update the revert button*/
 		gtk_widget_set_sensitive (revert_button, TRUE);
 	}
 	gtk_widget_destroy (file_chooser_dialog);
@@ -341,7 +423,7 @@ static void
 applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 	GtkTreeSelection	*selection;
 	GtkTreeModel		*model;
-	GtkTreeIter			selected_row;
+	GtkTreeIter			iter;
 	AppletPreferences	*a_prefs = (AppletPreferences *)data;
 	GtkWidget			*tree_view = a_prefs->priv->tree_view;
 
@@ -350,8 +432,28 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 
 	/* get the iterator for the current selection and remove the corresponding
 	 * row form the model */
-	if (gtk_tree_selection_get_selected (selection, &model, &selected_row)) {
-		gtk_list_store_remove (GTK_LIST_STORE(model), &selected_row);
+	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+
+		/* get the instance from the iterator */
+		gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+
+		gtk_list_store_remove (GTK_LIST_STORE(model), &iter);
+
+		/* create the data structure with the event info to pass to panel_menu_bar */
+		PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+		signal_data->signal_id = PREFS_SIGNAL_DIR_DEL;
+		signal_data->instance  = atoi (instance);
+		signal_data->label 	   = NULL;
+		signal_data->path 	   = NULL;
+		g_free (instance);
+
+		/* emit the signal so the panel menu bar updates itself */
+		g_signal_emit (G_OBJECT (data),
+				applet_preferences_signals [PREFS_CHANGED],
+				0,
+				signal_data);
+
+		/* update the revert button*/
 		gtk_widget_set_sensitive (revert_button, TRUE);
 	}
 
@@ -375,9 +477,29 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 		iter_next = iter;
 		/* get the next iterator and it it's valid, swap them */
 		if (gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter_next)){
+
+			/* get the instance from the iterator */
+			gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+
 			gtk_list_store_swap (GTK_LIST_STORE (model),
 								 &iter,
 								 &iter_next);
+
+			/* create the data structure with the event info to pass to panel_menu_bar */
+			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			signal_data->signal_id = PREFS_SIGNAL_DIR_MOVE_DOWN;
+			signal_data->instance  = atoi (instance);
+			signal_data->label 	   = NULL;
+			signal_data->path 	   = NULL;
+			g_free (instance);
+
+			/* emit the signal so the panel menu bar updates itself */
+			g_signal_emit (G_OBJECT (data),
+					applet_preferences_signals [PREFS_CHANGED],
+					0,
+					signal_data);
+
+			/* update the revert button*/
 			gtk_widget_set_sensitive (revert_button, TRUE);
 		}
 	}
@@ -386,12 +508,12 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
-	GtkTreeSelection	*selection = NULL;
-	GtkTreeModel 		*model = NULL;
+	GtkTreeSelection	*selection	= NULL;
+	GtkTreeModel 		*model		= NULL;
 	GtkTreeIter			iter, iter_prev;
 	GtkTreePath			*path;
-	AppletPreferences	*a_prefs = (AppletPreferences *)data;
-	GtkWidget			*tree_view = a_prefs->priv->tree_view;
+	AppletPreferences	*a_prefs	= (AppletPreferences *)data;
+	GtkWidget			*tree_view	= a_prefs->priv->tree_view;
 
 	/* get the current selection */
 	selection =  gtk_tree_view_get_selection (GTK_TREE_VIEW (tree_view));
@@ -406,9 +528,29 @@ applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
 		if (gtk_tree_path_prev (path)) {
 			/* get the corresponding iter, and swap the store elements*/
 			gtk_tree_model_get_iter (model, &iter_prev, path);
+
+			/* get the instance from the iterator */
+			gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+
 			gtk_list_store_swap (GTK_LIST_STORE (model),
 								 &iter,
 								 &iter_prev);
+
+			/* create the data structure with the event info to pass to panel_menu_bar */
+			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			signal_data->signal_id = PREFS_SIGNAL_DIR_MOVE_UP;
+			signal_data->instance  = atoi (instance);
+			signal_data->label 	   = NULL;
+			signal_data->path 	   = NULL;
+			g_free (instance);
+
+			/* emit the signal so the panel menu bar updates itself */
+			g_signal_emit (G_OBJECT (data),
+					applet_preferences_signals [PREFS_CHANGED],
+					0,
+					signal_data);
+
+			/* update the revert button*/
 			gtk_widget_set_sensitive (revert_button, TRUE);
 		}
 		gtk_tree_path_free (path);
@@ -454,7 +596,7 @@ applet_preferences_create_list_view (AppletPreferences *a_prefs) {
 	g_signal_connect (G_OBJECT (renderer),
 					  "edited",
 					  G_CALLBACK (applet_preferences_label_cell_edited),
-					  (gpointer)store);
+					  (gpointer) a_prefs);
 
 	/* Create a column, associating the "text" attribute of the
 	* cell_renderer to the first column of the model */
@@ -470,7 +612,7 @@ applet_preferences_create_list_view (AppletPreferences *a_prefs) {
 	g_signal_connect (G_OBJECT (view),
 					  "row-activated",
 					  G_CALLBACK (applet_preferences_path_cell_activated),
-					  (gpointer)store);
+					  (gpointer) a_prefs);
 	column = gtk_tree_view_column_new_with_attributes ("Path", renderer,
 													   "text", PATH_COLUMN,
 													   NULL);
@@ -790,7 +932,6 @@ applet_preferences_class_init (AppletPreferencesClass * klass) {
 	g_type_class_add_private (klass, sizeof (AppletPreferencesPrivate));
 	G_OBJECT_CLASS (klass)->dispose = applet_preferences_dispose;
 
-
 	applet_preferences_signals [PREFS_CHANGED] =
 		g_signal_new ("prefs_changed",
     	              G_TYPE_FROM_CLASS (klass),
@@ -802,7 +943,11 @@ applet_preferences_class_init (AppletPreferencesClass * klass) {
 				      g_cclosure_marshal_VOID__INT,
 					  G_TYPE_NONE,
 					  1,
-					  G_TYPE_INT);
+					  G_TYPE_POINTER);
+	/* NOTE!!! a dynamically allocated PrefsChangedSignalData structure is passed
+	 * to the callback function including 2 gchar pointers. The callback function
+	 * is responsible for freeing this memory. HOWEVER!!! make sure that the gchar*
+	 * can be freed!!! Be careful!!!*/
 }
 /******************************************************************************/
 static void

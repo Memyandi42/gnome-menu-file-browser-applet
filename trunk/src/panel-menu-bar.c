@@ -56,13 +56,13 @@ static void panel_menu_bar_dispose (GObject * obj);
 /******************************************************************************/
 /******************************************************************************/
 void
-panel_menu_bar_edit_prefs (PanelMenuBar *menu_bar) {
-	AppletPreferences *prefs = menu_bar->priv->prefs;
+panel_menu_bar_edit_prefs (PanelMenuBar *self) {
+	AppletPreferences *prefs = self->priv->prefs;
 	applet_preferences_make_dialog (prefs);
 }
 /******************************************************************************/
 static void
-file_browser_applet_hide_tooltip (GtkWidget *widget,
+panel_menu_bar_hide_tooltip (GtkWidget *widget,
 								  GtkTooltips *tooltip) {
 	gtk_tooltips_disable (tooltip);
 	/* reposition the menu too. */
@@ -72,7 +72,7 @@ file_browser_applet_hide_tooltip (GtkWidget *widget,
 }
 /******************************************************************************/
 static void
-file_browser_applet_show_tooltip (GtkWidget *widget,
+panel_menu_bar_show_tooltip (GtkWidget *widget,
 								  GtkTooltips *tooltip) {
 	gtk_tooltips_enable (tooltip);
 	return;
@@ -232,10 +232,10 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 }
 /******************************************************************************/
 static void
-update_image (PanelMenuBar *menu_bar, int changed_pref) {
+panel_menu_bar_update_image (PanelMenuBar *self, int changed_pref) {
 	GtkWidget *image = NULL;
-	AppletPreferences *a_prefs = menu_bar->priv->prefs;
-	MenuFileBrowser *file_browser = (MenuFileBrowser *)(g_ptr_array_index (menu_bar->priv->file_browsers, 0));
+	AppletPreferences *a_prefs = self->priv->prefs;
+	MenuFileBrowser *file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
 
 	image = gtk_image_menu_item_get_image ( GTK_IMAGE_MENU_ITEM (file_browser->menu_item));
 
@@ -252,28 +252,108 @@ update_image (PanelMenuBar *menu_bar, int changed_pref) {
 	return;
 }
 /******************************************************************************/
+/******************************************************************************/
 static void
-on_preferences_changed (AppletPreferences *a_prefs, gint signal, gpointer data) {
-	PanelMenuBar *menu_bar = (PanelMenuBar *)data;
+panel_menu_bar_update_entry (PanelMenuBar *self,
+							 PrefsChangedSignalData *signal_data) {
 
-	switch (signal) {
+	return;
+}
+/******************************************************************************/
+static void
+panel_menu_bar_move_entry (PanelMenuBar *self,
+							 PrefsChangedSignalData *signal_data) {
+
+	return;
+}
+/******************************************************************************/
+static void
+panel_menu_bar_remove_entry (PanelMenuBar *self,
+							 gint instance) {
+	/* this is broken !!!!!!!!!!!!!!!!!!!!!!!! */
+	MenuFileBrowser *file_browser_instance = 
+					(MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, instance));
+
+	if (file_browser_instance != NULL) {
+		gtk_widget_destroy (GTK_WIDGET (file_browser_instance->menu_item));
+	}
+	else g_printf("shitzer\n");
+	/*
+	menu_browser_delete (file_browser_instance);
+	*/
+	return;
+}
+/******************************************************************************/
+static void
+panel_menu_bar_add_entry (PanelMenuBar *self,
+						  gchar *label,
+						  gchar *path) {
+
+	MenuFileBrowser *tmp_file_browser = menu_browser_new (label,
+														  path,
+														  self->priv->prefs->menu_bar_prefs->browser_prefs);
+
+	/* add it to the list and to the menu bar*/
+	g_ptr_array_add (self->priv->file_browsers, tmp_file_browser);
+
+	gtk_menu_shell_append (GTK_MENU_SHELL (self),
+						   tmp_file_browser->menu_item);
+
+	/* attach the signal to hide the tooltips when selected*/
+	g_signal_connect (G_OBJECT (tmp_file_browser->menu_item),
+					  "activate",
+					  G_CALLBACK (panel_menu_bar_hide_tooltip),
+					  self->priv->tooltip);
+
+	gtk_widget_show_all (tmp_file_browser->menu_item);
+	return;
+}
+/******************************************************************************/
+/******************************************************************************/
+static void
+panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
+						PrefsChangedSignalData *signal_data,
+						gpointer data) {
+	PanelMenuBar *self = (PanelMenuBar *)data;
+
+	switch (signal_data->signal_id) {
 		case PREFS_SIGNAL_TERMINAL :
 		case PREFS_SIGNAL_SHOW_HIDDEN :
 			break;
 		case PREFS_SIGNAL_SHOW_ICON :
 		case PREFS_SIGNAL_ICON_CHANGED :
-			update_image (menu_bar, signal);
+			panel_menu_bar_update_image (self, signal_data->signal_id);
 			break;
-		case PREFS_SIGNAL_DIRS_CHANGED :
+		case PREFS_SIGNAL_DIR_MOVE_UP :
+		case PREFS_SIGNAL_DIR_MOVE_DOWN :
+			panel_menu_bar_move_entry (self, signal_data);
+			break;
+		case PREFS_SIGNAL_DIR_CHANGED :
+			panel_menu_bar_update_entry (self, signal_data);
+			break;
+		case PREFS_SIGNAL_DIR_ADD :
+			panel_menu_bar_add_entry (self, signal_data->label, signal_data->path);
+			break;
+		case PREFS_SIGNAL_DIR_DEL :
+			panel_menu_bar_remove_entry (self, signal_data->instance);
 			break;
 	}
-	g_printf ("caught the signal %d!!!\n", signal);
+	g_printf ("caught the signal: %d, ", signal_data->signal_id);
+	g_printf ("instance %d, label: %s, path %s\n",
+			  signal_data->instance,
+			  signal_data->label,
+			  signal_data->path);
+
+	g_free (signal_data->label);
+	g_free (signal_data->path);
+	g_free (signal_data);
+
 	return;
 }
 /******************************************************************************/
 PanelMenuBar*
 panel_menu_bar_new (PanelApplet* applet) {
-	PanelMenuBar * self;
+	PanelMenuBar *self;
 
 	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
 	self = g_object_newv (TYPE_PANEL_MENU_BAR, 0, NULL);
@@ -308,28 +388,14 @@ panel_menu_bar_new (PanelApplet* applet) {
 	MenuBarPrefs *mb_prefs = self->priv->prefs->menu_bar_prefs;
 	g_signal_connect (G_OBJECT (self->priv->prefs), 
 			  "prefs_changed",
-			  G_CALLBACK (on_preferences_changed), 
+			  G_CALLBACK (panel_menu_bar_on_preferences_changed), 
 			  self);
 
-
-
-
 	/* for each path in the config, make a browser object */
-	for (i=0; i < mb_prefs->dirs->len; i++) {	/* make it */
-		tmp_file_browser = menu_browser_new ((gchar*)(g_ptr_array_index (mb_prefs->labels, i)),
-				  								  (gchar*)(g_ptr_array_index (mb_prefs->dirs, i)),
-												  mb_prefs->browser_prefs);
-		/* add it to the list and to the menu bar*/
-		g_ptr_array_add (self->priv->file_browsers, tmp_file_browser);
-
-		gtk_menu_shell_append (GTK_MENU_SHELL (self),
-							   tmp_file_browser->menu_item);
-
-		/* attach the signal to hide the tooltips when selected*/
-		g_signal_connect (G_OBJECT (tmp_file_browser->menu_item),
-						  "activate",
-						  G_CALLBACK (file_browser_applet_hide_tooltip),
-						  self->priv->tooltip);
+	for (i=0; i < mb_prefs->dirs->len; i++) {
+		panel_menu_bar_add_entry (self,
+								  (gchar*)(g_ptr_array_index (mb_prefs->labels, i)),
+								  (gchar*)(g_ptr_array_index (mb_prefs->dirs, i)));
 	}
 
     /* add the image to the menu item */
@@ -344,7 +410,7 @@ panel_menu_bar_new (PanelApplet* applet) {
 	/* attach the signal to show the tooltip again when deselected*/
     g_signal_connect (G_OBJECT (self),
                 	  "deactivate",
-					  G_CALLBACK (file_browser_applet_show_tooltip),
+					  G_CALLBACK (panel_menu_bar_show_tooltip),
 					  self->priv->tooltip);
 
 	gtk_container_add (GTK_CONTAINER (applet), GTK_WIDGET (self));	
@@ -379,8 +445,8 @@ panel_menu_bar_init (PanelMenuBar * self) {
 }
 /******************************************************************************/
 static void
-panel_menu_bar_dispose (GObject * obj) {
-	PanelMenuBar * self;
+panel_menu_bar_dispose (GObject *obj) {
+	PanelMenuBar *self;
 	PanelMenuBarClass * klass;
 /*	GObjectClass * parent_class;*/
 	self = PANEL_MENU_BAR (obj);

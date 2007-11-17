@@ -62,6 +62,7 @@ typedef struct _MenuBarPrefs MenuBarPrefs;
 typedef struct _AppletPreferences AppletPreferences;
 typedef struct _AppletPreferencesClass AppletPreferencesClass;
 typedef struct _AppletPreferencesPrivate AppletPreferencesPrivate;
+typedef struct _PrefsChangedSignalData PrefsChangedSignalData;
 /******************************************************************************/
 struct _BrowserPrefs {
 	gchar		*terminal;
@@ -82,13 +83,23 @@ struct _AppletPreferences {
 struct _AppletPreferencesClass {
 	GObjectClass parent;
 };
+struct _PrefsChangedSignalData {
+	gint	signal_id;
+	gint	instance;
+	gchar	*label;
+	gchar	*path;
+};
 /******************************************************************************/
 enum {
 	PREFS_SIGNAL_TERMINAL,
 	PREFS_SIGNAL_SHOW_HIDDEN,
 	PREFS_SIGNAL_SHOW_ICON,
 	PREFS_SIGNAL_ICON_CHANGED,
-	PREFS_SIGNAL_DIRS_CHANGED
+	PREFS_SIGNAL_DIR_CHANGED,
+	PREFS_SIGNAL_DIR_MOVE_UP,
+	PREFS_SIGNAL_DIR_MOVE_DOWN,
+	PREFS_SIGNAL_DIR_ADD,
+	PREFS_SIGNAL_DIR_DEL
 };
 /******************************************************************************/
 AppletPreferences*	applet_preferences_new (PanelApplet *applet);

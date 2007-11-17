@@ -73,11 +73,13 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 	gchar       *file;
 	const gchar *authors[] = {
 		"Axel von Bertoldi <bertoldia@gmail.com>",
+		"",
+		"Contributions by:",
+		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
 		NULL
 	};
 	const gchar *documenters [] = {
 /*		"Axel von Bertoldi", */
-		NULL,
 		NULL
 	};
 	const gchar *translator_credits = _("translator_credits");

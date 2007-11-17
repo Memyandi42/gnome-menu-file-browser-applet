@@ -407,9 +407,9 @@ menu_browser_add_menu_header (GtkWidget *current_menu,
     
     tmp = clamp_file_name(dir, &clamped);
 	menu_item = gtk_image_menu_item_new_with_label (tmp);
-    if (clamped == TRUE)
+    if (clamped == TRUE) {
         gtk_widget_set_tooltip_text (menu_item, dir);
-      
+	}
 	g_free(dir);
 	g_free(tmp);
     
@@ -473,10 +473,9 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
         /*make a menu item for this dir, limit the length of the text in the menu*/
         tmp = clamp_file_name ((gchar*)g_ptr_array_index (dirs, i), &clamped);
         menu_item = gtk_image_menu_item_new_with_label (tmp);
-
-        if (clamped == TRUE)
+        if (clamped == TRUE) {
             gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (dirs, i));
-            
+		}
 		g_free(tmp);
 		
         /*get the icon widget based on the returned icon name (always the same icon, can speed up here)*/
@@ -529,9 +528,9 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
         /*make a menu item for this dir*/
         tmp = clamp_file_name ((gchar*)g_ptr_array_index (files, i), &clamped);
 	    menu_item = gtk_image_menu_item_new_with_label (tmp);
-        if (clamped == TRUE)
+        if (clamped == TRUE) {
             gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (files, i));
-          
+		}
 		g_free (tmp);
         
         /*lookup the mime icon name for this file type */

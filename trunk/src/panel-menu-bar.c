@@ -262,7 +262,39 @@ panel_menu_bar_update_entry (PanelMenuBar *self,
 /******************************************************************************/
 static void
 panel_menu_bar_move_entry (PanelMenuBar *self,
-							 PrefsChangedSignalData *signal_data) {
+						   PrefsChangedSignalData *signal_data) {
+	int new_pos;
+	MenuFileBrowser *file_browser_instance = NULL;
+	MenuFileBrowser *file_browser_affected = NULL;
+
+	if (signal_data->signal_id == PREFS_SIGNAL_DIR_MOVE_UP) {
+		new_pos = signal_data->instance - 1;
+	}
+	else if (signal_data->signal_id == PREFS_SIGNAL_DIR_MOVE_DOWN) {
+		new_pos = signal_data->instance + 1;
+	}
+	else {
+		g_printf("shitzer\n");
+		return;
+	}
+
+	if (new_pos < 0) {
+		g_printf("shitzer\n");
+		return;
+	}
+
+	file_browser_instance = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
+	file_browser_affected = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, new_pos));
+
+	if (file_browser_instance != NULL && file_browser_affected != NULL) {
+		gtk_container_remove (GTK_CONTAINER (self), file_browser_instance->menu_item);
+		gtk_menu_shell_insert (GTK_MENU_SHELL (self),
+							   file_browser_instance->menu_item,
+							   new_pos);
+		self->priv->file_browsers->pdata[new_pos] 				= file_browser_instance;
+		self->priv->file_browsers->pdata[signal_data->instance] = file_browser_affected;
+	}
+	else g_printf("shitzer\n");
 
 	return;
 }
@@ -270,17 +302,16 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 static void
 panel_menu_bar_remove_entry (PanelMenuBar *self,
 							 gint instance) {
-	/* this is broken !!!!!!!!!!!!!!!!!!!!!!!! */
 	MenuFileBrowser *file_browser_instance = 
 					(MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, instance));
 
 	if (file_browser_instance != NULL) {
-		gtk_widget_destroy (GTK_WIDGET (file_browser_instance->menu_item));
+		gtk_container_remove (GTK_CONTAINER (self), file_browser_instance->menu_item);
+		g_ptr_array_remove_index (self->priv->file_browsers, instance);
+		menu_browser_delete (file_browser_instance);
 	}
 	else g_printf("shitzer\n");
-	/*
-	menu_browser_delete (file_browser_instance);
-	*/
+
 	return;
 }
 /******************************************************************************/

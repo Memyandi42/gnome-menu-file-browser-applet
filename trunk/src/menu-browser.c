@@ -85,15 +85,15 @@ menu_browser_clean_up (MenuFileBrowser *file_browser) {
 /******************************************************************************/
 void
 menu_browser_delete (MenuFileBrowser *browser) {
+	menu_browser_clean_up (browser);
+
 	/* should delete all child widgets */
 	gtk_widget_destroy (GTK_WIDGET (browser->menu_item));
 	
 	g_free (browser->priv->label);
 	g_free (browser->priv->root_path);
 	g_free (browser->priv->directory_mime_icon_name);
-	g_free (browser->priv->icon_theme); /* not sure if this one's right*/
 	
-	menu_browser_clean_up (browser);
 	g_ptr_array_free (browser->priv->tmp_handle, TRUE) ;
 
 	/* g_free (browser->prefs); */

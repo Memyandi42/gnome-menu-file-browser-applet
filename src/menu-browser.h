@@ -36,6 +36,7 @@
 #include "preferences.h"
 
 #define MAX_FILE_NAME_LENGTH 30 /* What's a good value here??? */
+#define DATA_LABEL "item_path"
 
 
 /******************************************************************************/
@@ -60,6 +61,7 @@ enum {
 MenuFileBrowser		*menu_browser_new (const gchar *label, const gchar *root_path, BrowserPrefs *cgf);
 gint				 menu_browser_open_file (const gchar *file_name_and_path, gint exec_action);
 void				 menu_browser_delete (MenuFileBrowser *browser);
+void				 menu_browser_update (MenuFileBrowser *browser, gchar *label, gchar *path);
 /******************************************************************************/
 
 

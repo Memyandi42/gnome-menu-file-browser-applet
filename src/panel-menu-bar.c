@@ -256,7 +256,12 @@ panel_menu_bar_update_image (PanelMenuBar *self, int changed_pref) {
 static void
 panel_menu_bar_update_entry (PanelMenuBar *self,
 							 PrefsChangedSignalData *signal_data) {
+	MenuFileBrowser *file_browser_instance = NULL;
+	file_browser_instance = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
 
+	menu_browser_update (file_browser_instance,
+						 signal_data->label,
+						 signal_data->path);
 	return;
 }
 /******************************************************************************/

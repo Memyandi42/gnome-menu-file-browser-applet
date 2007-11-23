@@ -64,7 +64,7 @@ void
 menu_browser_free_structure (Pair *pair) {
 /* but don't ever delete ->file_browser as it is a ref to a global object
 	   shared by all*/
-/*printf ("deleting %s\n", pair->path);*/
+/*g_printf ("deleting %s\n", pair->path);*/
 	g_free (pair->path);
 	g_free (pair);
 	return;
@@ -559,6 +559,15 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 	    menu_item = gtk_image_menu_item_new_with_label (tmp);
         if (clamped == TRUE) {
             gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (files, i));
+		}
+
+		/* bold executable files */
+		if (g_file_test (file_name_and_path, G_FILE_TEST_IS_EXECUTABLE) &&
+			!g_file_test (file_name_and_path, G_FILE_TEST_IS_DIR)) {
+			GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
+			gchar *markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>", tmp);
+			gtk_label_set_markup (GTK_LABEL (label), markup);
+			g_free (markup);
 		}
 		g_free (tmp);
 

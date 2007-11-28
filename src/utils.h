@@ -32,5 +32,6 @@
 gboolean	utils_check_gerror	(GError **error);
 void		utils_show_dialog	(gchar *title, gchar *message, GtkMessageType type);
 GtkWidget*	utils_get_scaled_image_from_file (gchar *file_name, int size);
+GSList*		g_slist_swap_data	(GSList *list, guint index);
 
 #endif

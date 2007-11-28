@@ -494,18 +494,6 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 	return;
 }
 /******************************************************************************/
-GSList *
-g_slist_swap_data (GSList *list, guint index) {
-	gpointer tmp   = NULL;
-	GSList *first  = g_slist_nth (list, index);
-	GSList *second = first->next;
-
-	tmp = first->data;
-	first->data  = second->data;
-	second->data = tmp;
-	return list;
-}
-/******************************************************************************/
 static void
 applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 	GtkTreeSelection	*selection = NULL;

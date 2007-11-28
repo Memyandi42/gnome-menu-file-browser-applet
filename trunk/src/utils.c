@@ -76,3 +76,15 @@ utils_get_scaled_image_from_file (gchar *file_name, int size) {
 		return icon;
 }
 /******************************************************************************/
+GSList *
+g_slist_swap_data (GSList *list, guint index) {
+	gpointer tmp   = NULL;
+	GSList *first  = g_slist_nth (list, index);
+	GSList *second = first->next;
+
+	tmp = first->data;
+	first->data  = second->data;
+	second->data = tmp;
+	return list;
+}
+/******************************************************************************/

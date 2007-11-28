@@ -70,7 +70,9 @@ struct _BrowserPrefs {
 };
 struct _MenuBarPrefs {
 	GPtrArray		*dirs;
+	GSList			*ldirs;
 	GPtrArray		*labels;
+	GSList			*llabels;
 	gboolean 		show_icon;
 	gchar 			*icon;
 	BrowserPrefs	*browser_prefs;

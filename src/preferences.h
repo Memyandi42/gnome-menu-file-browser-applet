@@ -69,10 +69,8 @@ struct _BrowserPrefs {
 	gboolean	show_hidden;
 };
 struct _MenuBarPrefs {
-	GPtrArray		*dirs;
-	GSList			*ldirs;
-	GPtrArray		*labels;
-	GSList			*llabels;
+	GSList			*dirs;
+	GSList			*labels;
 	gboolean 		show_icon;
 	gchar 			*icon;
 	BrowserPrefs	*browser_prefs;

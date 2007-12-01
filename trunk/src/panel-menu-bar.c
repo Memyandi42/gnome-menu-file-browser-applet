@@ -348,8 +348,8 @@ panel_menu_bar_add_entry (PanelMenuBar *self,
 /******************************************************************************/
 static void
 panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
-						PrefsChangedSignalData *signal_data,
-						gpointer data) {
+									   PrefsChangedSignalData *signal_data,
+									   gpointer data) {
 	PanelMenuBar *self = (PanelMenuBar *)data;
 
 	switch (signal_data->signal_id) {
@@ -397,10 +397,10 @@ panel_menu_bar_new (PanelApplet* applet) {
 /*============================================================================*/
 	MenuFileBrowser *tmp_file_browser = NULL;
 	self->priv->file_browsers = g_ptr_array_new ();
-	gint i;
 
 	self->priv->panel_size= 0;
 	self->priv->applet = applet;
+
 
 	/* setup callbacks to handle changes in the panel */
 	g_signal_connect (G_OBJECT (applet),
@@ -418,20 +418,26 @@ panel_menu_bar_new (PanelApplet* applet) {
 						  GTK_WIDGET (self),
 						  _(TOOLTIP_TEXT),
 						  NULL);
+
+    gtk_widget_set_tooltip_text (GTK_WIDGET (self), "asdfasdfasdfadsasdfsdf");
 	
 	/* get the applet configuration */
 	self->priv->prefs = applet_preferences_new (applet);
 	MenuBarPrefs *mb_prefs = self->priv->prefs->menu_bar_prefs;
-	g_signal_connect (G_OBJECT (self->priv->prefs), 
-			  "prefs_changed",
-			  G_CALLBACK (panel_menu_bar_on_preferences_changed), 
-			  self);
+	g_signal_connect (G_OBJECT (self->priv->prefs),
+					  "prefs_changed",
+					  G_CALLBACK (panel_menu_bar_on_preferences_changed), 
+					  self);
 
 	/* for each path in the config, make a browser object */
-	for (i=0; i < mb_prefs->dirs->len; i++) {
+	GSList *tmp_dir   = mb_prefs->dirs;
+	GSList *tmp_label = mb_prefs->labels;
+	while (tmp_label && tmp_dir) {
 		panel_menu_bar_add_entry (self,
-								  (gchar*)(g_ptr_array_index (mb_prefs->labels, i)),
-								  (gchar*)(g_ptr_array_index (mb_prefs->dirs, i)));
+								  (gchar*)tmp_label->data,
+								  (gchar*)tmp_dir->data);
+		tmp_dir   = tmp_dir->next;
+		tmp_label = tmp_label->next;
 	}
 
     /* add the image to the menu item */

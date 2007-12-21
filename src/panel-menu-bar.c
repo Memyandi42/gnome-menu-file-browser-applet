@@ -23,12 +23,14 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <glib-object.h>
+#include <glib.h>
+#include <glib/gprintf.h>
 #include "panel-menu-bar.h"
 #include "preferences.h"
+#include "menu-browser.h"
 
 #define PANEL_MENU_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PANEL_MENU_BAR, PanelMenuBarPrivate))
-#define TOOLTIP_TEXT		"Browse and open files in you home directory"
+#define TOOLTIP_TEXT		"Browse and open files in your home directory"
 #define ICON_SIZE			24 /* 22x22 pixels looks about right... */
 
 /******************************************************************************/
@@ -39,7 +41,6 @@ struct _PanelMenuBarPrivate {
 	PanelAppletOrient	orientation;
 	gint				panel_size;
 	gboolean			text_vertical;
-	GtkTooltips			*tooltip;
 };
 /******************************************************************************/
 enum {
@@ -61,23 +62,6 @@ panel_menu_bar_edit_prefs (PanelMenuBar *self) {
 	applet_preferences_make_dialog (prefs);
 }
 /******************************************************************************/
-static void
-panel_menu_bar_hide_tooltip (GtkWidget *widget,
-								  GtkTooltips *tooltip) {
-	gtk_tooltips_disable (tooltip);
-	/* reposition the menu too. */
-	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (widget));
-	gtk_menu_reposition (GTK_MENU (menu));
-	return;
-}
-/******************************************************************************/
-static void
-panel_menu_bar_show_tooltip (GtkWidget *widget,
-								  GtkTooltips *tooltip) {
-	gtk_tooltips_enable (tooltip);
-	return;
-}
-/******************************************************************************/
 static void	/* Originally from the Main Menu Bar Applet */
 panel_menu_bar_change_orient (PanelApplet		*applet,
 							  PanelAppletOrient	orientation,
@@ -87,7 +71,7 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 	gdouble				text_angle;
 	gfloat				text_xalign;
 	gfloat				text_yalign;
-	MenuFileBrowser		*tmp_file_browser = NULL;
+	GtkWidget			*menu_browser = NULL;
 	GtkRequisition		requisition;
 	GtkPackDirection	pack_direction;
 
@@ -102,8 +86,8 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 
 	/* iterate through each menu_item in the menu bar and check it's width */
 	for (i=0; i < self->priv->file_browsers->len; i++) {
-		tmp_file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, i));
-		gtk_widget_size_request (GTK_WIDGET (tmp_file_browser->menu_item),
+		menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
+		gtk_widget_size_request (menu_browser,
 								 &requisition);
 		/* if any of the menu_items are wider that the panel, set the text to be rotated */
 		if ((!self->priv->text_vertical & (requisition.width  > self->priv->panel_size)) ||
@@ -145,8 +129,8 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 
 	/* update the menu_item text direction */
 	for (i=0; i < self->priv->file_browsers->len; i++) {
-		tmp_file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, i));
-		GtkWidget *label = GTK_BIN (tmp_file_browser->menu_item)->child;
+		menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
+		GtkWidget *label = GTK_BIN (menu_browser)->child;
 		gtk_label_set_angle (GTK_LABEL (label), text_angle);
 		gtk_misc_set_alignment (GTK_MISC (label), text_xalign, text_yalign);
 	}
@@ -232,12 +216,12 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 }
 /******************************************************************************/
 static void
-panel_menu_bar_update_image (PanelMenuBar *self, int changed_pref) {
+panel_menu_bar_update_image (PanelMenuBar *self) {
 	GtkWidget *image = NULL;
 	AppletPreferences *a_prefs = self->priv->prefs;
-	MenuFileBrowser *file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
+	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, 0));
 
-	image = gtk_image_menu_item_get_image ( GTK_IMAGE_MENU_ITEM (file_browser->menu_item));
+	image = gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM (menu_browser));
 
 	if (image) {
 		gtk_widget_destroy (image);
@@ -246,22 +230,20 @@ panel_menu_bar_update_image (PanelMenuBar *self, int changed_pref) {
 	if (a_prefs->menu_bar_prefs->show_icon) {
 		GtkWidget *icon = utils_get_scaled_image_from_file (a_prefs->menu_bar_prefs->icon,
 															ICON_SIZE);
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (file_browser->menu_item),
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_browser),
 															icon);
 	}
 	return;
 }
 /******************************************************************************/
-/******************************************************************************/
 static void
 panel_menu_bar_update_entry (PanelMenuBar *self,
 							 PrefsChangedSignalData *signal_data) {
-	MenuFileBrowser *file_browser_instance = NULL;
-	file_browser_instance = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
+	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
 
-	menu_browser_update (file_browser_instance,
-						 signal_data->label,
-						 signal_data->path);
+	menu_browser_update (MENU_BROWSER (menu_browser),
+						 signal_data->path,
+						 signal_data->label);
 	return;
 }
 /******************************************************************************/
@@ -269,8 +251,8 @@ static void
 panel_menu_bar_move_entry (PanelMenuBar *self,
 						   PrefsChangedSignalData *signal_data) {
 	int new_pos;
-	MenuFileBrowser *file_browser_instance = NULL;
-	MenuFileBrowser *file_browser_affected = NULL;
+	GtkWidget *menu_browser = NULL;
+	GtkWidget *menu_browser_affected = NULL;
 
 	if (signal_data->signal_id == PREFS_SIGNAL_DIR_MOVE_UP) {
 		new_pos = signal_data->instance - 1;
@@ -288,16 +270,18 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 		return;
 	}
 
-	file_browser_instance = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
-	file_browser_affected = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, new_pos));
+	menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
+	menu_browser_affected = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, new_pos));
 
-	if (file_browser_instance != NULL && file_browser_affected != NULL) {
-		gtk_container_remove (GTK_CONTAINER (self), file_browser_instance->menu_item);
+	if (menu_browser != NULL && menu_browser_affected != NULL) {
+		g_object_ref (G_OBJECT (menu_browser));
+		gtk_container_remove (GTK_CONTAINER (self), menu_browser);
 		gtk_menu_shell_insert (GTK_MENU_SHELL (self),
-							   file_browser_instance->menu_item,
+							   menu_browser,
 							   new_pos);
-		self->priv->file_browsers->pdata[new_pos] 				= file_browser_instance;
-		self->priv->file_browsers->pdata[signal_data->instance] = file_browser_affected;
+		g_object_unref (G_OBJECT (menu_browser));
+		self->priv->file_browsers->pdata[new_pos] = menu_browser;
+		self->priv->file_browsers->pdata[signal_data->instance] = menu_browser_affected;
 	}
 	else g_printf("shitzer\n");
 
@@ -307,13 +291,11 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 static void
 panel_menu_bar_remove_entry (PanelMenuBar *self,
 							 gint instance) {
-	MenuFileBrowser *file_browser_instance = 
-					(MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, instance));
+	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, instance));
 
-	if (file_browser_instance != NULL) {
-		gtk_container_remove (GTK_CONTAINER (self), file_browser_instance->menu_item);
+	if (menu_browser != NULL) {
+		gtk_container_remove (GTK_CONTAINER (self), menu_browser);
 		g_ptr_array_remove_index (self->priv->file_browsers, instance);
-		menu_browser_delete (file_browser_instance);
 	}
 	else g_printf("shitzer\n");
 
@@ -325,26 +307,19 @@ panel_menu_bar_add_entry (PanelMenuBar *self,
 						  gchar *label,
 						  gchar *path) {
 
-	MenuFileBrowser *tmp_file_browser = menu_browser_new (label,
-														  path,
-														  self->priv->prefs->menu_bar_prefs->browser_prefs);
+	GtkWidget *menu_browser = menu_browser_new (path,
+												label,
+												self->priv->prefs->menu_bar_prefs->browser_prefs);
 
 	/* add it to the list and to the menu bar*/
-	g_ptr_array_add (self->priv->file_browsers, tmp_file_browser);
+	g_ptr_array_add (self->priv->file_browsers, menu_browser);
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (self),
-						   tmp_file_browser->menu_item);
+						   menu_browser);
 
-	/* attach the signal to hide the tooltips when selected*/
-	g_signal_connect (G_OBJECT (tmp_file_browser->menu_item),
-					  "activate",
-					  G_CALLBACK (panel_menu_bar_hide_tooltip),
-					  self->priv->tooltip);
-
-	gtk_widget_show_all (tmp_file_browser->menu_item);
+	gtk_widget_show_all (menu_browser);
 	return;
 }
-/******************************************************************************/
 /******************************************************************************/
 static void
 panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
@@ -358,7 +333,7 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 			break;
 		case PREFS_SIGNAL_SHOW_ICON :
 		case PREFS_SIGNAL_ICON_CHANGED :
-			panel_menu_bar_update_image (self, signal_data->signal_id);
+			panel_menu_bar_update_image (self);
 			break;
 		case PREFS_SIGNAL_DIR_MOVE_UP :
 		case PREFS_SIGNAL_DIR_MOVE_DOWN :
@@ -395,12 +370,10 @@ panel_menu_bar_new (PanelApplet* applet) {
 	self = g_object_newv (TYPE_PANEL_MENU_BAR, 0, NULL);
 
 /*============================================================================*/
-	MenuFileBrowser *tmp_file_browser = NULL;
 	self->priv->file_browsers = g_ptr_array_new ();
 
 	self->priv->panel_size= 0;
 	self->priv->applet = applet;
-
 
 	/* setup callbacks to handle changes in the panel */
 	g_signal_connect (G_OBJECT (applet),
@@ -412,17 +385,11 @@ panel_menu_bar_new (PanelApplet* applet) {
 					  G_CALLBACK (panel_menu_bar_change_orient),
 					  self);
 
-	/* make the tooltip */
-	self->priv->tooltip = gtk_tooltips_new ();
-	gtk_tooltips_set_tip (self->priv->tooltip,
-						  GTK_WIDGET (self),
-						  _(TOOLTIP_TEXT),
-						  NULL);
-
-    gtk_widget_set_tooltip_text (GTK_WIDGET (self), "asdfasdfasdfadsasdfsdf");
+    gtk_widget_set_tooltip_text (GTK_WIDGET (self), _(TOOLTIP_TEXT));
 	
 	/* get the applet configuration */
 	self->priv->prefs = applet_preferences_new (applet);
+
 	MenuBarPrefs *mb_prefs = self->priv->prefs->menu_bar_prefs;
 	g_signal_connect (G_OBJECT (self->priv->prefs),
 					  "prefs_changed",
@@ -441,19 +408,7 @@ panel_menu_bar_new (PanelApplet* applet) {
 	}
 
     /* add the image to the menu item */
-	if (mb_prefs->show_icon) {
-		tmp_file_browser = (MenuFileBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
-
-		GtkWidget *icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_SIZE);
-	    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (tmp_file_browser->menu_item),
-    	                                					icon);
-	}
-
-	/* attach the signal to show the tooltip again when deselected*/
-    g_signal_connect (G_OBJECT (self),
-                	  "deactivate",
-					  G_CALLBACK (panel_menu_bar_show_tooltip),
-					  self->priv->tooltip);
+	panel_menu_bar_update_image (self);
 
 	gtk_container_add (GTK_CONTAINER (applet), GTK_WIDGET (self));	
 
@@ -484,33 +439,36 @@ static void panel_menu_bar_class_init (PanelMenuBarClass * klass) {
 static void
 panel_menu_bar_init (PanelMenuBar * self) {
 	self->priv = PANEL_MENU_BAR_GET_PRIVATE (self);
+	return;
 }
 /******************************************************************************/
 static void
 panel_menu_bar_dispose (GObject *obj) {
 	PanelMenuBar *self;
-	PanelMenuBarClass * klass;
+	PanelMenuBarClass *klass;
 /*	GObjectClass * parent_class;*/
+
 	self = PANEL_MENU_BAR (obj);
 	(self->priv->applet == NULL ? NULL : (self->priv->applet = (g_object_unref (self->priv->applet), NULL)));
 	(self->priv->file_browsers == NULL ? NULL : (self->priv->file_browsers = (gpointer)(g_ptr_array_free (self->priv->file_browsers, TRUE))));
 	klass = PANEL_MENU_BAR_CLASS (g_type_class_peek (TYPE_PANEL_MENU_BAR));
 	G_OBJECT_CLASS (panel_menu_bar_parent_class)->dispose (obj);
+	return;
 }
 /******************************************************************************/
 GType
 panel_menu_bar_get_type (void) {
 	static GType panel_menu_bar_type_id = 0;
 	if (G_UNLIKELY (panel_menu_bar_type_id == 0)) {
-		static const GTypeInfo g_define_type_info = { sizeof (PanelMenuBarClass),
-													  (GBaseInitFunc) NULL,
-													  (GBaseFinalizeFunc) NULL,
-													  (GClassInitFunc) panel_menu_bar_class_init,
-													  (GClassFinalizeFunc) NULL,
-													  NULL,
-													  sizeof (PanelMenuBar),
-													  0,
-													  (GInstanceInitFunc) panel_menu_bar_init };
+		static const GTypeInfo g_define_type_info = {sizeof (PanelMenuBarClass),
+													 (GBaseInitFunc) NULL,
+													 (GBaseFinalizeFunc) NULL,
+													 (GClassInitFunc) panel_menu_bar_class_init,
+													 (GClassFinalizeFunc) NULL,
+													 NULL,
+													 sizeof (PanelMenuBar),
+													 0,
+													 (GInstanceInitFunc) panel_menu_bar_init };
 
 		panel_menu_bar_type_id = g_type_register_static (GTK_TYPE_MENU_BAR,
 														 "PanelMenuBar",

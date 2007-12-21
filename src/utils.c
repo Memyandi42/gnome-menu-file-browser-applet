@@ -23,6 +23,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#include <glib/gprintf.h>
+
 #include "utils.h"
 
 /******************************************************************************/
@@ -43,7 +45,7 @@ void
 utils_show_dialog (gchar *title, gchar *message, GtkMessageType type)
 {
 	GtkWidget *dialog = gtk_message_dialog_new (NULL,
-												GTK_DIALOG_NO_SEPARATOR,
+												0,
 												type,
 												GTK_BUTTONS_CLOSE,
 												message);

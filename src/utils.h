@@ -26,8 +26,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <glib.h>
 #include <gtk/gtk.h>
-#include <glib/gprintf.h>
 
 gboolean	utils_check_gerror	(GError **error);
 void		utils_show_dialog	(gchar *title, gchar *message, GtkMessageType type);

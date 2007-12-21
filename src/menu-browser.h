@@ -23,46 +23,48 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef MENU_BROWSER_H
-#define MENU_BROWSER_H
+#ifndef __MENU_BROWSER_H__
+#define __MENU_BROWSER_H__
 
-#include <glib/gprintf.h>
+#include <glib-object.h>
 #include <gtk/gtk.h>
-#include <libgnomeui/libgnomeui.h>
-#include <libgnomevfs/gnome-vfs.h>
-#include <libgnomevfs/gnome-vfs-mime-handlers.h>
 
-#include "utils.h"
 #include "preferences.h"
 
+G_BEGIN_DECLS
+
+/******************************************************************************/
+#define TYPE_MENU_BROWSER (menu_browser_get_type ())
+#define MENU_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_MENU_BROWSER, MenuBrowser))
+#define MENU_BROWSER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_MENU_BROWSER, MenuBrowserClass))
+#define IS_MENU_BROWSER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_MENU_BROWSER))
+#define IS_MENU_BROWSER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MENU_BROWSER))
+#define MENU_BROWSER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MENU_BROWSER, MenuBrowserClass))
+/******************************************************************************/
 #define MAX_FILE_NAME_LENGTH 30 /* What's a good value here??? */
-#define DATA_LABEL "item_path"
-
-
 /******************************************************************************/
-typedef struct _MenuFileBrowser			MenuFileBrowser;
-typedef struct _MenuFileBrowserPrivate	MenuFileBrowserPrivate;
+typedef struct _MenuBrowser MenuBrowser;
+typedef struct _MenuBrowserClass MenuBrowserClass;
+typedef struct _MenuBrowserPrivate MenuBrowserPrivate;
 /******************************************************************************/
-
-/****************** "Public" data *********************************************/
-struct _MenuFileBrowser {
-	GtkWidget				*menu_item;	
-	MenuFileBrowserPrivate	*priv;
-	BrowserPrefs			*prefs;
+struct _MenuBrowser {
+	GtkImageMenuItem 	parent;
+	MenuBrowserPrivate	*priv;
+	BrowserPrefs		*prefs;
 };
-
+struct _MenuBrowserClass {
+	GtkImageMenuItemClass parent;
+};
 enum {
 	EXEC_OPEN,
 	EXEC_RUN
 };
 /******************************************************************************/
-
-/****************** "Public" functions ****************************************/
-MenuFileBrowser		*menu_browser_new (const gchar *label, const gchar *root_path, BrowserPrefs *cgf);
-gint				 menu_browser_open_file (const gchar *file_name_and_path, gint exec_action);
-void				 menu_browser_delete (MenuFileBrowser *browser);
-void				 menu_browser_update (MenuFileBrowser *browser, gchar *label, gchar *path);
+GtkWidget*		menu_browser_new (const gchar *path, const gchar *label, BrowserPrefs *prefs);
+void			menu_browser_update (MenuBrowser *self, gchar *path, gchar *label);
+GType			menu_browser_get_type (void);
 /******************************************************************************/
 
+G_END_DECLS
 
-#endif /*MENU_BROWSER_H*/
+#endif

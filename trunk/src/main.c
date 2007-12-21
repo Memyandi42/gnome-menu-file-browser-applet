@@ -23,9 +23,13 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#include <glib.h>
 #include <gtk/gtk.h>
+#include <libgnomevfs/gnome-vfs.h>
 #include <panel-applet.h>
+
 #include "panel-menu-bar.h"
+#include "utils.h"
 
 #define APPLET_IID			"OAFIID:GNOME_MenuFileBrowserApplet"
 #define APPLET_FACTORY_IID	"OAFIID:GNOME_MenuFileBrowserApplet_Factory"

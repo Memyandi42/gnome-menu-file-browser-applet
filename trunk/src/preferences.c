@@ -326,6 +326,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 						&iter,
 						PATH_COLUMN, &old_path,
 						-1);
+
 	/* make a file chooser object to select the new path */
 	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select New Folder To Browse",
 													   NULL,
@@ -385,7 +386,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 		}
 	}
 	gtk_widget_destroy (file_chooser_dialog);
-	/* signal the panel_menu bar to update itself */
+
 	return;
 }
 /******************************************************************************/
@@ -466,7 +467,7 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 		/* get the instance from the iterator */
 		gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
-		gtk_list_store_remove (GTK_LIST_STORE(model), &iter);
+		gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 
 		/* create the data structure with the event info to pass to panel_menu_bar */
 		PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);

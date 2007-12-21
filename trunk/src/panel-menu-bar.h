@@ -26,11 +26,9 @@
 #ifndef __PANEL_MENU_BAR_H__
 #define __PANEL_MENU_BAR_H__
 
-#include <glib.h>
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <panel-applet.h>
-#include "menu-browser.h"
 
 G_BEGIN_DECLS
 

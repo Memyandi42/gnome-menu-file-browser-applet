@@ -8,7 +8,7 @@
         <default>TRUE</default>
         <locale name="C">
           <short>Show the icon in the menu bar</short>
-          <long></long>
+          <long>Show the icon in the menu bar</long>
         </locale>
       </schema>
 
@@ -19,7 +19,7 @@
         <default>/usr/share/pixmaps/menu-file-browser-applet.png</default>
         <locale name="C">
           <short>Path to the icon to show in the menu bar</short>
-          <long></long>
+          <long>Path to the icon to show in the menu bar</long>
         </locale>
       </schema>
 
@@ -30,7 +30,7 @@
         <default>gnome-terminal</default>
         <locale name="C">
           <short>The terminal to use when middle-clicking on a directory</short>
-          <long></long>
+          <long>The terminal to use when middle-clicking on a directory</long>
         </locale>
       </schema>
 
@@ -41,7 +41,7 @@
         <default>FALSE</default>
         <locale name="C">
           <short>Show hidden files</short>
-          <long></long>
+          <long>Show hidden files</long>
         </locale>
       </schema>
 
@@ -53,7 +53,7 @@
         <default>[Home]</default>
         <locale name="C">
           <short>The labels to use for the directories</short>
-          <long></long>
+          <long>The labels to use for the directories</long>
         </locale>
       </schema>
       
@@ -65,7 +65,7 @@
         <default>[]</default>
         <locale name="C">
           <short>The directories to show in the menu bar</short>
-          <long></long>
+          <long>The directories to show in the menu bar</long>
         </locale>
       </schema>
 

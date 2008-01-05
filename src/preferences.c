@@ -2,9 +2,9 @@
  * File:				preferences.c
  * Created:				April 2006
  * Created by:			Axel von Bertoldi
- * Last Modified:		October 2007
+ * Last Modified:		January 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,7 @@
  */
 
 #include "preferences.h"
+#include "utils.h"
 #include <gtk/gtk.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
@@ -697,14 +698,15 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		gtk_window_set_title (GTK_WINDOW (window), "Menu File Browser Applet Preferences");
 		gtk_window_set_icon_name (GTK_WINDOW (window), "menu-file-browser-applet");
 
+/*
 		revert_button = gtk_dialog_add_button (GTK_DIALOG (window),
 											   GTK_STOCK_REVERT_TO_SAVED,
 											   RESPONSE_REVERT);
 		gtk_widget_set_sensitive (revert_button, FALSE);
+*/
 		gtk_dialog_add_button (GTK_DIALOG (window),
 							   GTK_STOCK_CLOSE,
 							   GTK_RESPONSE_CLOSE);
-
 		g_signal_connect (G_OBJECT (GTK_DIALOG (window)),
 						  "response",
 						  G_CALLBACK (applet_preferences_dialog_response),

@@ -2,9 +2,9 @@
  * File:				menu-browser.c
  * Created:				September 2005
  * Created by:			Axel von Bertoldi
- * Last Modified:		August 2007
+ * Last Modified:		January 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -68,27 +68,27 @@ clamp_file_name (const gchar *file_name, gboolean *clamped) {
 	}
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_clean_up (MenuBrowser *self) {
-	g_printf ("freeing temporary data...\n");
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 	/* free the structure pointed to by each element */
+
 	g_ptr_array_foreach (self->priv->tmp_array,
 						 (GFunc)g_free,
 						 NULL);
 	/* delete and recreate the array */
     g_ptr_array_free (self->priv->tmp_array, TRUE);
 	self->priv->tmp_array = g_ptr_array_new();
-	return 0;
+	return;
 }
 /******************************************************************************/
 static gint
 menu_browser_sort_alpha (const gchar **s1,
 						 const gchar **s2) {
-	return g_ascii_strcasecmp ((gchar *)*s1, (gchar *)*s2);
-	/* return strcmp ((gchar *)*s1, (gchar *)*s2); */
+	return g_utf8_collate ((gchar *)*s1, (gchar *)*s2);       
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_launch_app (gchar **args, const gchar *working_dir) {
 	GError *error = NULL;
 	gint child_pid;
@@ -106,9 +106,14 @@ menu_browser_launch_app (gchar **args, const gchar *working_dir) {
 									NULL,
 									&error);
 
-	if (utils_check_gerror (&error)) return -1;
-
-	return 0;
+	if (utils_check_gerror (&error)) {
+		gchar *tmp = g_strdup_printf ("Error: Failed to launch \"%s\".", args[0]);
+		utils_show_dialog ("Error: Failed to launch application",
+						   tmp,
+						   GTK_MESSAGE_ERROR);
+		g_free (tmp);
+	}
+	return;
 }
 /******************************************************************************/
 static gchar *
@@ -130,7 +135,7 @@ menu_browser_get_mime_application (const gchar *file_name_and_path) {
     return file_mime_app_exec;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_launch_terminal (MenuBrowser *self, gchar *path) {
 
 	gchar **args = NULL;
@@ -139,13 +144,11 @@ menu_browser_launch_terminal (MenuBrowser *self, gchar *path) {
 					   "\1", 0);
 	
 	menu_browser_launch_app (args, path);
-	
 	g_free (args);	
 
-	return 0;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 	gchar **args = NULL;
 	gchar *arg = NULL;
@@ -159,7 +162,16 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
     is_executable = g_file_test (file_name_and_path, G_FILE_TEST_IS_EXECUTABLE) &&
 				   !g_file_test (file_name_and_path, G_FILE_TEST_IS_DIR);
 
-	file_mime_app_exec = menu_browser_get_mime_application	(file_name_and_path);
+	/* FIXME: sigh!!! "#" makes gnome_vfs_get_mime_type crash */
+	if (!g_strrstr (file_name_and_path, "#")) {
+		file_mime_app_exec = menu_browser_get_mime_application	(file_name_and_path);
+	}
+	else {
+		utils_show_dialog ("Error: gnome-vfs bug",
+						   "Some gnome-vfs functions cannot handle fine names that include the \"#\" character.",
+						   GTK_MESSAGE_ERROR);
+	}
+
 	/* if it's a binary file (i.e. it has no associated mime type) run it it as if it were a prog*/
     if (is_executable && file_mime_app_exec == NULL) {
 		arg = g_strdup_printf ("%s", file_name_and_path);    
@@ -178,11 +190,11 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 				arg = g_strdelimit (file_mime_app_exec, " ", '\1');
 				arg = g_strconcat (arg, "\1", file_name_and_path, NULL);    
 				args = g_strsplit (arg, "\1", 0);
-				g_printf ("%s ", file_mime_app_exec);
+				if (DEBUG) g_printf ("%s ", file_mime_app_exec);
 			}
 		}
 		else {
-			g_printf ("Error: failed to get mime application for %s\n", file_name_and_path);
+			if (DEBUG) g_printf ("Error: failed to get mime application for %s\n", file_name_and_path);
 			gchar *message = g_strdup_printf ("Cannot open %s:\n"
 											  "No application is known for this kind of file.",
 											  file_name_and_path);
@@ -191,10 +203,10 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 										   message,
 										   GTK_MESSAGE_ERROR);
 			g_free (message);
-			return -1;
+			return;
 		}
 	}
-    g_printf ("%s\n", file_name_and_path);
+    if (DEBUG) g_printf ("%s\n", file_name_and_path);
 	menu_browser_launch_app (args, working_dir);
 	
 	g_free (arg);
@@ -204,94 +216,131 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 	g_free (args);
 	g_free (file_mime_app_exec);
 
-	return 0;
+	return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_dir_left_click (const gchar *file_name_and_path) {
-	return menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_dir_middle_click (MenuBrowser *self, gchar *path) {
     menu_browser_launch_terminal (self, path);
-
-	return 0;
+	return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_dir_right_click (const gchar *file_name_and_path) {
-	g_printf ("Right click on directory action not implemented\n");
-	return 0;
+	utils_show_dialog ("Error: File not found.",
+					   "Right click on directory action not yet implemented\n",
+					   GTK_MESSAGE_INFO);
+	return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_file_left_click (const gchar *file_name_and_path) {
-	return menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_file_middle_click (const gchar *file_name_and_path) {
-	return menu_browser_open_file (file_name_and_path, EXEC_RUN);
+	menu_browser_open_file (file_name_and_path, EXEC_RUN);
+	return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_file_right_click (const gchar *file_name_and_path) {
-	g_printf ("Right click on file action not implemented\n");
-	return 0;
+	utils_show_dialog ("Error: File not found.",
+					   "Right click on file action not yet implemented\n",
+					   GTK_MESSAGE_INFO);
+	return;
 }
 /******************************************************************************/
-static gint
-menu_browser_on_directory_item_activate (GtkWidget *menu_item,
-										 GdkEventButton *event,
-										 MenuBrowser *self) {
+static void
+menu_browser_on_dir_item_activate (GtkWidget *menu_item,
+										 gpointer *self) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	MenuBrowser *_self = (MenuBrowser*)self;
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-    if (g_file_test (path, G_FILE_TEST_EXISTS)) {
-    	if (event->button == 1) {
+	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
+		GdkEvent *event = gtk_get_current_event ();
+
+		if (event->type == GDK_KEY_PRESS) {
 		    menu_browser_on_dir_left_click (path);
-    	}	
-	    else if (event->button == 2) {
-	    	menu_browser_on_dir_middle_click (self, path);
-    	}	
-	    else if (event->button == 3) {
-	    	menu_browser_on_dir_right_click (path);
-    	}
+		}
+		else if (event->type == GDK_BUTTON_RELEASE) {
+			GdkEventButton *button_event = (GdkEventButton *)event;
+
+			if (button_event->button == 1) {
+				menu_browser_on_dir_left_click (path);
+			}	
+			else if (button_event->button == 2) {
+				menu_browser_on_dir_middle_click (_self, path);
+			}	
+			else if (button_event->button == 3) {
+				menu_browser_on_dir_right_click (path);
+			}
+		}
     }
     else {
-        g_printf ("Error: directory %s does not exist\n", path);
+		gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
+		utils_show_dialog ("Error: File not found.",
+						   tmp,
+						   GTK_MESSAGE_ERROR);
+        g_free (tmp);
     }
-	/*menu_browser_clean_up (self);*/
-    return 0;
+	menu_browser_clean_up (_self);
+    return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_on_file_item_activate (GtkWidget *menu_item,
-									GdkEventButton *event,
-									MenuBrowser *self) {
+									gpointer *self) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
+	MenuBrowser *_self = (MenuBrowser*)self;
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-    if (g_file_test (path, G_FILE_TEST_EXISTS)) {
-		if (event->button == 1) {
+	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
+		GdkEvent *event = gtk_get_current_event ();
+
+		if (event->type == GDK_KEY_PRESS) {
 			menu_browser_on_file_left_click (path);
-		}	
-		else if (event->button == 2) {
-			menu_browser_on_file_middle_click (path);
-		}	
-		else if (event->button == 3) {
-			menu_browser_on_file_right_click (path);
-		}	  
+		}
+		else if (event->type == GDK_BUTTON_RELEASE) {
+			GdkEventButton *button_event = (GdkEventButton *)event;
+
+			if (button_event->button == 1) {
+				menu_browser_on_file_left_click (path);
+			}	
+			else if (button_event->button == 2) {
+				menu_browser_on_file_middle_click (path);
+			}	
+			else if (button_event->button == 3) {
+				menu_browser_on_file_right_click (path);
+			}
+		}
     }
     else {
-        g_printf ("Error: file %s does not exist\n", path);
+		gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
+		utils_show_dialog ("Error: File not found.",
+						   tmp,
+						   GTK_MESSAGE_ERROR);
+        g_free (tmp);
     }
-	/*menu_browser_clean_up (self);*/
-    return 0;
+	menu_browser_clean_up (_self);
+    return;
 }
 /******************************************************************************/
 static void
 menu_browser_clear_menu (GtkWidget *menu_item) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
     GtkWidget *menu = NULL;
 	if (1) {
 		menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
@@ -360,8 +409,8 @@ menu_browser_get_dir_contents (GPtrArray *files,
 	}
 	else {
 		error = g_strdup_printf ("(%s)",gnome_vfs_result_to_string (vfs_result));
-		g_printf ("Error opening directory. GNOME_VFS error: %s\n",
-				  error);
+		if (DEBUG) g_printf ("Error opening directory. GNOME_VFS error: %s\n",
+							 error);
 	}
     /**************************** Finished reading dir contents ************************/
 	
@@ -374,7 +423,7 @@ menu_browser_get_dir_contents (GPtrArray *files,
 	return error;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_add_menu_header (GtkWidget *current_menu,
 							  MenuBrowser *self,
 							  gchar *path) {
@@ -402,14 +451,14 @@ menu_browser_add_menu_header (GtkWidget *current_menu,
 
     gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
                            menu_item);
-    /* FIXME: path should be deleted ? */
+
 	g_object_set_data (G_OBJECT (menu_item),
 					   G_OBJECT_DATA_NAME,
 					   path);
 
     g_signal_connect (G_OBJECT (menu_item),
-                      "button_release_event",
-					  G_CALLBACK (menu_browser_on_directory_item_activate),
+                      "activate",
+					  G_CALLBACK (menu_browser_on_dir_item_activate),
 					  (gpointer)self);
 	
     separator = gtk_separator_menu_item_new();
@@ -417,10 +466,10 @@ menu_browser_add_menu_header (GtkWidget *current_menu,
     gtk_menu_shell_append (GTK_MENU_SHELL (current_menu),
                            separator);
 
-    return 0;
+    return;
 }
 /******************************************************************************/
-static gint
+static void
 menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 							MenuBrowser *self) {
     gchar 					*file_name_and_path = NULL;
@@ -437,6 +486,8 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 	gchar					*tmp = NULL;
     gboolean                clamped = TRUE;
 
+	/* empty the menu of its existing contents first */
+	menu_browser_clear_menu (parent_menu_item);
 
 	current_path = (gchar*)g_object_get_data (G_OBJECT (parent_menu_item), G_OBJECT_DATA_NAME);
 
@@ -484,7 +535,7 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
         gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
 								   child_menu);
 
-    	/* FIXME: path should be deleted ? */
+		g_ptr_array_add (self->priv->tmp_array, file_name_and_path);
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
 						   file_name_and_path);
@@ -493,11 +544,6 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
                 		  "activate",
 						  G_CALLBACK (menu_browser_populate_menu),
 						  (gpointer) self);
-
-        g_signal_connect (GTK_MENU_ITEM (menu_item),
-						  "deselect",
-						  G_CALLBACK (menu_browser_clear_menu),
-						  NULL);
     }	
 	/*********************Finished adding the dirs to the menu******************/
     
@@ -552,11 +598,13 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 							   menu_item);
 		
     	/* FIXME: path should be deleted ? */
+		g_ptr_array_add (self->priv->tmp_array, file_name_and_path);
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
 						   file_name_and_path);
-        g_signal_connect (GTK_WIDGET (menu_item),
-                          "button_release_event",
+
+        g_signal_connect (menu_item,
+                          "activate",
 						  G_CALLBACK (menu_browser_on_file_item_activate),
 						  (gpointer) self);
         g_free (icon_name);
@@ -588,7 +636,7 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
     g_ptr_array_free (dirs, TRUE);
     g_ptr_array_free (files, TRUE);
 
-    return 0;		
+    return;		
 }
 /******************************************************************************/
 void
@@ -707,16 +755,15 @@ menu_browser_new (const gchar* path,
 					  G_CALLBACK (menu_browser_populate_menu),
 					  (gpointer) self);
 
-    g_signal_connect (GTK_MENU_ITEM (self),
-                	  "deselect",
-					  G_CALLBACK (menu_browser_clear_menu),
-					  NULL);
-
+	/* unfortunately this signal is activated before the "activate" signal,
+	 * which has the result of deleting all objects before the activate signal
+	 * handler is called.*/
+/* 
     g_signal_connect_swapped (GTK_MENU_ITEM (self),
-                	  		  "deselect",
-							  G_CALLBACK (menu_browser_clean_up),
-							  self);
-
+                	  		"deselect",
+							G_CALLBACK (menu_browser_clean_up),
+							self);
+*/
 	g_signal_connect (G_OBJECT (self),
 					  "activate",
 					  G_CALLBACK (menu_browser_reposition_menu),

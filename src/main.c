@@ -2,9 +2,9 @@
  * File:				main.c
  * Created:				September 2005
  * Created by:			Axel von Bertoldi
- * Last Modified:		October 2007
+ * Last Modified:		January 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -63,10 +63,27 @@ file_browser_applet_display_properties_dialog (GtkWidget *widget, gpointer *data
 static gboolean 
 file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
+	GError *error = NULL;
+
+	gnome_help_display_desktop_on_screen (
+	      NULL,
+	      "menu-file-browser-applet", 
+	      "menu-file-browser-applet", 
+	      NULL, 
+	      gtk_widget_get_screen (widget),
+	      &error);
+
+	if (error) {       
+		utils_show_dialog ("Error",
+						   "Could not display help.",
+						   GTK_MESSAGE_ERROR);
+		g_error_free (error);
+	}
+/*
 	utils_show_dialog ("Help",
 					   "Sorry, no help or documentation yet...",
 					   GTK_MESSAGE_ERROR);
-
+*/
 	return FALSE;
 }
 /******************************************************************************/
@@ -80,6 +97,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		"",
 		"Contributions by:",
 		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
+		"Ivan N. Zlatev <contact@i-nz.net>",
 		NULL
 	};
 	const gchar *documenters [] = {

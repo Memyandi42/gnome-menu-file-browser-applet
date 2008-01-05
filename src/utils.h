@@ -2,9 +2,9 @@
  * File:				utils.h
  * Created:				August 2007
  * Created by:			Axel von Bertoldi
- * Last Modified:		August 2007
+ * Last Modified:		January 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,6 +28,8 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+
+#define DEBUG 1
 
 gboolean	utils_check_gerror	(GError **error);
 void		utils_show_dialog	(gchar *title, gchar *message, GtkMessageType type);

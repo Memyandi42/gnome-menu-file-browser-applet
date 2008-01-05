@@ -2,9 +2,9 @@
  * File:				utils.c
  * Created:				August 2007
  * Created by:			Axel von Bertoldi
- * Last Modified:		August 2007
+ * Last Modified:		January 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,7 @@ utils_check_gerror (GError **error)
 {
 	if (*error)
 	{
-		g_printf ("error: %s\n", (*error)->message);
+		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
 		g_error_free (*error);
 		*error = NULL;
 		return TRUE;

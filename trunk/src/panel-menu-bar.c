@@ -2,9 +2,9 @@
  * File:				panel-menu-bar.c
  * Created:				October 2007
  * Created by:			Axel von Bertoldi
- * Last Modified:		October 2007
+ * Last Modified:		January 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,6 +28,7 @@
 #include "panel-menu-bar.h"
 #include "preferences.h"
 #include "menu-browser.h"
+#include "utils.h"
 
 #define PANEL_MENU_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PANEL_MENU_BAR, PanelMenuBarPrivate))
 #define TOOLTIP_TEXT		"Browse and open files in your home directory"
@@ -134,7 +135,7 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 		gtk_label_set_angle (GTK_LABEL (label), text_angle);
 		gtk_misc_set_alignment (GTK_MISC (label), text_xalign, text_yalign);
 	}
-	g_printf ("Changing panel orientation : %d\n", orientation);
+	if (DEBUG) g_printf ("Changing panel orientation : %d\n", orientation);
 	return;
 }
 /******************************************************************************/
@@ -163,15 +164,15 @@ panel_menu_bar_size_allocate (GtkWidget *widget,
 								  orientation,
 								  self);
 
-	g_printf ("Resizing panel : ");
-	g_printf ("x %d, "
-			  "y %d, "
-			  "height %d, "
-			  "width %d\n",
-			  allocation->x,
-			  allocation->y,
-			  allocation->height,
-			  allocation->width);
+	if (DEBUG) g_printf ("Resizing panel : ");
+	if (DEBUG) g_printf ("x %d, "
+						 "y %d, "
+						 "height %d, "
+						 "width %d\n",
+						 allocation->x,
+						 allocation->y,
+						 allocation->height,
+						 allocation->width);
 	return;
 }
 /******************************************************************************/
@@ -193,8 +194,8 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 	switch (type) {
 		case PANEL_COLOR_BACKGROUND:
 			gtk_widget_modify_bg (GTK_WIDGET (self),
-					      GTK_STATE_NORMAL, 
-					      color);
+								  GTK_STATE_NORMAL, 
+								  color);
 			break;
 		
 		case PANEL_PIXMAP_BACKGROUND:
@@ -211,7 +212,7 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 		default:
 			break;
 	}
-	g_printf ("Changing Applet Background\n");
+	if (DEBUG) g_printf ("Changing Applet Background\n");
 	return;
 }
 /******************************************************************************/
@@ -261,12 +262,12 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 		new_pos = signal_data->instance + 1;
 	}
 	else {
-		g_printf("shitzer\n");
+		if (DEBUG) g_printf("shitzer\n");
 		return;
 	}
 
 	if (new_pos < 0) {
-		g_printf("shitzer\n");
+		if (DEBUG) g_printf("shitzer\n");
 		return;
 	}
 
@@ -283,8 +284,9 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 		self->priv->file_browsers->pdata[new_pos] = menu_browser;
 		self->priv->file_browsers->pdata[signal_data->instance] = menu_browser_affected;
 	}
-	else g_printf("shitzer\n");
-
+	else {
+		if (DEBUG) g_printf("shitzer\n");
+	}
 	return;
 }
 /******************************************************************************/
@@ -297,7 +299,9 @@ panel_menu_bar_remove_entry (PanelMenuBar *self,
 		gtk_container_remove (GTK_CONTAINER (self), menu_browser);
 		g_ptr_array_remove_index (self->priv->file_browsers, instance);
 	}
-	else g_printf("shitzer\n");
+	else {
+		if (DEBUG) g_printf("shitzer\n");
+	}
 
 	return;
 }
@@ -349,11 +353,11 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 			panel_menu_bar_remove_entry (self, signal_data->instance);
 			break;
 	}
-	g_printf ("caught the signal: %d, ", signal_data->signal_id);
-	g_printf ("instance %d, label: %s, path %s\n",
-			  signal_data->instance,
-			  signal_data->label,
-			  signal_data->path);
+	if (DEBUG) g_printf ("caught the signal: %d, ", signal_data->signal_id);
+	if (DEBUG) g_printf ("instance %d, label: %s, path %s\n",
+						 signal_data->instance,
+						 signal_data->label,
+						 signal_data->path);
 
 	g_free (signal_data->label);
 	g_free (signal_data->path);
@@ -435,7 +439,6 @@ static void panel_menu_bar_class_init (PanelMenuBarClass * klass) {
 						 "class \"PanelMenuBar\" style \"panel-menubar-style\"");
 }
 /******************************************************************************/
-
 static void
 panel_menu_bar_init (PanelMenuBar * self) {
 	self->priv = PANEL_MENU_BAR_GET_PRIVATE (self);

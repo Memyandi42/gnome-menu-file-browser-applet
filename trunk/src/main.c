@@ -33,7 +33,7 @@
 
 #define APPLET_IID			"OAFIID:GNOME_MenuFileBrowserApplet"
 #define APPLET_FACTORY_IID	"OAFIID:GNOME_MenuFileBrowserApplet_Factory"
-#define VERSION				"0.5.3"
+#define VERSION				"0.5.4"
 
 /******************************************************************************/
 static const gchar file_browser_applet_menu_xml [] =
@@ -63,6 +63,7 @@ file_browser_applet_display_properties_dialog (GtkWidget *widget, gpointer *data
 static gboolean 
 file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
+	if (0) {
 	GError *error = NULL;
 
 	gnome_help_display_desktop_on_screen (
@@ -79,11 +80,12 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 						   GTK_MESSAGE_ERROR);
 		g_error_free (error);
 	}
-/*
+	}
+	else {
 	utils_show_dialog ("Help",
 					   "Sorry, no help or documentation yet...",
 					   GTK_MESSAGE_ERROR);
-*/
+	}
 	return FALSE;
 }
 /******************************************************************************/
@@ -115,7 +117,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 	gtk_show_about_dialog (NULL,
 			       "name", _("Menu File Browser Applet"),
 			       "version", VERSION,
-			       "copyright", "Copyright \xc2\xa9 2006-2007 Axel von Bertoldi.",
+			       "copyright", "Copyright \xc2\xa9 2006-2008 Axel von Bertoldi.",
 			       "comments", _("Browse and open files in your home directory from the panel"),
 			       "authors", authors,
 			       "documenters", documenters,

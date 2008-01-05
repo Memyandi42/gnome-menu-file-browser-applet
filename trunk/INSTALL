@@ -6,19 +6,43 @@ Requirements
 You will need to have the binary and development files (and all their
 dependencies) for the following packages installed to compile this program:
 
-gtk-2.0
+gtk-2.0 >= 2.12
 libgnomevfs-2.0
 libpanel-applet-2.0
 
 You will also need the following packages installed to compile this program:
 pkg-config
 cmake
-g++ (see bugs)
+
+Configuration
+*************
+There are 3 configuration options available:
+	* CMAKE_INSTALL_PATH
+    * CMAKE_INSTALL_LIBDIR
+    * CMAKE_INSTALL_GCONFDIR 
+
+CMAKE_INSTALL_PATH specifies the installation prefix and currently only affects
+installation of the icons which are installed in
+CMAKE_INSTALL_PATH/share/pixmaps and
+CMAKE_INSTALL_PATH/share/icons/hicolor/128x128/apps. The default is /usr.
+
+CMAKE_INSTALL_LIBDIR specifies the installation prefix of the binary
+application file and bonobo server file which are installed in
+CMAKE_INSTALL_LIBDIR/gnome-panel and CMAKE_INSTALL_LIBDIR/bonobo/servers
+respectively. The default is /usr/lib.
+
+CMAKE_INSTALL_GCONFDIR specifies the installation prefix of the gconf schema
+file. The default is /usr/share/gconf/schemas
+
+To configure using the defaults, execute:
+'cmake .'
+
+To specify an option, execute:
+'cmake . CMAKE_OPTION=/new/option/val
 
 Compiling
 *********
 At the project's root directory, execute:
-'cmake .'
 'make'
 
 Installation

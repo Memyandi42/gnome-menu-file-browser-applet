@@ -1,3 +1,13 @@
+Version 0.5.4
+*************
+	* Added configuration dialog.
+	* Fixed bugs 5, 13, 16,18.
+	* "Addressed" bugs 17, 20.
+	* Plugged a memory leak.
+	* Added options to Build system.
+	* Re-implemented MenuBrowser object as a proper GObject.
+	* Added tooltips to truncated filenames.
+
 Version 0.5.3
 *************
 	* Re-implemented preferences back end to use GConf which means each

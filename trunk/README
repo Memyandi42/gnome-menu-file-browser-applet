@@ -1,4 +1,4 @@
-Menu File Browser Applet 0.5.3
+Menu File Browser Applet 0.5.4
 ******************************
 Menu File Browser Applet is an applet for the GNOME Panel. It lets you browse
 and open files in your home directory from the gnome panel, without having to
@@ -32,7 +32,6 @@ See the file INSTALL.
 To Do
 *****
 	* Make the menu bar ignore right-click so context menu pops-up, and remove handlebar.
-	* Make a configuration dialog. 
 	* Add context menu (open with, delete, etc.) to files and dirs (maybe
 	  hook into nautilus context menu if possible).
 	* Drag-n-drop out of applet.

@@ -1,5 +1,5 @@
 #labels Phase-Deploy
-Installation instructions
+Instructions for installing menu-file-browser-applet
 
 =Dependencies=
 You will need to have the binary and development files (and all their

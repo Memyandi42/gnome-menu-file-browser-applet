@@ -1,0 +1,10 @@
+Instructions for using menu-file-browser-applet
+
+
+To load and use the applet, right click on the GNOME panel and select 'Add to Panel...' Select the Menu File Browser Applet entry from the dialog and click 'Add'.
+
+[http://gnome-menu-file-browser-applet.googlecode.com/svn/web/running.png]
+
+[http://gnome-menu-file-browser-applet.googlecode.com/svn/web/about.png]
+
+[http://gnome-menu-file-browser-applet.googlecode.com/svn/web/preferences.png]

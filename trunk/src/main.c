@@ -63,7 +63,7 @@ file_browser_applet_display_properties_dialog (GtkWidget *widget, gpointer *data
 static gboolean 
 file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
-	if (0) {
+	if (1) {
 	GError *error = NULL;
 
 	gnome_help_display_desktop_on_screen (

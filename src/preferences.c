@@ -26,6 +26,7 @@
 #include "preferences.h"
 #include "utils.h"
 #include <gtk/gtk.h>
+#include <glade/glade-xml.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
 
@@ -37,7 +38,7 @@ struct _AppletPreferencesPrivate {
 };
 /******************************************************************************/
 #define APPLET_PREFERENCES_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_APPLET_PREFERENCES, AppletPreferencesPrivate))
-#define ICON_BUTTON_SIZE 45
+#define ICON_BUTTON_SIZE 24
 /******************************************************************************/
 enum  {
 	APPLET_PREFERENCES_DUMMY_PROPERTY
@@ -59,7 +60,7 @@ enum
 static guint applet_preferences_signals[LAST_SIGNAL] = { 0 };
 /* this is bad, but I need to get at the button from all over the file to
  * update it's state. The other option is make it private member. */
-static GtkWidget *revert_button = NULL;
+/*static GtkWidget *revert_button = NULL;*/
 /******************************************************************************/
 static gpointer applet_preferences_parent_class = NULL;
 static void applet_preferences_dispose (GObject *obj);
@@ -85,7 +86,7 @@ applet_preferences_on_show_icon_pressed (GtkWidget *widget, gpointer data) {
 
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
-	gtk_widget_set_sensitive (revert_button, TRUE);
+	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	return;
 }
 /******************************************************************************/
@@ -98,7 +99,7 @@ applet_preferences_on_show_hidden_pressed (GtkWidget *widget, gpointer data) {
 
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
-	gtk_widget_set_sensitive (revert_button, TRUE);
+	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	return;
 }
 /******************************************************************************/
@@ -115,7 +116,7 @@ applet_preferences_on_terminal_changed (GtkWidget *widget, gpointer data) {
 
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
-	gtk_widget_set_sensitive (revert_button, TRUE);
+	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	return;
 }	
 /******************************************************************************/
@@ -165,7 +166,7 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 						   applet_preferences_signals [PREFS_CHANGED],
 						   0,
 						   signal_data);
-			gtk_widget_set_sensitive (revert_button, TRUE);
+			/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 		}
 		else {
 			/* they chose the same icon again! */
@@ -231,13 +232,13 @@ applet_preferences_dialog_response (GtkWidget *window, gint response, gpointer d
 	switch (response) {
 		case RESPONSE_REVERT:
 			/* revert to the saved config */
-			gtk_widget_set_sensitive (revert_button, FALSE);
+			/*gtk_widget_set_sensitive (revert_button, FALSE);*/
 			break;
 
 		case GTK_RESPONSE_CLOSE:
 			/* save the current configuration */
 			applet_preferences_save_to_gconf (self);
-			gtk_widget_set_sensitive (revert_button, FALSE);
+			/*gtk_widget_set_sensitive (revert_button, FALSE);*/
 			gtk_widget_hide (window);
 			break;
 
@@ -299,7 +300,7 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 				   signal_data);
 
 	/* update the revert button*/
-	gtk_widget_set_sensitive (revert_button, TRUE);
+	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 
 	/* signal the panel_menu bar to update itself */
 	return;
@@ -383,7 +384,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 						   signal_data);
 
 			/* update the revert button*/
-			gtk_widget_set_sensitive (revert_button, TRUE);
+			/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 		}
 	}
 	gtk_widget_destroy (file_chooser_dialog);
@@ -444,7 +445,7 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 					   signal_data);
 
 		/* update the revert button*/
-		gtk_widget_set_sensitive (revert_button, TRUE);
+		/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	}
 	gtk_widget_destroy (file_chooser_dialog);
 	return;
@@ -494,7 +495,7 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 				signal_data);
 
 		/* update the revert button*/
-		gtk_widget_set_sensitive (revert_button, TRUE);
+		/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	}
 
 	return;
@@ -544,7 +545,7 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 					signal_data);
 
 			/* update the revert button*/
-			gtk_widget_set_sensitive (revert_button, TRUE);
+			/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 		}
 	}
 	return;
@@ -599,18 +600,17 @@ applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
 						   signal_data);
 
 			/* update the revert button*/
-			gtk_widget_set_sensitive (revert_button, TRUE);
+			/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 		}
 		gtk_tree_path_free (path);
 	}
 	return;
 }
 /******************************************************************************/
-static GtkWidget*
+static void
 applet_preferences_create_list_view (AppletPreferences *self) {
 	GtkTreeIter			iter;
 	GtkListStore		*store;
-	GtkWidget			*view;
 	GtkTreeViewColumn	*column;
 	GtkCellRenderer		*renderer;
 	GtkTreeSelection 	*selection;
@@ -635,8 +635,8 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 	}
 
 	/* Create a view */
-	view = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (view), TRUE);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (self->priv->tree_view), GTK_TREE_MODEL (store));
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (self->priv->tree_view), TRUE);
 
 	/* The view now holds a reference.  We can get rid of our own
 	* reference */
@@ -656,24 +656,24 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 													   "text", LABEL_COLUMN,
 													   NULL);
 	/* Add the column to the view. */
-	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (self->priv->tree_view), column);
 
 	/* Create a cell render for the path */
 	renderer = gtk_cell_renderer_text_new ();
-	g_signal_connect (G_OBJECT (view),
+	g_signal_connect (G_OBJECT (self->priv->tree_view),
 					  "row-activated",
 					  G_CALLBACK (applet_preferences_path_cell_activated),
 					  (gpointer) self);
 	column = gtk_tree_view_column_new_with_attributes ("Path", renderer,
 													   "text", PATH_COLUMN,
 													   NULL);
-	gtk_tree_view_append_column (GTK_TREE_VIEW (view), column);
+	gtk_tree_view_append_column (GTK_TREE_VIEW (self->priv->tree_view), column);
 
 	/*put the selection in SINGLE mode */
-	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(view));
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(self->priv->tree_view));
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-
-	return view;
+	
+	return;
 }
 /******************************************************************************/
 void
@@ -681,8 +681,6 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 	g_return_if_fail (self == NULL || IS_APPLET_PREFERENCES (self));
 
 	GtkWidget *window;
-    GtkWidget *hbox;
-    GtkWidget *vbox;
     GtkWidget *show_icon;
     GtkWidget *icon_button;
     GtkWidget *show_hidden;
@@ -690,23 +688,10 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 	MenuBarPrefs *mb_prefs = self->menu_bar_prefs;
 
 	if (self->priv->window == NULL) {
-		window = gtk_dialog_new_with_buttons ("Menu File Browser Applet Preferences",
-											  NULL,
-											  0,
-											  NULL);
-		
-		gtk_window_set_title (GTK_WINDOW (window), "Menu File Browser Applet Preferences");
-		gtk_window_set_icon_name (GTK_WINDOW (window), "menu-file-browser-applet");
+		GladeXML *xml = glade_xml_new (GLADEUI_PATH, NULL, NULL);
+		g_return_if_fail (xml != NULL);
+		window = glade_xml_get_widget (xml, "preferences_dialog");
 
-/*
-		revert_button = gtk_dialog_add_button (GTK_DIALOG (window),
-											   GTK_STOCK_REVERT_TO_SAVED,
-											   RESPONSE_REVERT);
-		gtk_widget_set_sensitive (revert_button, FALSE);
-*/
-		gtk_dialog_add_button (GTK_DIALOG (window),
-							   GTK_STOCK_CLOSE,
-							   GTK_RESPONSE_CLOSE);
 		g_signal_connect (G_OBJECT (GTK_DIALOG (window)),
 						  "response",
 						  G_CALLBACK (applet_preferences_dialog_response),
@@ -717,10 +702,8 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 						  G_CALLBACK (gtk_widget_hide),
 						  (gpointer) self);
 
-		vbox = GTK_WIDGET (GTK_DIALOG(window)->vbox);
 		/***** terminal *****/
-		hbox = gtk_hbox_new (FALSE, 0);
-		terminal = gtk_entry_new ();
+		terminal = glade_xml_get_widget (xml, "terminal_entry");
 		gtk_entry_set_width_chars (GTK_ENTRY (terminal), 15);
 		gtk_entry_set_text (GTK_ENTRY (terminal),
 							mb_prefs->browser_prefs->terminal);
@@ -728,30 +711,18 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_terminal_changed),
 						  (gpointer)self);
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   gtk_label_new ("terminal "),
-						   FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   terminal,
-						   FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (vbox),
-						   hbox, 
-						   FALSE, FALSE, 0);
+
 		/***** show hidden *****/
-		show_hidden = gtk_check_button_new_with_label ("show hidden");
+		show_hidden = glade_xml_get_widget (xml, "show_hidden_check");
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (show_hidden),
 									  mb_prefs->browser_prefs->show_hidden);
 		g_signal_connect (G_OBJECT (show_hidden),
 						  "toggled",
 						  G_CALLBACK (applet_preferences_on_show_hidden_pressed),
 						  (gpointer)self);
-		gtk_box_pack_start (GTK_BOX (vbox),
-						   show_hidden, 
-						   FALSE, FALSE, 0);
-		/***** icon *****/
-		hbox = gtk_hbox_new (FALSE, 0);
 
-		show_icon = gtk_check_button_new_with_label ("show icon");
+		/***** icon *****/
+		show_icon = glade_xml_get_widget (xml, "show_icon_check");
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (show_icon),
 									  mb_prefs->show_icon);
 		g_signal_connect (G_OBJECT (show_icon),
@@ -759,7 +730,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 						  G_CALLBACK (applet_preferences_on_show_icon_pressed),
 						  (gpointer)self);
 
-		icon_button = gtk_button_new ();
+		icon_button = glade_xml_get_widget (xml, "icon_button");
 		GtkWidget *icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_BUTTON_SIZE);
 		gtk_button_set_image (GTK_BUTTON (icon_button), icon);
 		g_signal_connect (G_OBJECT (icon_button),
@@ -767,54 +738,16 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 						  G_CALLBACK (applet_preferences_on_icon_select),
 						  (gpointer)self);
 
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   show_icon, 
-						   FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   icon_button, 
-						   FALSE, FALSE, 0);
-		gtk_box_pack_start (GTK_BOX (vbox),
-						   hbox, 
-						   FALSE, FALSE, 0);
 		/***** dirs/labels **/
-		GtkWidget *tree_view = applet_preferences_create_list_view (self);
+		self->priv->tree_view = glade_xml_get_widget (xml, "directories_tree");
+		applet_preferences_create_list_view (self);
 
-		if (1) {
-			/* use a scrollable window */
-			GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
-			gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
-												 GTK_SHADOW_ETCHED_IN);
-			gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-											GTK_POLICY_NEVER,
-											GTK_POLICY_NEVER);
-			gtk_container_add (GTK_CONTAINER (sw), tree_view);
-			gtk_container_add (GTK_CONTAINER (vbox), sw);
-		}
-		else {
-			/* let the tree_view widget expand the window as needed */
-			gtk_container_add (GTK_CONTAINER (vbox), tree_view);
-		}
-		self->priv->tree_view = tree_view;
 		/***** more buttons ******/
-		hbox = gtk_hbox_new (TRUE, 0);
+		GtkWidget *add_button  = glade_xml_get_widget (xml, "directory_add_button");
+		GtkWidget *rem_button  = glade_xml_get_widget (xml, "directory_remove_button");
+		GtkWidget *up_button   = glade_xml_get_widget (xml, "move_up_button");
+		GtkWidget *down_button = glade_xml_get_widget (xml, "move_down_button");
 
-		GtkWidget *add_button  = gtk_button_new ();
-		GtkWidget *rem_button  = gtk_button_new ();
-		GtkWidget *up_button   = gtk_button_new ();
-		GtkWidget *down_button = gtk_button_new ();
-
-		gtk_button_set_image (GTK_BUTTON (add_button),
-							  gtk_image_new_from_stock (GTK_STOCK_ADD,
-								  						GTK_ICON_SIZE_BUTTON));
-		gtk_button_set_image (GTK_BUTTON (rem_button),
-							  gtk_image_new_from_stock (GTK_STOCK_REMOVE,
-								  						GTK_ICON_SIZE_BUTTON));
-		gtk_button_set_image (GTK_BUTTON (up_button),
-							  gtk_image_new_from_stock (GTK_STOCK_GO_UP,
-								  						GTK_ICON_SIZE_BUTTON));
-		gtk_button_set_image (GTK_BUTTON (down_button),
-							  gtk_image_new_from_stock (GTK_STOCK_GO_DOWN,
-								  						GTK_ICON_SIZE_BUTTON));
 
 		g_signal_connect (G_OBJECT (add_button),
 						  "released",
@@ -833,21 +766,6 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 						  G_CALLBACK (applet_preferences_on_down_dir_clicked),
 						  (gpointer) self);
 
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   add_button, 
-						   TRUE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   rem_button, 
-						   TRUE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   up_button, 
-						   TRUE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (hbox),
-						   down_button, 
-						   TRUE, TRUE, 0);
-		gtk_box_pack_start (GTK_BOX (vbox),
-						   hbox, 
-						   FALSE, FALSE, 0);
 		/***** the end ******/
 		self->priv->window = window;
 	}

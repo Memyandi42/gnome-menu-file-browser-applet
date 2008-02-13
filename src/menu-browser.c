@@ -744,7 +744,7 @@ menu_browser_update (MenuBrowser *self,
 
 	g_object_set_data (G_OBJECT (self),
 					   G_OBJECT_DATA_NAME,
-					   path);
+					   g_strdup (path));
 	return;
 }
 /******************************************************************************/

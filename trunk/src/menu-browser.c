@@ -28,6 +28,7 @@
 #include <libgnomeui/libgnomeui.h>
 #include <libgnomevfs/gnome-vfs.h>
 #include <libgnomevfs/gnome-vfs-mime-handlers.h>
+#include <libgnome/gnome-desktop-item.h>
 
 #include "menu-browser.h"
 #include "utils.h"
@@ -89,6 +90,22 @@ menu_browser_sort_alpha (const gchar **s1,
 	return g_utf8_collate ((gchar *)*s1, (gchar *)*s2);
 }
 /******************************************************************************/
+void
+menu_browser_launch_desktop_file (GnomeDesktopItem *ditem) {
+	GError *error = NULL;
+
+	gnome_desktop_item_launch  (ditem,
+								NULL,
+								GNOME_DESKTOP_ITEM_LAUNCH_ONLY_ONE,
+								&error);
+
+	utils_check_gerror (&error);
+
+	gnome_desktop_item_unref (ditem);
+
+	return;
+}
+/******************************************************************************/
 static void
 menu_browser_launch_app (gchar **args, const gchar *working_dir) {
 	GError *error = NULL;
@@ -114,6 +131,45 @@ menu_browser_launch_app (gchar **args, const gchar *working_dir) {
 						   GTK_MESSAGE_ERROR);
 		g_free (tmp);
 	}
+	return;
+}
+/******************************************************************************/
+void
+menu_browser_add_desktop_item (gchar *file, GtkWidget *menu) {
+
+	GnomeDesktopItem	*ditem = NULL;
+	GError				*error = NULL;
+	gchar				*icon_name = NULL;
+	const gchar			*app_name = NULL;
+	GtkWidget			*icon = NULL;
+	GtkWidget			*menu_item = NULL;
+	GtkIconTheme		*icon_theme = gtk_icon_theme_get_default();	
+	
+	ditem = gnome_desktop_item_new_from_file (file, 0, &error);
+
+	if (utils_check_gerror (&error) || ditem == NULL) {
+		gnome_desktop_item_unref (ditem);
+		return;
+	}
+
+	icon_name = gnome_desktop_item_get_icon (ditem, icon_theme);
+	app_name = gnome_desktop_item_get_string (ditem, GNOME_DESKTOP_ITEM_NAME);
+
+	if (icon_name && app_name) {
+		menu_item = gtk_image_menu_item_new_with_label (app_name);
+
+		/* This sucks. Should really use gtk_image_new_from_stock */
+		icon = utils_get_scaled_image_from_file (icon_name, 20);
+
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item), icon);
+		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
+		g_signal_connect_swapped (G_OBJECT (menu_item),
+								  "activate",
+								  G_CALLBACK (menu_browser_launch_desktop_file),
+								  ditem);
+		g_free (icon_name);
+	}
+
 	return;
 }
 /******************************************************************************/
@@ -487,7 +543,7 @@ menu_browser_add_folders (GtkWidget		*menu,
 	for (i=0; i<dirs->len; i++) {
 		file_name_and_path = g_strdup_printf ("%s/%s",
 											  path,
-											  (gchar *)g_ptr_array_index (dirs, i)),
+											  (gchar *)g_ptr_array_index (dirs, i));
 
 		/*make a menu item for this dir, limit the length of the text in the menu*/
 		tmp = clamp_file_name ((gchar*)g_ptr_array_index (dirs, i), &clamped);
@@ -543,7 +599,13 @@ menu_browser_add_files (GtkWidget	*menu,
 	for (i=0; i<files->len; i++) {
 		file_name_and_path = g_strdup_printf ("%s/%s",
 											  path,
-											  (gchar *)g_ptr_array_index (files, i)),
+											  (gchar *)g_ptr_array_index (files, i));
+
+		/* desktop files */
+		if (g_str_has_suffix (file_name_and_path, ".desktop")) {
+			menu_browser_add_desktop_item (file_name_and_path, menu);
+			continue;
+		}
 
 		/*make a menu item for this dir*/
 		tmp = clamp_file_name ((gchar*)g_ptr_array_index (files, i), &clamped);
@@ -592,6 +654,7 @@ menu_browser_add_files (GtkWidget	*menu,
 						  (gpointer) self);
 		g_free (icon_name);
 	}
+	return;
 }
 /******************************************************************************/
 static void

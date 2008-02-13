@@ -32,8 +32,11 @@ gboolean
 utils_check_gerror (GError **error)
 {
 	if (*error)
-	{
+	{		
 		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
+		utils_show_dialog ("Application Error",
+						   (*error)->message,
+						   GTK_MESSAGE_ERROR);
 		g_error_free (*error);
 		*error = NULL;
 		return TRUE;

@@ -301,8 +301,6 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 
 	/* update the revert button*/
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-
-	/* signal the panel_menu bar to update itself */
 	return;
 }
 /******************************************************************************/

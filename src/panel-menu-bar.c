@@ -347,7 +347,7 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 			panel_menu_bar_update_entry (self, signal_data);
 			break;
 		case PREFS_SIGNAL_DIR_ADD :
-			panel_menu_bar_add_entry (self, signal_data->label, signal_data->path);
+			panel_menu_bar_add_entry (self, signal_data->label, g_strdup (signal_data->path));
 			break;
 		case PREFS_SIGNAL_DIR_DEL :
 			panel_menu_bar_remove_entry (self, signal_data->instance);
@@ -362,8 +362,6 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 	g_free (signal_data->label);
 	g_free (signal_data->path);
 	g_free (signal_data);
-
-	return;
 }
 /******************************************************************************/
 PanelMenuBar*

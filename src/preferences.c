@@ -117,7 +117,22 @@ applet_preferences_on_terminal_changed (GtkWidget *widget, gpointer data) {
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-	return;
+}	
+/******************************************************************************/
+static void
+applet_preferences_on_editor_changed (GtkWidget *widget, gpointer data) {
+	gchar *tmp = NULL;
+	AppletPreferences *self = (AppletPreferences *)data;
+	
+	/* get the new state from the widget and update the prefs structure. No
+	 * need to let the menu bar or browser object know */
+	tmp = self->menu_bar_prefs->browser_prefs->editor;
+	g_free (tmp);
+	self->menu_bar_prefs->browser_prefs->editor = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
+
+	/* update the state of the revert button. A pref has changed so the button
+	 * should now be sensitive  */
+	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 }	
 /******************************************************************************/
 static void
@@ -194,6 +209,12 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 	panel_applet_gconf_set_string (applet,
 								   KEY_TERMINAL,
 								   self->menu_bar_prefs->browser_prefs->terminal,
+								   &error);
+	utils_check_gerror (&error);
+	/* editor */
+	panel_applet_gconf_set_string (applet,
+								   KEY_EDITOR,
+								   self->menu_bar_prefs->browser_prefs->editor,
 								   &error);
 	utils_check_gerror (&error);
 	/* the icon */
@@ -683,6 +704,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
     GtkWidget *icon_button;
     GtkWidget *show_hidden;
     GtkWidget *terminal;
+    GtkWidget *editor;
 	MenuBarPrefs *mb_prefs = self->menu_bar_prefs;
 
 	if (self->priv->window == NULL) {
@@ -702,12 +724,22 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 
 		/***** terminal *****/
 		terminal = glade_xml_get_widget (xml, "terminal_entry");
-		gtk_entry_set_width_chars (GTK_ENTRY (terminal), 15);
+		gtk_entry_set_width_chars (GTK_ENTRY (terminal), 10);
 		gtk_entry_set_text (GTK_ENTRY (terminal),
 							mb_prefs->browser_prefs->terminal);
 		g_signal_connect (G_OBJECT (terminal),			
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_terminal_changed),
+						  (gpointer)self);
+
+		/***** editor *****/
+		editor = glade_xml_get_widget (xml, "editor_entry");
+		gtk_entry_set_width_chars (GTK_ENTRY (editor), 10);
+		gtk_entry_set_text (GTK_ENTRY (editor),
+							mb_prefs->browser_prefs->editor);
+		g_signal_connect (G_OBJECT (editor),			
+						  "changed",
+						  G_CALLBACK (applet_preferences_on_editor_changed),
 						  (gpointer)self);
 
 		/***** show hidden *****/
@@ -809,6 +841,18 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 									   mb_prefs->browser_prefs->terminal,
 									   &error);
 	}
+	/* editor */
+	mb_prefs->browser_prefs->editor = panel_applet_gconf_get_string (applet,
+																	 KEY_EDITOR,
+																	 &error);
+	if (utils_check_gerror (&error) || mb_prefs->browser_prefs->editor == NULL) {
+		mb_prefs->browser_prefs->editor = g_strdup (DEFAULT_EDITOR);
+		panel_applet_gconf_set_string (applet,
+									   KEY_TERMINAL,
+									   mb_prefs->browser_prefs->editor,
+									   &error);
+	}
+
 	/* the icon */
 	mb_prefs->icon = panel_applet_gconf_get_string (applet,
 												 KEY_ICON_NAME,

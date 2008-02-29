@@ -23,7 +23,8 @@ SET (SRCS main.c
 	 panel-menu-bar.c
  	 menu-browser.c
  	 utils.c
- 	 preferences.c)
+ 	 preferences.c
+	 vfs.c)
 
 SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBPANEL_CFLAGS} ${LIBGLADE_CFLAGS} ${LIBDESKTOP_CFLAGS}")
 ADD_EXECUTABLE (${EXEC} ${SRCS})

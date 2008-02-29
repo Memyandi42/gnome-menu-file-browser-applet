@@ -32,6 +32,7 @@
 
 #include "menu-browser.h"
 #include "utils.h"
+#include "vfs.h"
 
 /******************************************************************************/
 #define G_OBJECT_DATA_NAME "item_path"
@@ -52,24 +53,6 @@ static gpointer menu_browser_parent_class = NULL;
 static void menu_browser_dispose (GObject * obj);
 static void menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self);
 /******************************************************************************/
-static gchar *
-clamp_file_name (const gchar *file_name, gboolean *clamped) {
-/* *clamped is true if the string is actually clamped */
-	gchar *tmp, *ret;
-
-	if (strlen (file_name) > MAX_FILE_NAME_LENGTH) {
-		tmp = g_strndup (file_name, MAX_FILE_NAME_LENGTH - 3);
-		ret = g_strdup_printf ("%s...", tmp);
-		g_free (tmp);
-		if (clamped != NULL) *clamped = TRUE;
-		return ret;
-	}
-	else {
-		if (clamped != NULL) *clamped = FALSE;
-		return g_strdup (file_name);
-	}
-}
-/******************************************************************************/
 static void
 menu_browser_clean_up (MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
@@ -84,26 +67,21 @@ menu_browser_clean_up (MenuBrowser *self) {
 	return;
 }
 /******************************************************************************/
-static gint
-menu_browser_sort_alpha (const gchar **s1,
-						 const gchar **s2) {
-	return g_utf8_collate ((gchar *)*s1, (gchar *)*s2);
-}
-/******************************************************************************/
-void
-menu_browser_launch_desktop_file (GnomeDesktopItem *ditem) {
+gboolean
+menu_browser_launch_desktop_file (const gchar *file_name) {
+	if (!vfs_file_is_desktop (file_name)) {
+		return FALSE;
+	}
 	GError *error = NULL;
+	GnomeDesktopItem *ditem = gnome_desktop_item_new_from_file (file_name, 0, &error);
 
 	gnome_desktop_item_launch  (ditem,
 								NULL,
 								GNOME_DESKTOP_ITEM_LAUNCH_ONLY_ONE,
 								&error);
-
 	utils_check_gerror (&error);
-
 	gnome_desktop_item_unref (ditem);
-
-	return;
+	return TRUE;
 }
 /******************************************************************************/
 static void
@@ -134,8 +112,11 @@ menu_browser_launch_app (gchar **args, const gchar *working_dir) {
 	return;
 }
 /******************************************************************************/
-void
-menu_browser_add_desktop_item (gchar *file, GtkWidget *menu) {
+GtkWidget*
+menu_browser_add_desktop_file (gchar *file_name, GtkWidget *menu, MenuBrowser *self) {
+	if (!vfs_file_is_desktop (file_name)) {
+		return NULL;
+	}
 
 	GnomeDesktopItem	*ditem = NULL;
 	GError				*error = NULL;
@@ -145,11 +126,11 @@ menu_browser_add_desktop_item (gchar *file, GtkWidget *menu) {
 	GtkWidget			*menu_item = NULL;
 	GtkIconTheme		*icon_theme = gtk_icon_theme_get_default();	
 	
-	ditem = gnome_desktop_item_new_from_file (file, 0, &error);
+	ditem = gnome_desktop_item_new_from_file (file_name, 0, &error);
 
 	if (utils_check_gerror (&error) || ditem == NULL) {
 		gnome_desktop_item_unref (ditem);
-		return;
+		return NULL;
 	}
 
 	icon_name = gnome_desktop_item_get_icon (ditem, icon_theme);
@@ -162,47 +143,89 @@ menu_browser_add_desktop_item (gchar *file, GtkWidget *menu) {
 		icon = utils_get_scaled_image_from_file (icon_name, 20);
 
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item), icon);
-		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
-		g_signal_connect_swapped (G_OBJECT (menu_item),
-								  "activate",
-								  G_CALLBACK (menu_browser_launch_desktop_file),
-								  ditem);
 		g_free (icon_name);
 	}
-
-	return;
+	gnome_desktop_item_unref (ditem);
+	return menu_item;
 }
 /******************************************************************************/
-static gchar *
-menu_browser_get_mime_application (const gchar *file_name_and_path) {
-	GnomeVFSMimeApplication *mime_application = NULL;
-	gchar *mime_type = NULL;
-	gchar *file_mime_app_exec = NULL;
-	
-	mime_type		 = gnome_vfs_get_mime_type (file_name_and_path);	
-	mime_application = gnome_vfs_mime_get_default_application (mime_type);
+GtkWidget*
+menu_browser_add_default_file (gchar *file_name, GtkWidget *menu, MenuBrowser *self) {
+	GtkWidget	*menu_item = NULL;
+	GtkWidget	*menu_item_icon = NULL;
+	gchar		*icon_name = NULL;
+	gchar		*tmp = NULL;
+	gchar		*base_name = g_path_get_basename (file_name);
+	gboolean	clamped = TRUE;
 
-	if (mime_application) {
-		file_mime_app_exec = g_strdup ((gchar *)mime_application->command);	
+	/*make a menu item for this dir*/
+	tmp = utils_clamp_file_name (base_name, MAX_FILE_NAME_LENGTH, &clamped);
+	menu_item = gtk_image_menu_item_new_with_label (tmp);
+	if (clamped == TRUE) {
+		gtk_widget_set_tooltip_text (menu_item, base_name);
 	}
 
-	g_free (mime_type);
-	g_free (mime_application);
+	/* bold executable files */
+	if (vfs_file_is_executable (file_name)) {
+		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
+		gchar *markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>", tmp);
+		gtk_label_set_markup (GTK_LABEL (label), markup);
+		g_free (markup);
+	}
+	g_free (tmp);
+	g_free (base_name);
 
-	return file_mime_app_exec;
+	/*lookup the mime icon name for this file type */
+	icon_name = gnome_icon_lookup_sync (self->priv->icon_theme,
+										NULL,
+										file_name,
+										NULL,
+										0,
+										NULL);		
+
+	/*get the icon widget based on the returned icon name*/
+	menu_item_icon = gtk_image_new_from_icon_name (icon_name,
+												   GTK_ICON_SIZE_MENU);
+
+	/*stick the icon in the menu item, the menu item in the menu and show it all*/
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+									menu_item_icon);
+	g_free (icon_name);
+	return menu_item;
 }
 /******************************************************************************/
 static void
-menu_browser_launch_terminal (MenuBrowser *self, gchar *path) {
+menu_browser_launch_terminal (const gchar *path, MenuBrowser *self) {
 
 	gchar **args = NULL;
 		
 	args = g_strsplit (self->prefs->terminal,
-					   "\1", 0);
+					   " ", 0);
 	
 	menu_browser_launch_app (args, path);
 	g_free (args);	
 
+}
+/******************************************************************************/
+static void
+menu_browser_edit_file (const gchar *file_name_and_path, MenuBrowser *self) {
+	gchar **args = NULL;
+	gchar *arg = NULL;
+	gchar *working_dir = NULL;
+	int i;
+
+	working_dir = g_path_get_dirname (file_name_and_path);
+	arg = g_strdelimit (self->prefs->editor, " ", '\1');
+	arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
+	args = g_strsplit (arg, "\1", 0);
+	menu_browser_launch_app (args, working_dir);
+	
+	g_free (arg);
+	for (i = 0; args[i]; i++) {
+		g_free (args[i]);
+	}
+	g_free (args);
+	g_free (working_dir);
 }
 /******************************************************************************/
 static void
@@ -215,40 +238,30 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 	int i;
 
 	working_dir = g_path_get_dirname (file_name_and_path);
-
-	is_executable = g_file_test (file_name_and_path, G_FILE_TEST_IS_EXECUTABLE) &&
-				   !g_file_test (file_name_and_path, G_FILE_TEST_IS_DIR);
+	is_executable = vfs_file_is_executable (file_name_and_path);
 
 	/* FIXME: sigh!!! "#" makes gnome_vfs_get_mime_type crash */
 	if (!g_strrstr (file_name_and_path, "#")) {
-		file_mime_app_exec = menu_browser_get_mime_application	(file_name_and_path);
+		file_mime_app_exec = vfs_get_mime_application (file_name_and_path);
 	}
 	else {
 		utils_show_dialog ("Error: gnome-vfs bug",
 						   "Some gnome-vfs functions cannot handle fine names that include the \"#\" character.",
 						   GTK_MESSAGE_ERROR);
+		return;
 	}
 
-	/* if it's a binary file (i.e. it has no associated mime type) run it it as if it were a prog*/
-	if (is_executable && file_mime_app_exec == NULL) {
+	/* if it's a binary file run it*/
+	if (is_executable) {
 		arg = g_strdup_printf ("%s", file_name_and_path);
 		args = g_strsplit (arg, "\1", 0);
 	}
 	else {
 		if (file_mime_app_exec) {
-			/* if it's a script or something, look at the exec_action option*/
-			if (is_executable && exec_action == EXEC_RUN) {
-				/* run it */
-				arg = g_strdup_printf ("%s", file_name_and_path);
-				args = g_strsplit (arg, "\1", 0);
-			}
-			else {
-				/* open it for editing/viewing */
-				arg = g_strdelimit (file_mime_app_exec, " ", '\1');
-				arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
-				args = g_strsplit (arg, "\1", 0);
-				if (DEBUG) g_printf ("%s ", file_mime_app_exec);
-			}
+			arg = g_strdelimit (file_mime_app_exec, " ", '\1');
+			arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
+			args = g_strsplit (arg, "\1", 0);
+			if (DEBUG) g_printf ("%s ", file_mime_app_exec);
 		}
 		else {
 			if (DEBUG) g_printf ("Error: failed to get mime application for %s\n", file_name_and_path);
@@ -277,70 +290,69 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 }
 /******************************************************************************/
 static void
-menu_browser_on_dir_left_click (const gchar *file_name_and_path) {
+menu_browser_on_dir_left_click (const gchar *file_name_and_path, MenuBrowser *self) {
 	menu_browser_open_file (file_name_and_path, EXEC_OPEN);
 	return;
 }
 /******************************************************************************/
 static void
-menu_browser_on_dir_middle_click (MenuBrowser *self, gchar *path) {
-	menu_browser_launch_terminal (self, path);
+menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
+	menu_browser_launch_terminal (path, self);
 	return;
 }
 /******************************************************************************/
 static void
-menu_browser_on_dir_right_click (const gchar *file_name_and_path) {
-	utils_show_dialog ("Error: File not found.",
+menu_browser_on_dir_right_click (const gchar *file_name_and_path, MenuBrowser *self) {
+	utils_show_dialog ("Error: Action not implemented.",
 					   "Right click on directory action not yet implemented\n",
 					   GTK_MESSAGE_INFO);
 	return;
 }
 /******************************************************************************/
 static void
-menu_browser_on_file_left_click (const gchar *file_name_and_path) {
-	menu_browser_open_file (file_name_and_path, EXEC_OPEN);
-	return;
+menu_browser_on_file_left_click (const gchar *file_name_and_path, MenuBrowser *self) {
+	/* try launching the desktop file first */
+	if (!menu_browser_launch_desktop_file (file_name_and_path)) { 
+		menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	}
 }
 /******************************************************************************/
 static void
-menu_browser_on_file_middle_click (const gchar *file_name_and_path) {
-	menu_browser_open_file (file_name_and_path, EXEC_RUN);
-	return;
+menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser *self) {
+	menu_browser_edit_file (file_name_and_path, self);
 }
 /******************************************************************************/
 static void
-menu_browser_on_file_right_click (const gchar *file_name_and_path) {
-	utils_show_dialog ("Error: File not found.",
+menu_browser_on_file_right_click (const gchar *file_name_and_path, MenuBrowser *self) {
+	utils_show_dialog ("Error: Action not implemented.",
 					   "Right click on file action not yet implemented\n",
 					   GTK_MESSAGE_INFO);
-	return;
 }
 /******************************************************************************/
 static void
 menu_browser_on_dir_item_activate (GtkWidget *menu_item,
-										 gpointer *self) {
+								   MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	MenuBrowser *_self = (MenuBrowser*)self;
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
 		GdkEvent *event = gtk_get_current_event ();
 
 		if (event->type == GDK_KEY_PRESS) {
-			menu_browser_on_dir_left_click (path);
+			menu_browser_on_dir_left_click (path, self);
 		}
 		else if (event->type == GDK_BUTTON_RELEASE) {
 			GdkEventButton *button_event = (GdkEventButton *)event;
 
 			if (button_event->button == 1) {
-				menu_browser_on_dir_left_click (path);
+				menu_browser_on_dir_left_click (path, self);
 			}	
 			else if (button_event->button == 2) {
-				menu_browser_on_dir_middle_click (_self, path);
+				menu_browser_on_dir_middle_click (path, self);
 			}	
 			else if (button_event->button == 3) {
-				menu_browser_on_dir_right_click (path);
+				menu_browser_on_dir_right_click (path, self);
 			}
 		}
 	}
@@ -351,35 +363,34 @@ menu_browser_on_dir_item_activate (GtkWidget *menu_item,
 						   GTK_MESSAGE_ERROR);
 		g_free (tmp);
 	}
-	menu_browser_clean_up (_self);
+	menu_browser_clean_up (self);
 	return;
 }
 /******************************************************************************/
 static void
 menu_browser_on_file_item_activate (GtkWidget *menu_item,
-									gpointer *self) {
+									MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	MenuBrowser *_self = (MenuBrowser*)self;
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
 		GdkEvent *event = gtk_get_current_event ();
 
 		if (event->type == GDK_KEY_PRESS) {
-			menu_browser_on_file_left_click (path);
+			menu_browser_on_file_left_click (path, self);
 		}
 		else if (event->type == GDK_BUTTON_RELEASE) {
 			GdkEventButton *button_event = (GdkEventButton *)event;
 
 			if (button_event->button == 1) {
-				menu_browser_on_file_left_click (path);
+				menu_browser_on_file_left_click (path, self);
 			}	
 			else if (button_event->button == 2) {
-				menu_browser_on_file_middle_click (path);
+				menu_browser_on_file_middle_click (path, self);
 			}	
 			else if (button_event->button == 3) {
-				menu_browser_on_file_right_click (path);
+				menu_browser_on_file_right_click (path, self);
 			}
 		}
 	}
@@ -390,7 +401,7 @@ menu_browser_on_file_item_activate (GtkWidget *menu_item,
 						   GTK_MESSAGE_ERROR);
 		g_free (tmp);
 	}
-	menu_browser_clean_up (_self);
+	menu_browser_clean_up (self);
 	return;
 }
 /******************************************************************************/
@@ -416,70 +427,6 @@ menu_browser_clear_menu (GtkWidget *menu_item) {
 	return;
 }
 /******************************************************************************/
-static gchar *
-menu_browser_get_dir_contents (GPtrArray *files,
-							   GPtrArray *dirs,
-							   MenuBrowser *self,
-							   gchar *path) {
-
-	GnomeVFSDirectoryHandle *vfs_dir_handle = NULL;
-	GnomeVFSResult	 		vfs_result;
-	GnomeVFSFileInfo		*vfs_file_info = NULL;
-	gchar					*error = NULL;
-	gboolean show_hidden = self->prefs->show_hidden;
-
-	/*make struct for getting file info, open the dir for reading and get the first entry*/
-	vfs_file_info = gnome_vfs_file_info_new();
-	
-	vfs_result = gnome_vfs_directory_open (&vfs_dir_handle,
-										   path,
-/*										   GNOME_VFS_FILE_INFO_GET_MIME_TYPE |*/
-										   GNOME_VFS_FILE_INFO_FOLLOW_LINKS);
-
-	/* make sure the dir was opened OK. This fixes bug #3 */
-	if (vfs_result == GNOME_VFS_OK) {
-		/* get the first entry */
-		vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
-													vfs_file_info);
-		/* if it opened OK and while its not empty, keep reading items */
-		while (vfs_result == GNOME_VFS_OK) {	
-			/*if it's not a hidden file or were showing hidden files...*/
-			if ((g_ascii_strncasecmp (vfs_file_info->name, ".", 1) != 0 || show_hidden) &&
-				 g_ascii_strcasecmp (vfs_file_info->name, ".") != 0 &&
-				 g_ascii_strcasecmp (vfs_file_info->name, "..") != 0) {
-
-				if (vfs_file_info->type == GNOME_VFS_FILE_TYPE_DIRECTORY) {
-					/*make an array that holds all the dirs in this dir*/
-					g_ptr_array_add (dirs, (gpointer)g_strdup (vfs_file_info->name));
-				}
-				if (vfs_file_info->type == GNOME_VFS_FILE_TYPE_REGULAR) {
-					/*make an array that holds all the files in this dir*/
-					g_ptr_array_add (files, (gpointer)g_strdup (vfs_file_info->name));
-				}
-			}
-		/*get the next entry*/
-			vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
-														vfs_file_info);
-		}
-		/*close the dir*/
-		vfs_result = gnome_vfs_directory_close (vfs_dir_handle);
-	}
-	else {
-		error = g_strdup_printf ("(%s)",gnome_vfs_result_to_string (vfs_result));
-		if (DEBUG) g_printf ("Error opening directory. GNOME_VFS error: %s\n",
-							 error);
-	}
-	/**************************** Finished reading dir contents ************************/
-	
-	/*sort the arrays containing the directory and file listings*/
-	g_ptr_array_sort (dirs, (GCompareFunc)&menu_browser_sort_alpha);
-	g_ptr_array_sort (files, (GCompareFunc)&menu_browser_sort_alpha);
-
-	gnome_vfs_file_info_clear (vfs_file_info);
-	g_free (vfs_file_info);
-	return error;
-}
-/******************************************************************************/
 static void
 menu_browser_add_menu_header (GtkWidget *menu,
 							  gchar *path,
@@ -492,7 +439,7 @@ menu_browser_add_menu_header (GtkWidget *menu,
 	gchar *tmp;
 	gboolean clamped = TRUE;
 
-	tmp = clamp_file_name(dir, &clamped);
+	tmp = utils_clamp_file_name(dir, MAX_FILE_NAME_LENGTH, &clamped);
 	menu_item = gtk_image_menu_item_new_with_label (tmp);
 	if (clamped == TRUE) {
 		gtk_widget_set_tooltip_text (menu_item, dir);
@@ -516,7 +463,7 @@ menu_browser_add_menu_header (GtkWidget *menu,
 	g_signal_connect (G_OBJECT (menu_item),
 					  "activate",
 					  G_CALLBACK (menu_browser_on_dir_item_activate),
-					  (gpointer)self);
+					  self);
 	
 	separator = gtk_separator_menu_item_new();
 
@@ -546,7 +493,7 @@ menu_browser_add_folders (GtkWidget		*menu,
 											  (gchar *)g_ptr_array_index (dirs, i));
 
 		/*make a menu item for this dir, limit the length of the text in the menu*/
-		tmp = clamp_file_name ((gchar*)g_ptr_array_index (dirs, i), &clamped);
+		tmp = utils_clamp_file_name ((gchar*)g_ptr_array_index (dirs, i), MAX_FILE_NAME_LENGTH, &clamped);
 		menu_item = gtk_image_menu_item_new_with_label (tmp);
 		if (clamped == TRUE) {
 			gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (dirs, i));
@@ -589,11 +536,7 @@ menu_browser_add_files (GtkWidget	*menu,
 						MenuBrowser	*self) {
 
 	GtkWidget	*menu_item = NULL;
-	GtkWidget	*menu_item_icon = NULL;
-	gchar		*icon_name = NULL;
 	gchar		*file_name_and_path = NULL;
-	gchar		*tmp = NULL;
-	gboolean	clamped = TRUE;
 	int i;
 
 	for (i=0; i<files->len; i++) {
@@ -602,47 +545,12 @@ menu_browser_add_files (GtkWidget	*menu,
 											  (gchar *)g_ptr_array_index (files, i));
 
 		/* desktop files */
-		if (g_str_has_suffix (file_name_and_path, ".desktop")) {
-			menu_browser_add_desktop_item (file_name_and_path, menu);
-			continue;
+		menu_item = menu_browser_add_desktop_file (file_name_and_path, menu, self);
+		if (menu_item == NULL) {
+			menu_item = menu_browser_add_default_file (file_name_and_path, menu, self);
 		}
-
-		/*make a menu item for this dir*/
-		tmp = clamp_file_name ((gchar*)g_ptr_array_index (files, i), &clamped);
-		menu_item = gtk_image_menu_item_new_with_label (tmp);
-		if (clamped == TRUE) {
-			gtk_widget_set_tooltip_text (menu_item, (gchar*)g_ptr_array_index (files, i));
-		}
-
-		/* bold executable files */
-		if (g_file_test (file_name_and_path, G_FILE_TEST_IS_EXECUTABLE) &&
-			!g_file_test (file_name_and_path, G_FILE_TEST_IS_DIR)) {
-			GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
-			gchar *markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>", tmp);
-			gtk_label_set_markup (GTK_LABEL (label), markup);
-			g_free (markup);
-		}
-		g_free (tmp);
-
-		/*lookup the mime icon name for this file type */
-		icon_name = gnome_icon_lookup_sync (self->priv->icon_theme,
-											NULL,
-											file_name_and_path,
-											NULL,
-											0,
-											NULL);		
-
-		/*get the icon widget based on the returned icon name*/
-		menu_item_icon = gtk_image_new_from_icon_name (icon_name,
-													   GTK_ICON_SIZE_MENU);
-
-		/*stick the icon in the menu item, the menu item in the menu and show it all*/
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-										menu_item_icon);
-
-		gtk_menu_shell_append (GTK_MENU_SHELL(menu),
-							   menu_item);
 		
+		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
 		g_ptr_array_add (self->priv->tmp_array, file_name_and_path);
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
@@ -651,8 +559,7 @@ menu_browser_add_files (GtkWidget	*menu,
 		g_signal_connect (menu_item,
 						  "activate",
 						  G_CALLBACK (menu_browser_on_file_item_activate),
-						  (gpointer) self);
-		g_free (icon_name);
+						  self);
 	}
 	return;
 }
@@ -681,10 +588,10 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 								  self);
 
 	/* read the contents of the dir. */
-	error = menu_browser_get_dir_contents (files,
-										   dirs,
-										   self,
-										   current_path);
+	error = vfs_get_dir_contents (files,
+								  dirs,
+								  self->prefs->show_hidden,
+								  current_path);
 	/* add the folders*/
 	menu_browser_add_folders (current_menu,
 							  current_path,

@@ -93,3 +93,27 @@ g_slist_swap_data (GSList *list, guint index) {
 	return list;
 }
 /******************************************************************************/
+gint
+utils_sort_alpha (const gchar **s1,
+				  const gchar **s2) {
+	return g_utf8_collate ((gchar *)*s1, (gchar *)*s2);
+}
+/******************************************************************************/
+gchar *
+utils_clamp_file_name (const gchar *file_name, int length, gboolean *clamped) {
+/* clamped is true if the string is actually clamped */
+	gchar *tmp, *ret;
+
+	if (strlen (file_name) > length) {
+		tmp = g_strndup (file_name, length - 3);
+		ret = g_strdup_printf ("%s...", tmp);
+		g_free (tmp);
+		if (clamped != NULL) *clamped = TRUE;
+		return ret;
+	}
+	else {
+		if (clamped != NULL) *clamped = FALSE;
+		return g_strdup (file_name);
+	}
+}
+/******************************************************************************/

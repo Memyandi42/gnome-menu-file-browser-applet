@@ -98,8 +98,8 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		"Axel von Bertoldi <bertoldia@gmail.com>",
 		"",
 		"Contributions by:",
-		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
 		"Ivan N. Zlatev <contact@i-nz.net>",
+		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
 		NULL
 	};
 	const gchar *documenters [] = {
@@ -115,7 +115,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 	}
 
 	gtk_show_about_dialog (NULL,
-			       "name", _("Menu File Browser Applet"),
+			       "name", _("File Browser Applet"),
 			       "version", VERSION,
 			       "copyright", "Copyright \xc2\xa9 2006-2008 Axel von Bertoldi.",
 			       "comments", _("Browse and open files in your home directory from the panel"),

@@ -1,8 +1,8 @@
 /*
- * File:				utils.h
- * Created:				August 2007
+ * File:				vfs.h
+ * Created:				February 2008
  * Created by:			Axel von Bertoldi
- * Last Modified:		January 2008
+ * Last Modified:		March 2008
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005-2008		Axel von Bertoldi
  *
@@ -23,19 +23,17 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef VFS_H
+#define VFS_H
 
 #include <glib.h>
 #include <gtk/gtk.h>
 
 #define DEBUG 1
 
-gboolean	utils_check_gerror (GError **error);
-void		utils_show_dialog (gchar *title, gchar *message, GtkMessageType type);
-GtkWidget*	utils_get_scaled_image_from_file (gchar *file_name, int size);
-GSList*		g_slist_swap_data (GSList *list, guint index);
-gint		utils_sort_alpha (const gchar **s1, const gchar **s2);
-gchar*		utils_clamp_file_name (const gchar *file_name, int length, gboolean *clamped);
+gboolean vfs_file_is_executable (const gchar *file_name);
+gboolean vfs_file_is_desktop (const gchar *file_name);
+gchar*	 vfs_get_mime_application (const gchar *file_name_and_path);
+gchar*	 vfs_get_dir_contents (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, gchar *path);
 
 #endif

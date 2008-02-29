@@ -34,6 +34,17 @@
         </locale>
       </schema>
 
+	  <schema>
+        <key>/schemas/apps/menu-file-browser-applet/prefs/editor</key>
+        <owner>menu-file-browser-applet</owner>
+        <type>string</type>
+        <default>gedit</default>
+        <locale name="C">
+          <short>The editor to use when middle-clicking on a file</short>
+          <long>The editor to use when middle-clicking on a file</long>
+        </locale>
+      </schema>
+
       <schema>
         <key>/schemas/apps/menu-file-browser-applet/prefs/show_hidden</key>
         <owner>menu-file-browser-applet</owner>

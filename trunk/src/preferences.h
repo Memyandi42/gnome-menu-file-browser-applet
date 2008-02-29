@@ -49,6 +49,7 @@ G_BEGIN_DECLS
 #define KEY_ICON_SHOW	"show_icon"
 #define KEY_HIDDEN_SHOW	"show_hidden"
 #define KEY_TERMINAL	"terminal"
+#define KEY_EDITOR		"editor"
 
 /* default options */
 #define DEFAULT_ICON		"/usr/share/pixmaps/menu-file-browser-applet.png"
@@ -56,6 +57,7 @@ G_BEGIN_DECLS
 #define DEFAULT_LABEL		"Home"
 #define DEFAULT_PATH		g_get_home_dir ()
 #define DEFAULT_TERMINAL	"gnome-terminal"
+#define DEFAULT_EDITOR		"gedit"
 #define DEFAULT_SHOW_HIDDEN	FALSE
 /******************************************************************************/
 typedef struct _BrowserPrefs BrowserPrefs;
@@ -67,6 +69,7 @@ typedef struct _PrefsChangedSignalData PrefsChangedSignalData;
 /******************************************************************************/
 struct _BrowserPrefs {
 	gchar		*terminal;
+	gchar		*editor;
 	gboolean	show_hidden;
 };
 struct _MenuBarPrefs {

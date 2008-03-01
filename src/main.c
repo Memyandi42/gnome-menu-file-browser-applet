@@ -24,6 +24,7 @@
  */
 
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <gtk/gtk.h>
 #include <libgnomevfs/gnome-vfs.h>
 #include <panel-applet.h>

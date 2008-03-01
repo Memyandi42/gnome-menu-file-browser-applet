@@ -1,6 +1,6 @@
-Menu File Browser Applet 0.5.4
+File Browser Applet 0.5.4
 ******************************
-Menu File Browser Applet is an applet for the GNOME Panel. It lets you browse
+File Browser Applet is an applet for the GNOME Panel. It lets you browse
 and open files in your home directory from the gnome panel, without having to
 open a file manager. It is _not_ intended as replacement to proper file
 managers like nautilus. Sometimes you (like me) just want to open a file and

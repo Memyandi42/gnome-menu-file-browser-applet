@@ -26,6 +26,7 @@
 #include "vfs.h"
 #include "utils.h"
 
+#include <glib/gprintf.h>
 #include <libgnomevfs/gnome-vfs.h>
 #include <libgnomevfs/gnome-vfs-mime-handlers.h>
 #include <libgnome/gnome-desktop-item.h>
@@ -35,7 +36,6 @@ gboolean
 vfs_file_is_executable (const gchar *file_name) {
 	gchar *mime_type = gnome_vfs_get_mime_type (file_name);	
 	gboolean is_executable = FALSE;
-
 	is_executable =  g_file_test (file_name, G_FILE_TEST_IS_EXECUTABLE) &&
 					!g_file_test (file_name, G_FILE_TEST_IS_DIR) &&
 					(g_str_has_prefix (mime_type, "application/x-") ||

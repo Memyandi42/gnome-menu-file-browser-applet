@@ -8,8 +8,8 @@
 			<item value="IDL:Bonobo/GenericFactory:1.0"/>
 			<item value="IDL:Bonobo/Unknown:1.0"/>
 		</oaf_attribute>	
-		<oaf_attribute name="name" type="string" value="Menu File Browser Applet Factory"/>
-		<oaf_attribute name="description" type="string" value="Factory for the Menu File Browser Applet"/>
+		<oaf_attribute name="name" type="string" value="File Browser Applet Factory"/>
+		<oaf_attribute name="description" type="string" value="Factory for the File Browser Applet"/>
 	</oaf_server>
 
 	<oaf_server iid="OAFIID:GNOME_MenuFileBrowserApplet"
@@ -22,7 +22,7 @@
 			<item value="IDL:Bonobo/Unknown:1.0"/>
 		</oaf_attribute>
 		<oaf_attribute name="name" type="string" value="File Browser"/>
-		<oaf_attribute name="description" type="string" value="Menu based file browser applet for the GNOME2 panel"/>
+		<oaf_attribute name="description" type="string" value="File browser applet for the GNOME2 panel"/>
 		<oaf_attribute name="panel:category" type="string" value="Utilities"/>
 		<oaf_attribute name="panel:icon" type="string" value="menu-file-browser-applet.png"/>
 	</oaf_server>

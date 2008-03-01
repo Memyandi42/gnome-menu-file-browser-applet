@@ -250,7 +250,6 @@ menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
 						   GTK_MESSAGE_ERROR);
 		return;
 	}
-
 	/* if it's a binary file run it*/
 	if (is_executable) {
 		arg = g_strdup_printf ("%s", file_name_and_path);

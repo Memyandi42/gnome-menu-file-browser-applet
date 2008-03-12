@@ -42,7 +42,7 @@ G_BEGIN_DECLS
 #define IS_APPLET_PREFERENCES_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_APPLET_PREFERENCES))
 #define APPLET_PREFERENCES_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_APPLET_PREFERENCES, AppletPreferencesClass))
 /******************************************************************************/
-#define GLADEUI_PATH	"/usr/share/menu-file-browser-applet/glade/menu-file-browser-applet.glade"
+#define GLADEUI_PATH	"/usr/share/file-browser-applet/glade/file-browser-applet.glade"
 #define KEY_DIR			"dirs"
 #define KEY_LABELS		"labels"
 #define KEY_ICON_NAME	"icon"
@@ -52,7 +52,7 @@ G_BEGIN_DECLS
 #define KEY_EDITOR		"editor"
 
 /* default options */
-#define DEFAULT_ICON		"/usr/share/pixmaps/menu-file-browser-applet.png"
+#define DEFAULT_ICON		"/usr/share/pixmaps/file-browser-applet.png"
 #define DEFAULT_SHOW_ICON	TRUE
 #define DEFAULT_LABEL		"Home"
 #define DEFAULT_PATH		g_get_home_dir ()

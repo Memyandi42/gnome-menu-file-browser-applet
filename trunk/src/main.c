@@ -32,8 +32,8 @@
 #include "panel-menu-bar.h"
 #include "utils.h"
 
-#define APPLET_IID			"OAFIID:GNOME_MenuFileBrowserApplet"
-#define APPLET_FACTORY_IID	"OAFIID:GNOME_MenuFileBrowserApplet_Factory"
+#define APPLET_IID			"OAFIID:GNOME_FileBrowserApplet"
+#define APPLET_FACTORY_IID	"OAFIID:GNOME_FileBrowserApplet_Factory"
 #define VERSION				"0.5.4"
 
 /******************************************************************************/
@@ -69,8 +69,8 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
 		gnome_help_display_desktop_on_screen (
 			  NULL,
-			  "menu-file-browser-applet", 
-			  "menu-file-browser-applet", 
+			  "file-browser-applet", 
+			  "file-browser-applet", 
 			  NULL, 
 			  gtk_widget_get_screen (widget),
 			  &error);
@@ -109,7 +109,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 	};
 	const gchar *translator_credits = _("translator_credits");
 	
-	file = gnome_program_locate_file (NULL, GNOME_FILE_DOMAIN_PIXMAP, "menu-file-browser-applet.png", TRUE, NULL);
+	file = gnome_program_locate_file (NULL, GNOME_FILE_DOMAIN_PIXMAP, "file-browser-applet.png", TRUE, NULL);
 	if (file != NULL) {
 		pixbuf = gdk_pixbuf_new_from_file (file, NULL);
 		g_free (file);

@@ -1,5 +1,6 @@
 Version 0.5.5
 *************
+	* Renamed applet to "File Browser Applet"
 	* Improved configuration dialog (thanks to Ivan N. Zlatev)
 	* Added support for .desktop files
 	* New actions associated with left and middle click: Left-click is default

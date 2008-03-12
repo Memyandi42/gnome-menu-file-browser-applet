@@ -65,27 +65,27 @@ static gboolean
 file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
 	if (1) {
-	GError *error = NULL;
+		GError *error = NULL;
 
-	gnome_help_display_desktop_on_screen (
-	      NULL,
-	      "menu-file-browser-applet", 
-	      "menu-file-browser-applet", 
-	      NULL, 
-	      gtk_widget_get_screen (widget),
-	      &error);
+		gnome_help_display_desktop_on_screen (
+			  NULL,
+			  "menu-file-browser-applet", 
+			  "menu-file-browser-applet", 
+			  NULL, 
+			  gtk_widget_get_screen (widget),
+			  &error);
 
-	if (error) {       
-		utils_show_dialog ("Error",
-						   "Could not display help.",
-						   GTK_MESSAGE_ERROR);
-		g_error_free (error);
-	}
+		if (error) {       
+			utils_show_dialog ("Error",
+							   "Could not display help.",
+							   GTK_MESSAGE_ERROR);
+			g_error_free (error);
+		}
 	}
 	else {
-	utils_show_dialog ("Help",
-					   "Sorry, no help or documentation yet...",
-					   GTK_MESSAGE_ERROR);
+		utils_show_dialog ("Help",
+						   "Sorry, no help or documentation yet...",
+						   GTK_MESSAGE_ERROR);
 	}
 	return FALSE;
 }

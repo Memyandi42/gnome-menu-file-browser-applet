@@ -1,4 +1,4 @@
-File Browser Applet 0.5.4
+File Browser Applet 0.5.5
 ******************************
 File Browser Applet is an applet for the GNOME Panel. It lets you browse
 and open files in your home directory from the gnome panel, without having to
@@ -13,17 +13,11 @@ Features
 	* Respects Gnome mime type options and includes mime icon in menu.
 	* Middle clicking in a directory header will open a terminal in that
 	  directory.
-	* Middle clicking on file will execute the file (if it executable).
-	* Executable files are now handled more intuitively: if the
-	  file is binary and executable it is launched on either left of middle
-	  click. If the file is text and executable (i.e. a script), left clicking
-	  opens it for editing, middle click runs it.
+	* Middle-clicking on file will open with the configured editor,
+	  right-clicking will execute the default action
 	* Configuration options: Select directories to show (and label), select
-	  icon, show/hide icon, show hidden, select terminal. Now uses GConf as
-	  back-end, through still must be configured "manually" through
-	  gconf-editor.
-	* Properly handles changes in the panel (size allocation, background and
-	  orientation).
+	  icon, show/hide icon, show hidden, select terminal and editor. Uses
+	  GConf as back-end.
 
 Installation
 ************
@@ -38,18 +32,15 @@ To Do
 	* Drag-n-drop configuration.
 	* Add append files to "Recent Documents."
 	* Add key-binding to pop-up root menu.
-	* More Documentation?
+	* More Documentation
 	* A better icon.
 	* Translation.
 	* Generating distribution packages.
-	* Add handling of .desktop files.
 
 Bugs
 ****
-	* Pressing enter on item has no effect (bug #5).
 	* Icon sometimes appears blurry (bug #10)
 	* Can't make a menu that starts at / (bug #12).
-	* Configuration fails of g++ not installed (even though g++ is not used).
 	* There are probably a few memory leaks here and there too...
 Send bugs to bertoldia@gmail.com for now.
 
@@ -59,4 +50,3 @@ Contributions are welcome, but it might take a while for them to make it into a
 release as I (unfortunately) don't always have a lot of time to devote to this
 project (and other lame excuses). Send ideas/code/patches to
 bertoldia@gmail.com for now.
-

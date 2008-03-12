@@ -9,6 +9,8 @@ dependencies) for the following packages installed to compile this program:
 gtk-2.0 >= 2.12
 libgnomevfs-2.0
 libpanel-applet-2.0
+libglade-2.0
+libgnome-desktop-2.0
 
 You will also need the following packages installed to compile this program:
 pkg-config

@@ -1,4 +1,4 @@
-PROJECT (MENU_FILE_BROWSER_APPLET C)
+PROJECT (FILE_BROWSER_APPLET C)
 
 #compiler flags
 SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -g -Wall -ansi")
@@ -41,7 +41,7 @@ SET (CPACK_PACKAGE_VERSION_MINOR 5)
 SET (CPACK_PACKAGE_VERSION_PATCH 5)
 SET (CPACK_GENERATOR TGZ)
 SET (CPACK_SOURCE_PACKAGE_FILE_NAME
-	"menu-file-browser-applet-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+	"file-browser-applet-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET (CPACK_SOURCE_GENERATOR TGZ)
 SET (CPACK_SOURCE_IGNORE_FILES
 	 "CMakeFiles"
@@ -58,7 +58,7 @@ SET (CPACK_SOURCE_IGNORE_FILES
 )
 INCLUDE (CPack)
 
-ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="menu-file-browser-applet"
+ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="file-browser-applet"
 									   --pkgversion="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
 									   --install=0
 									   --deldoc=1
@@ -80,7 +80,7 @@ ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   pixmaps/CMakeFiles
 									   pixmaps/cmake_install.cmake
 									   pixmaps/Makefile
-									   src/menu-file-browser-applet
+									   src/file-browser-applet
 									   src/cmake_install.cmake
 									   src/CMakeFiles
 									   src/Makefile)

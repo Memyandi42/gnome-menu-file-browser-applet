@@ -2,8 +2,8 @@
     <schemalist>    
 
       <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/show_icon</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/show_icon</key>
+        <owner>file-browser-applet</owner>
         <type>bool</type>
         <default>TRUE</default>
         <locale name="C">
@@ -13,10 +13,10 @@
       </schema>
 
       <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/icon</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/icon</key>
+        <owner>file-browser-applet</owner>
         <type>string</type>
-        <default>/usr/share/pixmaps/menu-file-browser-applet.png</default>
+        <default>/usr/share/pixmaps/file-browser-applet.png</default>
         <locale name="C">
           <short>Path to the icon to show in the menu bar</short>
           <long>Path to the icon to show in the menu bar</long>
@@ -24,8 +24,8 @@
       </schema>
 
 	  <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/terminal</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/terminal</key>
+        <owner>file-browser-applet</owner>
         <type>string</type>
         <default>gnome-terminal</default>
         <locale name="C">
@@ -35,8 +35,8 @@
       </schema>
 
 	  <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/editor</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/editor</key>
+        <owner>file-browser-applet</owner>
         <type>string</type>
         <default>gedit</default>
         <locale name="C">
@@ -46,8 +46,8 @@
       </schema>
 
       <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/show_hidden</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/show_hidden</key>
+        <owner>file-browser-applet</owner>
         <type>bool</type>
         <default>FALSE</default>
         <locale name="C">
@@ -57,8 +57,8 @@
       </schema>
 
       <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/labels</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/labels</key>
+        <owner>file-browser-applet</owner>
         <type>list</type>
 	<list_type>string</list_type>
         <default>[Home]</default>
@@ -69,8 +69,8 @@
       </schema>
       
 	  <schema>
-        <key>/schemas/apps/menu-file-browser-applet/prefs/dirs</key>
-        <owner>menu-file-browser-applet</owner>
+        <key>/schemas/apps/file-browser-applet/prefs/dirs</key>
+        <owner>file-browser-applet</owner>
         <type>list</type>
 	<list_type>string</list_type>
         <default>[]</default>

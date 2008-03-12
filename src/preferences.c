@@ -816,7 +816,7 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 	/* this loads the default key's/values into the gconf entry for this applet
 	 * instance. It also check to make sure the values were retrieved properly
 	 * AND that they are valid */
-	panel_applet_add_preferences (applet, "/schemas/apps/menu-file-browser-applet/prefs", &error);
+	panel_applet_add_preferences (applet, "/schemas/apps/file-browser-applet/prefs", &error);
 	if (utils_check_gerror (&error)) return NULL;	
 
 	/* show hidden files? */

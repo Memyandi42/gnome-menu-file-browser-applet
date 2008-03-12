@@ -18,7 +18,7 @@ PKGCONFIG (libglade-2.0
 		   LIBGLADE_LINK_FLAGS
 		   LIBGLADE_CFLAGS)
 
-SET (EXEC menu-file-browser-applet)
+SET (EXEC file-browser-applet)
 SET (SRCS main.c
 	 panel-menu-bar.c
  	 menu-browser.c
@@ -37,4 +37,4 @@ TARGET_LINK_LIBRARIES (${EXEC} ${LIBS})
 INSTALL (TARGETS ${EXEC} DESTINATION "${CMAKE_INSTALL_LIBDIR}/gnome-panel")
 
 #FIXME this tries to configure the glade xml file path 
-#CONFIGURE_FILE (${MENU_FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h ${MENU_FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h)
+#CONFIGURE_FILE (${FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h ${FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h)

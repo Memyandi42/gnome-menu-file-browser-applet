@@ -1,8 +1,8 @@
 <oaf_info>
 
-	<oaf_server iid="OAFIID:GNOME_MenuFileBrowserApplet_Factory"
+	<oaf_server iid="OAFIID:GNOME_FileBrowserApplet_Factory"
 		type="exe"
-		location="${CMAKE_INSTALL_LIBDIR}/gnome-panel/menu-file-browser-applet">
+		location="${CMAKE_INSTALL_LIBDIR}/gnome-panel/file-browser-applet">
 	
 		<oaf_attribute name="repo_ids" type="stringv">
 			<item value="IDL:Bonobo/GenericFactory:1.0"/>
@@ -12,9 +12,9 @@
 		<oaf_attribute name="description" type="string" value="Factory for the File Browser Applet"/>
 	</oaf_server>
 
-	<oaf_server iid="OAFIID:GNOME_MenuFileBrowserApplet"
+	<oaf_server iid="OAFIID:GNOME_FileBrowserApplet"
 		type="factory"
-	    location="OAFIID:GNOME_MenuFileBrowserApplet_Factory">
+	    location="OAFIID:GNOME_FileBrowserApplet_Factory">
 	
 		<oaf_attribute name="repo_ids" type="stringv">
 			<item value="IDL:GNOME/Vertigo/PanelAppletShell:1.0"/>
@@ -24,7 +24,7 @@
 		<oaf_attribute name="name" type="string" value="File Browser"/>
 		<oaf_attribute name="description" type="string" value="File browser applet for the GNOME2 panel"/>
 		<oaf_attribute name="panel:category" type="string" value="Utilities"/>
-		<oaf_attribute name="panel:icon" type="string" value="menu-file-browser-applet.png"/>
+		<oaf_attribute name="panel:icon" type="string" value="file-browser-applet.png"/>
 	</oaf_server>
 
 </oaf_info>

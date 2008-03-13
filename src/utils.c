@@ -68,7 +68,8 @@ utils_show_dialog (gchar *title, gchar *message, GtkMessageType type)
 /******************************************************************************/
 GtkWidget*
 utils_get_scaled_image_from_file (gchar *file_name, int size) {
-		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (file_name ,NULL);
+		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (file_name, NULL);
+		if (orig == NULL) return NULL;
 
 		GdkPixbuf *scaled = gdk_pixbuf_scale_simple (orig,
                                           			 size,

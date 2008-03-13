@@ -16,7 +16,7 @@
         <key>/schemas/apps/file-browser-applet/prefs/icon</key>
         <owner>file-browser-applet</owner>
         <type>string</type>
-        <default>/usr/share/pixmaps/file-browser-applet.png</default>
+        <default>user-home</default>
         <locale name="C">
           <short>Path to the icon to show in the menu bar</short>
           <long>Path to the icon to show in the menu bar</long>
@@ -82,4 +82,3 @@
 
   </schemalist>
 </gconfschemafile>
-

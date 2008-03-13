@@ -29,6 +29,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "config.h"
+
 #define DEBUG 1
 
 gboolean	utils_check_gerror (GError **error);

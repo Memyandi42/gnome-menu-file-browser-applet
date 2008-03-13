@@ -1,5 +1,8 @@
 INCLUDE (UsePkgConfig)
 
+CONFIGURE_FILE ("${FILE_BROWSER_APPLET_SOURCE_DIR}/src/config.h.in" 
+				"${FILE_BROWSER_APPLET_SOURCE_DIR}/src/config.h")
+
 PKGCONFIG (libpanelapplet-2.0
 		   LIBPANEL_INCLUDE_DIR
 		   LIBPANEL_LINK_DIR

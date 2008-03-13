@@ -30,6 +30,8 @@
 #include <glib/gprintf.h>
 #include <stdlib.h>
 
+#include "vfs.h"
+
 /******************************************************************************/
 struct _AppletPreferencesPrivate {
 	GtkWidget	*window;
@@ -38,7 +40,7 @@ struct _AppletPreferencesPrivate {
 };
 /******************************************************************************/
 #define APPLET_PREFERENCES_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_APPLET_PREFERENCES, AppletPreferencesPrivate))
-#define ICON_BUTTON_SIZE 24
+#define DEFAULT_ICON_PATH "/usr/share/pixmaps/"
 /******************************************************************************/
 enum  {
 	APPLET_PREFERENCES_DUMMY_PROPERTY
@@ -138,6 +140,7 @@ applet_preferences_on_editor_changed (GtkWidget *widget, gpointer data) {
 static void
 applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 	GtkWidget *file_chooser_dialog;
+	gchar *icon_path = DEFAULT_ICON_PATH;
 	AppletPreferences *self = (AppletPreferences *)data;
 	/* set up a file chooser dialog so we can choose the new icon. An icon
 	 * chooser would be better, but that widget is deprecated in the Gnome UI
@@ -151,8 +154,11 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 													   GTK_RESPONSE_ACCEPT,
 													   NULL);
 	/* Set the starting path */
+	if (vfs_file_exists (self->menu_bar_prefs->icon)) {
+		icon_path = self->menu_bar_prefs->icon;
+	}
 	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog),
-								   self->menu_bar_prefs->icon);
+								   icon_path);
 	/* check the reply */
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
 		gchar *new_icon;
@@ -168,6 +174,9 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 			gtk_widget_destroy (icon);
 			icon = utils_get_scaled_image_from_file (self->menu_bar_prefs->icon,
 													 ICON_BUTTON_SIZE);
+			if (icon == NULL) {
+				icon = gtk_image_new_from_icon_name ("user-home", GTK_ICON_SIZE_BUTTON);
+			}
 			gtk_button_set_image (GTK_BUTTON (button), icon);
 
 			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
@@ -762,6 +771,9 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 
 		icon_button = glade_xml_get_widget (xml, "icon_button");
 		GtkWidget *icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_BUTTON_SIZE);
+		if (icon == NULL) {
+			icon = gtk_image_new_from_icon_name ("user-home", GTK_ICON_SIZE_BUTTON);
+		}
 		gtk_button_set_image (GTK_BUTTON (icon_button), icon);
 		g_signal_connect (G_OBJECT (icon_button),
 						  "released",
@@ -864,6 +876,7 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 									   mb_prefs->icon,
 									   &error);
 	}
+
 	/* show the icon? */
 	mb_prefs->show_icon = panel_applet_gconf_get_bool (applet,
 													KEY_ICON_SHOW,

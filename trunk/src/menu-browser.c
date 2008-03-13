@@ -140,7 +140,7 @@ menu_browser_add_desktop_file (gchar *file_name, GtkWidget *menu, MenuBrowser *s
 		menu_item = gtk_image_menu_item_new_with_label (app_name);
 
 		/* This sucks. Should really use gtk_image_new_from_stock */
-		icon = utils_get_scaled_image_from_file (icon_name, 20);
+		icon = utils_get_scaled_image_from_file (icon_name, ICON_MENU_SIZE);
 
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item), icon);
 		g_free (icon_name);
@@ -335,7 +335,7 @@ menu_browser_on_dir_item_activate (GtkWidget *menu_item,
 
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
+	if (vfs_file_exists (path)) {
 		GdkEvent *event = gtk_get_current_event ();
 
 		if (event->type == GDK_KEY_PRESS) {
@@ -373,7 +373,7 @@ menu_browser_on_file_item_activate (GtkWidget *menu_item,
 
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
+	if (vfs_file_exists (path)) {
 		GdkEvent *event = gtk_get_current_event ();
 
 		if (event->type == GDK_KEY_PRESS) {

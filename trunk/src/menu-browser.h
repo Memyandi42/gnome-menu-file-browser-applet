@@ -30,6 +30,7 @@
 #include <gtk/gtk.h>
 
 #include "preferences.h"
+#include "config.h"
 
 G_BEGIN_DECLS
 

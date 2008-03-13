@@ -68,6 +68,11 @@ vfs_get_mime_application (const gchar *file_name_and_path) {
 	return file_mime_app_exec;
 }
 /******************************************************************************/
+gboolean
+vfs_file_exists (const gchar *file_name) {
+	return g_file_test (file_name, G_FILE_TEST_EXISTS);
+}
+/******************************************************************************/
 gchar *
 vfs_get_dir_contents (GPtrArray *files,
 					  GPtrArray *dirs,

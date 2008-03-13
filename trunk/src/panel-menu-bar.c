@@ -30,10 +30,9 @@
 #include "menu-browser.h"
 #include "utils.h"
 
+/******************************************************************************/
 #define PANEL_MENU_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PANEL_MENU_BAR, PanelMenuBarPrivate))
 #define TOOLTIP_TEXT		"Browse and open files in your home directory"
-#define ICON_SIZE			24 /* 22x22 pixels looks about right... */
-
 /******************************************************************************/
 struct _PanelMenuBarPrivate {
 	PanelApplet			*applet;
@@ -230,7 +229,11 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 
 	if (a_prefs->menu_bar_prefs->show_icon) {
 		GtkWidget *icon = utils_get_scaled_image_from_file (a_prefs->menu_bar_prefs->icon,
-															ICON_SIZE);
+															ICON_BUTTON_SIZE);
+		if (icon == NULL) {
+			icon = gtk_image_new_from_icon_name ("user-home", GTK_ICON_SIZE_BUTTON);
+		}
+
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_browser),
 															icon);
 	}

@@ -30,6 +30,8 @@
 #include <gtk/gtk.h>
 #include <panel-applet.h>
 
+#include "config.h"
+
 G_BEGIN_DECLS
 
 #define TYPE_PANEL_MENU_BAR (panel_menu_bar_get_type ())

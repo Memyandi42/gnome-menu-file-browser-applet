@@ -32,10 +32,10 @@ CMAKE_INSTALL_PATH/share/icons/hicolor/128x128/apps. The default is /usr.
 CMAKE_INSTALL_LIB_DIR specifies the installation prefix of the binary
 application file and bonobo server file which are installed in
 CMAKE_INSTALL_LIB_DIR/gnome-panel and CMAKE_INSTALL_LIB_DIR/bonobo/servers
-respectively. The default is /usr/lib.
+respectively. The default is CMAKE_INSTALL_PATH/lib.
 
 CMAKE_INSTALL_GCONF_SCHEMA_DIR specifies the installation prefix of the gconf schema
-file. The default is /usr/share/gconf/schemas
+file. The default is CMAKE_INSTALL_PATH/share/gconf/schemas
 
 CMAKE_INSTALL_GLADEUI_DIR specifies the installation prefix of the glade ui
 file. The default is CMAKE_INSTALL_PATH/share/file-browser-applet/glade
@@ -44,7 +44,7 @@ To configure using the defaults, execute:
 'cmake .'
 
 To specify an option, execute:
-'cmake . CMAKE_OPTION=/new/option/val
+'cmake -D CMAKE_OPTION=/new/option/val .
 
 Compiling
 *********

@@ -37,7 +37,7 @@ ADD_EXECUTABLE (${EXEC} ${SRCS})
 SET (LIBS panel-applet-2 glade-2.0 gnome-desktop-2 gnomevfs-2)
 TARGET_LINK_LIBRARIES (${EXEC} ${LIBS})
 
-INSTALL (TARGETS ${EXEC} DESTINATION "${CMAKE_INSTALL_LIBDIR}/gnome-panel")
+INSTALL (TARGETS ${EXEC} DESTINATION "${CMAKE_INSTALL_LIB_DIR}/gnome-panel")
 
 #FIXME this tries to configure the glade xml file path 
 #CONFIGURE_FILE (${FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h ${FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h)

@@ -41,26 +41,26 @@ file. The default is CMAKE_INSTALL_PATH/share/file-browser-applet/glade
 
 To configure using the defaults, execute:
 {{{
-'cmake .'
+cmake .
 }}}
 
 To specify an option, execute:
 {{{
-'cmake -D CMAKE_OPTION=/new/option/value .'
+cmake -D CMAKE_OPTION=/new/option/value .
 }}}
 
 =Compiling=
 To compile, at the project's root directory, execute:
 {{{
-'make'
+make
 }}}
 
 =Installing/Uninstalling=
 To install, at the project's root directory, with root privileges execute:
 {{{
-'make install'
+make install
 }}}
 Similarly, to uninstall...
 {{{
-'make uninstall'
+make uninstall
 }}}

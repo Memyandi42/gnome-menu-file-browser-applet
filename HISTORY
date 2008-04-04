@@ -6,6 +6,7 @@ Version 0.5.5
 	* New actions associated with left and middle click: Left-click is default
 	  action (run if file is executable, open with default application
 	  otherwise). Middle-click opens file for editing with configured editor.
+	* Fixes to build system
 
 Version 0.5.4
 *************

@@ -55,7 +55,7 @@ static void menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser
 /******************************************************************************/
 static void
 menu_browser_clean_up (MenuBrowser *self) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+	/*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
 	/* free the structure pointed to by each element */
 
 	g_ptr_array_foreach (self->priv->tmp_array,
@@ -331,7 +331,7 @@ menu_browser_on_file_right_click (const gchar *file_name_and_path, MenuBrowser *
 static void
 menu_browser_on_dir_item_activate (GtkWidget *menu_item,
 								   MenuBrowser *self) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+	/*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
 
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
@@ -369,7 +369,7 @@ menu_browser_on_dir_item_activate (GtkWidget *menu_item,
 static void
 menu_browser_on_file_item_activate (GtkWidget *menu_item,
 									MenuBrowser *self) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+	/*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
 
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
@@ -406,7 +406,7 @@ menu_browser_on_file_item_activate (GtkWidget *menu_item,
 /******************************************************************************/
 static void
 menu_browser_clear_menu (GtkWidget *menu_item) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+	/*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
 
 	GtkWidget *menu = NULL;
 	if (1) {
@@ -706,11 +706,12 @@ menu_browser_get_type (void) {
 	return menu_browser_type_id;
 }
 /******************************************************************************/
-static void
-menu_browser_reposition_menu (GtkWidget *widget) {
-	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (widget));
+static gboolean
+menu_browser_activate_main_menu (MenuBrowser *self) {
+	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (self));
+	menu_browser_populate_menu (GTK_WIDGET (self), self);
 	gtk_menu_reposition (GTK_MENU (menu));
-	return;
+	return TRUE;
 }
 /******************************************************************************/
 GtkWidget*
@@ -748,10 +749,10 @@ menu_browser_new (const gchar* path,
 
 	g_object_set_data (G_OBJECT (self), G_OBJECT_DATA_NAME, (char *)path);
 
-	g_signal_connect (GTK_MENU_ITEM (self),
+	g_signal_connect (G_OBJECT (self),
 					  "activate",
-					  G_CALLBACK (menu_browser_populate_menu),
-					  (gpointer) self);
+					  G_CALLBACK (menu_browser_activate_main_menu),
+					  self);
 
 	/* unfortunately this signal is activated before the "activate" signal,
 	 * which has the result of deleting all objects before the activate signal
@@ -759,14 +760,9 @@ menu_browser_new (const gchar* path,
 /*
 	g_signal_connect_swapped (GTK_MENU_ITEM (self),
 							  "deselect",
-							G_CALLBACK (menu_browser_clean_up),
-							self);
+							  G_CALLBACK (menu_browser_clean_up),
+							  self);
 */
-	g_signal_connect (G_OBJECT (self),
-					  "activate",
-					  G_CALLBACK (menu_browser_reposition_menu),
-					  self);
-
 	return GTK_WIDGET (self);
 }
 /******************************************************************************/

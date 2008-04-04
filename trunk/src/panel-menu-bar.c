@@ -382,6 +382,81 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 	g_free (signal_data);
 }
 /******************************************************************************/
+/* this function was blatantly stolen (and slightly modified) from applet.c
+ * from the gnome-panel code base.*/
+/******************************************************************************/
+void
+panel_menu_bar_position_menu (GtkMenu	*menu,
+							  int		*x,
+							  int		*y,
+							  gboolean  *push_in,
+							  GtkWidget *applet) {
+	GtkRequisition  requisition;
+	GdkScreen      *screen;
+	int             menu_x = 0;
+	int             menu_y = 0;
+	int             pointer_x;
+	int             pointer_y;
+
+	g_return_if_fail (PANEL_IS_APPLET (applet));
+
+	screen = gtk_widget_get_screen (applet);
+
+	gtk_widget_size_request (GTK_WIDGET (menu), &requisition);
+
+	gdk_window_get_origin (applet->window, &menu_x, &menu_y);
+	gtk_widget_get_pointer (applet, &pointer_x, &pointer_y);
+
+	if (GTK_WIDGET_NO_WINDOW (applet)) {
+		menu_x += applet->allocation.x;
+		menu_y += applet->allocation.y;
+	}
+
+	if (panel_applet_get_orient (PANEL_APPLET (applet)) == PANEL_APPLET_ORIENT_UP ||
+		panel_applet_get_orient (PANEL_APPLET (applet)) == PANEL_APPLET_ORIENT_DOWN) {
+		if (gtk_widget_get_direction (GTK_WIDGET (menu)) != GTK_TEXT_DIR_RTL) {
+			if (pointer_x < applet->allocation.width &&
+			    requisition.width < pointer_x) {
+				menu_x += MIN (pointer_x, applet->allocation.width - requisition.width);
+			}
+		} 
+		else {
+			menu_x += applet->allocation.width - requisition.width;
+			if (pointer_x > 0 && pointer_x < applet->allocation.width &&
+			    pointer_x < applet->allocation.width - requisition.width) {
+					menu_x -= MIN (applet->allocation.width - pointer_x,
+								   applet->allocation.width - requisition.width);
+			}
+		}
+		menu_x = MIN (menu_x, gdk_screen_get_width (screen) - requisition.width);
+
+		if (menu_y > gdk_screen_get_height (screen) / 2) {
+			menu_y -= requisition.height;
+		}
+		else {
+			menu_y += applet->allocation.height;
+		}
+	}
+	else {
+		if (pointer_y < applet->allocation.height &&
+		    requisition.height < pointer_y) {
+			menu_y += MIN (pointer_y, applet->allocation.height - requisition.height);
+		}
+		menu_y = MIN (menu_y, gdk_screen_get_height (screen) - requisition.height);
+
+		if (menu_x > gdk_screen_get_width (screen) / 2) {
+			menu_x -= requisition.width;
+		}
+		else {
+			menu_x += applet->allocation.width;
+		}
+	}
+
+	*x = menu_x;
+	*y = menu_y;
+	*push_in = TRUE;
+}
+/******************************************************************************/
 void
 panel_menu_bar_on_deactivate (GtkWidget *widget,
 							  GdkEventButton *event,
@@ -394,13 +469,17 @@ panel_menu_bar_on_activate (GtkWidget *widget,
 							GdkEventButton *event,
 							PanelMenuBar *self) {
 	if (event->button == 3) {
-		/* popup the applet context menu */
+		/* popup the applet context menu and make sure it's poped up in the
+		 * right place*/
 		gtk_menu_shell_deactivate (GTK_MENU_SHELL (self));
-		GtkWidget *widget = bonobo_control_get_widget (self->priv->bonobo_control);
-		bonobo_control_do_popup (self->priv->bonobo_control,
-								 event->button,
-								 event->time);
-		gtk_menu_reposition (GTK_MENU (widget));
+
+		bonobo_control_do_popup_full (self->priv->bonobo_control,
+									  NULL,
+									  NULL,
+									  (GtkMenuPositionFunc) panel_menu_bar_position_menu,
+									  self->priv->applet,
+									  event->button,
+									  event->time);
 		return TRUE;
 	}
 	g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);	

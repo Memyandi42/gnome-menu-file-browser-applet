@@ -48,16 +48,9 @@ static const gchar file_browser_applet_menu_xml [] =
 	"</popup>\n";
 /******************************************************************************/
 static gboolean
-file_browser_applet_display_properties_dialog (GtkWidget *widget, gpointer *data) {
+file_browser_applet_display_properties_dialog (GtkWidget *widget, PanelMenuBar *panel_menu_bar) {
 
-/*
-	utils_show_dialog ("Preferences",
-					   "Use Gconf for now...",
-					   GTK_MESSAGE_ERROR);
-*/
-
-	PanelMenuBar *menu_bar = (PanelMenuBar *)data; 
-	panel_menu_bar_edit_prefs (menu_bar);
+	panel_menu_bar_edit_prefs (panel_menu_bar);
 	return FALSE;
 }
 /******************************************************************************/
@@ -148,13 +141,14 @@ file_browser_applet_create (PanelApplet *applet) {
 
 	panel_applet_set_flags (applet,
 /*							PANEL_APPLET_EXPAND_MAJOR |*/
-							PANEL_APPLET_EXPAND_MINOR |
-							PANEL_APPLET_HAS_HANDLE);
+/*							PANEL_APPLET_HAS_HANDLE |*/
+							PANEL_APPLET_EXPAND_MINOR
+							);
 
 	panel_applet_setup_menu (PANEL_APPLET (applet),
 							 file_browser_applet_menu_xml,
 							 file_browser_applet_menu_verbs,
-							 (gpointer) panel_menu_bar);
+							 panel_menu_bar);
 
 	gtk_widget_show_all (GTK_WIDGET(applet));
 	gtk_main ();	

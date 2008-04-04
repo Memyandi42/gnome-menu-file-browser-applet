@@ -41,6 +41,7 @@ struct _PanelMenuBarPrivate {
 	PanelAppletOrient	orientation;
 	gint				panel_size;
 	gboolean			text_vertical;
+	BonoboControl		*bonobo_control;
 };
 /******************************************************************************/
 enum {
@@ -241,6 +242,20 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 }
 /******************************************************************************/
 static void
+panel_menu_bar_add_keybinding (PanelMenuBar *self) {
+	/*
+	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, 0));
+	GtkBindingSet *binding_set;
+	binding_set = gtk_binding_set_by_class (panel_menu_bar_parent_class);
+	gtk_binding_entry_add_signal (binding_set,
+								  GDK_b,
+								  GDK_SHIFT_MASK | GDK_CONTROL_MASK,
+								  signal_name,
+								  0);
+								  */
+}
+/******************************************************************************/
+static void
 panel_menu_bar_update_entry (PanelMenuBar *self,
 							 PrefsChangedSignalData *signal_data) {
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
@@ -367,6 +382,31 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 	g_free (signal_data);
 }
 /******************************************************************************/
+void
+panel_menu_bar_on_deactivate (GtkWidget *widget,
+							  GdkEventButton *event,
+							  PanelMenuBar *self) {
+	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
+}
+/******************************************************************************/
+gboolean
+panel_menu_bar_on_activate (GtkWidget *widget,
+							GdkEventButton *event,
+							PanelMenuBar *self) {
+	if (event->button == 3) {
+		/* popup the applet context menu */
+		gtk_menu_shell_deactivate (GTK_MENU_SHELL (self));
+		GtkWidget *widget = bonobo_control_get_widget (self->priv->bonobo_control);
+		bonobo_control_do_popup (self->priv->bonobo_control,
+								 event->button,
+								 event->time);
+		gtk_menu_reposition (GTK_MENU (widget));
+		return TRUE;
+	}
+	g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);	
+	return FALSE;
+}
+/******************************************************************************/
 PanelMenuBar*
 panel_menu_bar_new (PanelApplet* applet) {
 	PanelMenuBar *self;
@@ -374,7 +414,16 @@ panel_menu_bar_new (PanelApplet* applet) {
 	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
 	self = g_object_newv (TYPE_PANEL_MENU_BAR, 0, NULL);
 
-/*============================================================================*/
+	g_signal_connect (GTK_MENU_BAR (self),
+					  "button_press_event",
+					  G_CALLBACK (panel_menu_bar_on_activate),
+					  self);
+
+	g_signal_connect (GTK_MENU_SHELL (self),
+					  "deactivate",
+					  G_CALLBACK (panel_menu_bar_on_deactivate),
+					  NULL);
+
 	self->priv->file_browsers = g_ptr_array_new ();
 
 	self->priv->panel_size= 0;
@@ -419,7 +468,13 @@ panel_menu_bar_new (PanelApplet* applet) {
 
 	/* make sure the text orientation is correct on startup */
 	self->priv->text_vertical = FALSE;
-/*============================================================================*/
+
+	/* get a handle to the applet context menu */
+	self->priv->bonobo_control = panel_applet_get_control (applet);
+
+	/* setup global keybinding */
+	panel_menu_bar_add_keybinding (self);
+
 	return self;
 }
 /******************************************************************************/

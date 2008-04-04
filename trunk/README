@@ -40,7 +40,8 @@ To Do
 Bugs
 ****
 	* Icon sometimes appears blurry (bug #10)
-	* Can't make a menu that starts at / (bug #12).
+	* Some bugs associated with gnome_vfs (#12 - Can't make a menu that starts
+	  at /; Can't open files with # in name).
 	* There are probably a few memory leaks here and there too...
 Send bugs to bertoldia@gmail.com for now.
 

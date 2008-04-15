@@ -1,3 +1,9 @@
+Version 0.5.6
+*************
+	* Fixed longstanding bug #2. The panel-nenu-bar now catches left clicks and
+	  pops up the applet context menu, allowing for the removal of the applet
+	  handle bars.
+
 Version 0.5.5
 *************
 	* Renamed applet to "File Browser Applet"

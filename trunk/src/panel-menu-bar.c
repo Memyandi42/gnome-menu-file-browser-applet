@@ -42,6 +42,7 @@ struct _PanelMenuBarPrivate {
 	gint				panel_size;
 	gboolean			text_vertical;
 	BonoboControl		*bonobo_control;
+	gboolean			child_active;
 };
 /******************************************************************************/
 enum {
@@ -459,9 +460,9 @@ panel_menu_bar_position_menu (GtkMenu	*menu,
 /******************************************************************************/
 void
 panel_menu_bar_on_deactivate (GtkWidget *widget,
-							  GdkEventButton *event,
 							  PanelMenuBar *self) {
 	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
+	self->priv->child_active = FALSE;
 }
 /******************************************************************************/
 gboolean
@@ -469,21 +470,27 @@ panel_menu_bar_on_activate (GtkWidget *widget,
 							GdkEventButton *event,
 							PanelMenuBar *self) {
 	if (event->button == 3) {
-		/* popup the applet context menu and make sure it's poped up in the
-		 * right place*/
-		gtk_menu_shell_deactivate (GTK_MENU_SHELL (self));
+		if (!self->priv->child_active) {
+			/* popup the applet context menu and make sure it's poped up in the
+			 * right place*/
+			gtk_menu_shell_deactivate (GTK_MENU_SHELL (self));
 
-		bonobo_control_do_popup_full (self->priv->bonobo_control,
-									  NULL,
-									  NULL,
-									  (GtkMenuPositionFunc) panel_menu_bar_position_menu,
-									  self->priv->applet,
-									  event->button,
-									  event->time);
-		return TRUE;
+			bonobo_control_do_popup_full (self->priv->bonobo_control,
+										  NULL,
+										  NULL,
+										  (GtkMenuPositionFunc) panel_menu_bar_position_menu,
+										  self->priv->applet,
+										  event->button,
+										  event->time);
+			return TRUE;
+		}
+		return FALSE;		
 	}
-	g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);	
-	return FALSE;
+	else {
+		g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);	
+		self->priv->child_active = TRUE;
+		return FALSE;
+	}
 }
 /******************************************************************************/
 PanelMenuBar*
@@ -501,7 +508,7 @@ panel_menu_bar_new (PanelApplet* applet) {
 	g_signal_connect (GTK_MENU_SHELL (self),
 					  "deactivate",
 					  G_CALLBACK (panel_menu_bar_on_deactivate),
-					  NULL);
+					  self);
 
 	self->priv->file_browsers = g_ptr_array_new ();
 
@@ -553,6 +560,8 @@ panel_menu_bar_new (PanelApplet* applet) {
 
 	/* setup global keybinding */
 	panel_menu_bar_add_keybinding (self);
+
+	self->priv->child_active = FALSE;
 
 	return self;
 }

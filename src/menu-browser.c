@@ -33,6 +33,7 @@
 #include "menu-browser.h"
 #include "utils.h"
 #include "vfs.h"
+#include "context-menu.h"
 
 /******************************************************************************/
 #define G_OBJECT_DATA_NAME "item_path"
@@ -161,12 +162,16 @@ menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 	return;
 }
 /******************************************************************************/
-static void
+static gboolean
 menu_browser_on_dir_right_click (const gchar *file_name_and_path, MenuBrowser *self) {
+	GdkEvent *event = gtk_get_current_event ();
+	GdkEventButton *button_event = (GdkEventButton *)event;
+	return context_menu_display (file_name_and_path, button_event, self);
+/*
 	utils_show_dialog ("Error: Action not implemented.",
 					   "Right click on directory action not yet implemented\n",
 					   GTK_MESSAGE_INFO);
-	return;
+*/
 }
 /******************************************************************************/
 static void
@@ -182,38 +187,34 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 	vfs_edit_file (file_name_and_path, self->prefs->editor);
 }
 /******************************************************************************/
-static void
+static gboolean
 menu_browser_on_file_right_click (const gchar *file_name_and_path, MenuBrowser *self) {
+	GdkEvent *event = gtk_get_current_event ();
+	GdkEventButton *button_event = (GdkEventButton *)event;
+	return context_menu_display (file_name_and_path, button_event, self);
+/*
 	utils_show_dialog ("Error: Action not implemented.",
 					   "Right click on file action not yet implemented\n",
 					   GTK_MESSAGE_INFO);
+*/
 }
 /******************************************************************************/
-static void
-menu_browser_on_dir_item_activate (GtkWidget *menu_item,
-								   MenuBrowser *self) {
-	/*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
-
+/* This is for mouse button presses */
+static gboolean
+menu_browser_on_dir_item_button_press (GtkWidget *menu_item,
+									   GdkEventButton *event,
+									   MenuBrowser *self) {
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (vfs_file_exists (path)) {
-		GdkEvent *event = gtk_get_current_event ();
-
-		if (event->type == GDK_KEY_PRESS) {
+		if (event->button == 1) {
 			menu_browser_on_dir_left_click (path, self);
-		}
-		else if (event->type == GDK_BUTTON_RELEASE) {
-			GdkEventButton *button_event = (GdkEventButton *)event;
-
-			if (button_event->button == 1) {
-				menu_browser_on_dir_left_click (path, self);
-			}	
-			else if (button_event->button == 2) {
-				menu_browser_on_dir_middle_click (path, self);
-			}	
-			else if (button_event->button == 3) {
-				menu_browser_on_dir_right_click (path, self);
-			}
+		}	
+		else if (event->button == 2) {
+			menu_browser_on_dir_middle_click (path, self);
+		}	
+		else if (event->button == 3) {
+			return menu_browser_on_dir_right_click (path, self);
 		}
 	}
 	else {
@@ -224,34 +225,48 @@ menu_browser_on_dir_item_activate (GtkWidget *menu_item,
 		g_free (tmp);
 	}
 	menu_browser_clean_up (self);
+	return FALSE;
+}
+/******************************************************************************/
+/* This is for mouse key presses */
+static void
+menu_browser_on_dir_item_activate (GtkWidget *menu_item,
+								   MenuBrowser *self) {
+	GdkEvent *event = gtk_get_current_event ();
+	if (event->type == GDK_KEY_PRESS) {
+		gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
+
+		if (vfs_file_exists (path)) {
+				menu_browser_on_dir_left_click (path, self);
+			}
+		else {
+			gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
+			utils_show_dialog ("Error: File not found.",
+							   tmp,
+							   GTK_MESSAGE_ERROR);
+			g_free (tmp);
+		}
+	}
+	menu_browser_clean_up (self);
 	return;
 }
 /******************************************************************************/
-static void
-menu_browser_on_file_item_activate (GtkWidget *menu_item,
-									MenuBrowser *self) {
-	/*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
-
+/* This is for mouse button presses */
+static gboolean
+menu_browser_on_file_item_button_press (GtkWidget *menu_item,
+										GdkEventButton *event,
+										MenuBrowser *self) {
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (vfs_file_exists (path)) {
-		GdkEvent *event = gtk_get_current_event ();
-
-		if (event->type == GDK_KEY_PRESS) {
+		if (event->button == 1) {
 			menu_browser_on_file_left_click (path, self);
-		}
-		else if (event->type == GDK_BUTTON_RELEASE) {
-			GdkEventButton *button_event = (GdkEventButton *)event;
-
-			if (button_event->button == 1) {
-				menu_browser_on_file_left_click (path, self);
-			}	
-			else if (button_event->button == 2) {
-				menu_browser_on_file_middle_click (path, self);
-			}	
-			else if (button_event->button == 3) {
-				menu_browser_on_file_right_click (path, self);
-			}
+		}	
+		else if (event->button == 2) {
+			menu_browser_on_file_middle_click (path, self);
+		}	
+		else if (event->button == 3) {
+			return menu_browser_on_file_right_click (path, self);
 		}
 	}
 	else {
@@ -260,6 +275,29 @@ menu_browser_on_file_item_activate (GtkWidget *menu_item,
 						   tmp,
 						   GTK_MESSAGE_ERROR);
 		g_free (tmp);
+	}
+	menu_browser_clean_up (self);
+	return FALSE;
+}
+/******************************************************************************/
+/* This is for key presses */
+static void
+menu_browser_on_file_item_activate (GtkWidget *menu_item,
+									MenuBrowser *self) {
+	GdkEvent *event = gtk_get_current_event ();
+	if (event->type == GDK_KEY_PRESS) {
+		gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
+
+		if (vfs_file_exists (path)) {
+			menu_browser_on_file_left_click (path, self);
+		}
+		else {
+			gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
+			utils_show_dialog ("Error: File not found.",
+							   tmp,
+							   GTK_MESSAGE_ERROR);
+			g_free (tmp);
+		}
 	}
 	menu_browser_clean_up (self);
 	return;
@@ -319,6 +357,11 @@ menu_browser_add_menu_header (GtkWidget *menu,
 	g_object_set_data (G_OBJECT (menu_item),
 					   G_OBJECT_DATA_NAME,
 					   path);
+
+	g_signal_connect (G_OBJECT (menu_item),
+					  "button_press_event",
+					  G_CALLBACK (menu_browser_on_dir_item_button_press),
+					  self);
 
 	g_signal_connect (G_OBJECT (menu_item),
 					  "activate",
@@ -415,6 +458,11 @@ menu_browser_add_files (GtkWidget	*menu,
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
 						   file_name_and_path);
+
+		g_signal_connect (menu_item,
+						  "button_press_event",
+						  G_CALLBACK (menu_browser_on_file_item_button_press),
+						  self);
 
 		g_signal_connect (menu_item,
 						  "activate",

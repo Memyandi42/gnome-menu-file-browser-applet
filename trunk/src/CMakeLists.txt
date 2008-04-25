@@ -27,6 +27,7 @@ SET (SRCS main.c
  	 menu-browser.c
  	 utils.c
  	 preferences.c
+	 context-menu.c
 	 vfs.c)
 
 SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBPANEL_CFLAGS} ${LIBGLADE_CFLAGS} ${LIBDESKTOP_CFLAGS}")

@@ -33,15 +33,16 @@
 
 #define DEBUG 1
 
-gboolean vfs_file_is_executable (const gchar *file_name);
-gboolean vfs_file_is_desktop (const gchar *file_name);
-gboolean vfs_file_exists (const gchar *file_name);
-gchar*	 vfs_get_mime_application (const gchar *file_name_and_path);
-gchar*	 vfs_get_dir_contents (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, gchar *path);
-gboolean vfs_launch_desktop_file (const gchar *file_name);
-void	 vfs_launch_app (gchar **args, const gchar *working_dir);
-void	 vfs_edit_file (const gchar *file_name_and_path, gchar *editor_bin);
-void	 vfs_launch_terminal (const gchar *path, gchar *terminal_bin);
-void	 vfs_open_file (const gchar *file_name_and_path, gint exec_action);
+gboolean vfs_file_is_executable		(const gchar *file_name);
+gboolean vfs_file_is_desktop		(const gchar *file_name);
+gboolean vfs_file_exists			(const gchar *file_name);
+gchar*	 vfs_get_mime_application	(const gchar *file_name_and_path);
+gchar*	 vfs_get_dir_contents		(GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, gchar *path);
+gboolean vfs_launch_desktop_file	(const gchar *file_name);
+void	 vfs_launch_app				(gchar **args, const gchar *working_dir);
+void	 vfs_edit_file				(const gchar *file_name_and_path, gchar *editor_bin);
+void	 vfs_launch_terminal		(const gchar *path, gchar *terminal_bin);
+void	 vfs_open_file				(const gchar *file_name_and_path, gint exec_action);
+void	 vfs_trash_file				(gchar *file_name);
 
 #endif

@@ -274,3 +274,25 @@ vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
 	return;
 }
 /******************************************************************************/
+void
+vfs_trash_file (gchar *file_name) {
+	int i = 1;
+	const gchar *home = g_get_home_dir();
+	gchar *file = g_path_get_basename (file_name);
+	gchar *new_file_name = g_strdup_printf ("%s/.Trash/%s",
+											home,
+											file);
+
+	while (GNOME_VFS_ERROR_FILE_EXISTS == gnome_vfs_move (file_name,
+														  new_file_name,
+														  FALSE)) {
+		g_free (new_file_name);
+		new_file_name = g_strdup_printf ("%s/.Trash/%s (%d)",
+										 home,
+										 file,
+										 i++);
+	}
+	g_free (file);
+	g_free (new_file_name);
+}
+/******************************************************************************/

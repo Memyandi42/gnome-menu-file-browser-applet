@@ -67,51 +67,6 @@ menu_browser_clean_up (MenuBrowser *self) {
 	return;
 }
 /******************************************************************************/
-gboolean
-menu_browser_launch_desktop_file (const gchar *file_name) {
-	if (!vfs_file_is_desktop (file_name)) {
-		return FALSE;
-	}
-	GError *error = NULL;
-	GnomeDesktopItem *ditem = gnome_desktop_item_new_from_file (file_name, 0, &error);
-
-	gnome_desktop_item_launch  (ditem,
-								NULL,
-								GNOME_DESKTOP_ITEM_LAUNCH_ONLY_ONE,
-								&error);
-	utils_check_gerror (&error);
-	gnome_desktop_item_unref (ditem);
-	return TRUE;
-}
-/******************************************************************************/
-static void
-menu_browser_launch_app (gchar **args, const gchar *working_dir) {
-	GError *error = NULL;
-	gint child_pid;
-	gboolean ret;
-	
-	ret = g_spawn_async_with_pipes (working_dir,
-									args,
-									NULL,
-									G_SPAWN_SEARCH_PATH,
-									NULL,
-									NULL,
-									&child_pid,
-									NULL,
-									NULL,
-									NULL,
-									&error);
-
-	if (utils_check_gerror (&error)) {
-		gchar *tmp = g_strdup_printf ("Error: Failed to launch \"%s\".", args[0]);
-		utils_show_dialog ("Error: Failed to launch application",
-						   tmp,
-						   GTK_MESSAGE_ERROR);
-		g_free (tmp);
-	}
-	return;
-}
-/******************************************************************************/
 GtkWidget*
 menu_browser_add_desktop_file (gchar *file_name, GtkWidget *menu, MenuBrowser *self) {
 	if (!vfs_file_is_desktop (file_name)) {
@@ -195,108 +150,14 @@ menu_browser_add_default_file (gchar *file_name, GtkWidget *menu, MenuBrowser *s
 }
 /******************************************************************************/
 static void
-menu_browser_launch_terminal (const gchar *path, MenuBrowser *self) {
-
-	gchar **args = NULL;
-		
-	args = g_strsplit (self->prefs->terminal,
-					   " ", 0);
-	
-	menu_browser_launch_app (args, path);
-	g_free (args);	
-
-}
-/******************************************************************************/
-static void
-menu_browser_edit_file (const gchar *file_name_and_path, MenuBrowser *self) {
-	gchar **args = NULL;
-	gchar *arg = NULL;
-	gchar *working_dir = NULL;
-	int i;
-
-	working_dir = g_path_get_dirname (file_name_and_path);
-	arg = g_strdelimit (self->prefs->editor, " ", '\1');
-	arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
-	args = g_strsplit (arg, "\1", 0);
-	menu_browser_launch_app (args, working_dir);
-	
-	g_free (arg);
-	for (i = 0; args[i]; i++) {
-		g_free (args[i]);
-	}
-	g_free (args);
-	g_free (working_dir);
-}
-/******************************************************************************/
-static void
-menu_browser_open_file (const gchar *file_name_and_path, gint exec_action) {
-	gchar **args = NULL;
-	gchar *arg = NULL;
-	gchar *file_mime_app_exec = NULL;
-	gchar *working_dir = NULL;
-	gboolean is_executable;
-	int i;
-
-	working_dir = g_path_get_dirname (file_name_and_path);
-	is_executable = vfs_file_is_executable (file_name_and_path);
-
-	/* FIXME: sigh!!! "#" makes gnome_vfs_get_mime_type crash */
-	if (!g_strrstr (file_name_and_path, "#")) {
-		file_mime_app_exec = vfs_get_mime_application (file_name_and_path);
-	}
-	else {
-		utils_show_dialog ("Error: gnome-vfs bug",
-						   "Some gnome-vfs functions cannot handle fine names that include the \"#\" character.",
-						   GTK_MESSAGE_ERROR);
-		return;
-	}
-	/* if it's a binary file run it*/
-	if (is_executable) {
-		arg = g_strdup_printf ("%s", file_name_and_path);
-		args = g_strsplit (arg, "\1", 0);
-	}
-	else {
-		if (file_mime_app_exec) {
-			arg = g_strdelimit (file_mime_app_exec, " ", '\1');
-			arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
-			args = g_strsplit (arg, "\1", 0);
-			if (DEBUG) g_printf ("%s ", file_mime_app_exec);
-		}
-		else {
-			if (DEBUG) g_printf ("Error: failed to get mime application for %s\n", file_name_and_path);
-			gchar *message = g_strdup_printf ("Cannot open %s:\n"
-											  "No application is known for this kind of file.",
-											  file_name_and_path);
-
-			utils_show_dialog ("Error: no application found",
-										   message,
-										   GTK_MESSAGE_ERROR);
-			g_free (message);
-			return;
-		}
-	}
-	if (DEBUG) g_printf ("%s\n", file_name_and_path);
-	menu_browser_launch_app (args, working_dir);
-	
-	g_free (arg);
-	for (i = 0; args[i]; i++) {
-		g_free (args[i]);
-	}
-	g_free (args);
-	g_free (file_mime_app_exec);
-
-	return;
-}
-/******************************************************************************/
-static void
 menu_browser_on_dir_left_click (const gchar *file_name_and_path, MenuBrowser *self) {
-	menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	vfs_open_file (file_name_and_path, EXEC_OPEN);
 	return;
 }
 /******************************************************************************/
 static void
 menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
-	menu_browser_launch_terminal (path, self);
+	vfs_launch_terminal (path, self->prefs->terminal);
 	return;
 }
 /******************************************************************************/
@@ -311,14 +172,14 @@ menu_browser_on_dir_right_click (const gchar *file_name_and_path, MenuBrowser *s
 static void
 menu_browser_on_file_left_click (const gchar *file_name_and_path, MenuBrowser *self) {
 	/* try launching the desktop file first */
-	if (!menu_browser_launch_desktop_file (file_name_and_path)) { 
-		menu_browser_open_file (file_name_and_path, EXEC_OPEN);
+	if (!vfs_launch_desktop_file (file_name_and_path)) { 
+		vfs_open_file (file_name_and_path, EXEC_OPEN);
 	}
 }
 /******************************************************************************/
 static void
 menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser *self) {
-	menu_browser_edit_file (file_name_and_path, self);
+	vfs_edit_file (file_name_and_path, self->prefs->editor);
 }
 /******************************************************************************/
 static void

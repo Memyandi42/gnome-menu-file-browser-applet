@@ -25,6 +25,7 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <gdk/gdkkeysyms.h>
 #include "panel-menu-bar.h"
 #include "preferences.h"
 #include "menu-browser.h"
@@ -42,7 +43,6 @@ struct _PanelMenuBarPrivate {
 	gint				panel_size;
 	gboolean			text_vertical;
 	BonoboControl		*bonobo_control;
-	gboolean			child_active;
 };
 /******************************************************************************/
 enum {
@@ -60,6 +60,10 @@ static void panel_menu_bar_dispose (GObject * obj);
 /******************************************************************************/
 void
 panel_menu_bar_edit_prefs (PanelMenuBar *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	AppletPreferences *prefs = self->priv->prefs;
 	applet_preferences_make_dialog (prefs);
 }
@@ -68,6 +72,10 @@ static void	/* Originally from the Main Menu Bar Applet */
 panel_menu_bar_change_orient (PanelApplet		*applet,
 							  PanelAppletOrient	orientation,
 							  PanelMenuBar		*self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	gint				i;
 	gboolean			text_vertical = FALSE;
 	gdouble				text_angle;
@@ -125,7 +133,7 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 			g_assert_not_reached ();
 			break;
 	}
-	/* update the menu_bar pack direction */	
+	/* update the menu_bar pack direction */
 	gtk_menu_bar_set_pack_direction (GTK_MENU_BAR (self), pack_direction);
 	gtk_menu_bar_set_child_pack_direction (GTK_MENU_BAR (self), pack_direction);
 
@@ -136,13 +144,16 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 		gtk_label_set_angle (GTK_LABEL (label), text_angle);
 		gtk_misc_set_alignment (GTK_MISC (label), text_xalign, text_yalign);
 	}
-	if (DEBUG) g_printf ("Changing panel orientation : %d\n", orientation);
 	return;
 }
 /******************************************************************************/
 static void	/* Taken from the Main Menu Bar Applet */
 panel_menu_bar_size_allocate (GtkWidget *widget,
 							  GtkAllocation *allocation) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	PanelMenuBar *self = (PanelMenuBar *)widget;
 
 	/* WTF!? */
@@ -153,7 +164,7 @@ panel_menu_bar_size_allocate (GtkWidget *widget,
 
 	/* update the panel's width */
 	self->priv->panel_size = allocation->height;
-	if (self->priv->orientation == PANEL_APPLET_ORIENT_RIGHT || 
+	if (self->priv->orientation == PANEL_APPLET_ORIENT_RIGHT ||
 		self->priv->orientation == PANEL_APPLET_ORIENT_LEFT) {
 		self->priv->panel_size = allocation->width;
 	}
@@ -165,15 +176,6 @@ panel_menu_bar_size_allocate (GtkWidget *widget,
 								  orientation,
 								  self);
 
-	if (DEBUG) g_printf ("Resizing panel : ");
-	if (DEBUG) g_printf ("x %d, "
-						 "y %d, "
-						 "height %d, "
-						 "width %d\n",
-						 allocation->x,
-						 allocation->y,
-						 allocation->height,
-						 allocation->width);
 	return;
 }
 /******************************************************************************/
@@ -183,22 +185,26 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 								  GdkColor                  *color,
 								  GdkPixmap                 *pixmap,
 								  PanelMenuBar				*self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkRcStyle *rc_style;
 	GtkStyle *style;
-	
+
 	/* reset style */
 	gtk_widget_set_style (GTK_WIDGET (self), NULL);
 	rc_style = gtk_rc_style_new ();
 	gtk_widget_modify_style (GTK_WIDGET (self), rc_style);
-	gtk_rc_style_unref (rc_style);	
-	
+	gtk_rc_style_unref (rc_style);
+
 	switch (type) {
 		case PANEL_COLOR_BACKGROUND:
 			gtk_widget_modify_bg (GTK_WIDGET (self),
-								  GTK_STATE_NORMAL, 
+								  GTK_STATE_NORMAL,
 								  color);
 			break;
-		
+
 		case PANEL_PIXMAP_BACKGROUND:
 			style = gtk_style_copy (GTK_WIDGET (self)->style);
 			if (style->bg_pixmap[GTK_STATE_NORMAL] != NULL)
@@ -208,17 +214,20 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 			gtk_widget_set_style (GTK_WIDGET (self), style);
 			g_object_unref (style);
 			break;
-		
+
 		case PANEL_NO_BACKGROUND:
 		default:
 			break;
 	}
-	if (DEBUG) g_printf ("Changing Applet Background\n");
 	return;
 }
 /******************************************************************************/
 static void
 panel_menu_bar_update_image (PanelMenuBar *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkWidget *image = NULL;
 	AppletPreferences *a_prefs = self->priv->prefs;
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, 0));
@@ -244,7 +253,11 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 /******************************************************************************/
 static void
 panel_menu_bar_add_keybinding (PanelMenuBar *self) {
-	/*
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+/*
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, 0));
 	GtkBindingSet *binding_set;
 	binding_set = gtk_binding_set_by_class (panel_menu_bar_parent_class);
@@ -253,12 +266,16 @@ panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 								  GDK_SHIFT_MASK | GDK_CONTROL_MASK,
 								  signal_name,
 								  0);
-								  */
+*/
 }
 /******************************************************************************/
 static void
 panel_menu_bar_update_entry (PanelMenuBar *self,
 							 PrefsChangedSignalData *signal_data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
 
 	menu_browser_update (MENU_BROWSER (menu_browser),
@@ -270,6 +287,10 @@ panel_menu_bar_update_entry (PanelMenuBar *self,
 static void
 panel_menu_bar_move_entry (PanelMenuBar *self,
 						   PrefsChangedSignalData *signal_data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	int new_pos;
 	GtkWidget *menu_browser = NULL;
 	GtkWidget *menu_browser_affected = NULL;
@@ -312,6 +333,10 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 static void
 panel_menu_bar_remove_entry (PanelMenuBar *self,
 							 gint instance) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, instance));
 
 	if (menu_browser != NULL) {
@@ -329,6 +354,9 @@ static void
 panel_menu_bar_add_entry (PanelMenuBar *self,
 						  gchar *label,
 						  gchar *path) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
 
 	GtkWidget *menu_browser = menu_browser_new (path,
 												label,
@@ -348,6 +376,10 @@ static void
 panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 									   PrefsChangedSignalData *signal_data,
 									   gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	PanelMenuBar *self = (PanelMenuBar *)data;
 
 	switch (signal_data->signal_id) {
@@ -392,6 +424,10 @@ panel_menu_bar_position_menu (GtkMenu	*menu,
 							  int		*y,
 							  gboolean  *push_in,
 							  GtkWidget *applet) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkRequisition  requisition;
 	GdkScreen      *screen;
 	int             menu_x = 0;
@@ -420,7 +456,7 @@ panel_menu_bar_position_menu (GtkMenu	*menu,
 			    requisition.width < pointer_x) {
 				menu_x += MIN (pointer_x, applet->allocation.width - requisition.width);
 			}
-		} 
+		}
 		else {
 			menu_x += applet->allocation.width - requisition.width;
 			if (pointer_x > 0 && pointer_x < applet->allocation.width &&
@@ -461,18 +497,27 @@ panel_menu_bar_position_menu (GtkMenu	*menu,
 void
 panel_menu_bar_on_deactivate (GtkWidget *widget,
 							  PanelMenuBar *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
-	self->priv->child_active = FALSE;
 }
 /******************************************************************************/
 gboolean
-panel_menu_bar_on_activate (GtkWidget *widget,
-							GdkEventButton *event,
-							PanelMenuBar *self) {
+panel_menu_bar_on_button_press (GtkWidget *widget,
+								GdkEventButton *event,
+								PanelMenuBar *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+	GtkMenuShell *menu_shell = GTK_MENU_SHELL (self);
+
 	if (event->button == 3) {
-		if (!self->priv->child_active) {
-			/* popup the applet context menu and make sure it's poped up in the
-			 * right place*/
+		if (!menu_shell->active) {
+			/* popup the applet context menu on right-clicks and make sure it's
+			 * popped up in the right place */
 			gtk_menu_shell_deactivate (GTK_MENU_SHELL (self));
 
 			bonobo_control_do_popup_full (self->priv->bonobo_control,
@@ -484,17 +529,48 @@ panel_menu_bar_on_activate (GtkWidget *widget,
 										  event->time);
 			return TRUE;
 		}
-		return FALSE;		
+		return FALSE;
+	}
+	else if (event->button == 2) {
+		/* Do nothing  on middle-clicks */
+		return TRUE;
 	}
 	else {
-		g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);	
-		self->priv->child_active = TRUE;
+		/* Activate the menu only on left-clicks */
+		g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);
 		return FALSE;
 	}
 }
 /******************************************************************************/
+gboolean
+panel_menu_bar_on_key_press (GtkWidget *widget,
+								GdkEventKey *event,
+								PanelMenuBar *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+	if ((event->keyval == GDK_Menu) ||
+			 (event->keyval == GDK_F10 &&
+			 (event->state & gtk_accelerator_get_default_mod_mask ()) == GDK_SHIFT_MASK)){
+		bonobo_control_do_popup_full (self->priv->bonobo_control,
+									  NULL,
+									  NULL,
+									  (GtkMenuPositionFunc) panel_menu_bar_position_menu,
+									  self->priv->applet,
+									  3,
+									  GDK_CURRENT_TIME);
+		return TRUE;
+	}
+	return FALSE;
+}
+/******************************************************************************/
 PanelMenuBar*
 panel_menu_bar_new (PanelApplet* applet) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	PanelMenuBar *self;
 
 	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
@@ -502,7 +578,11 @@ panel_menu_bar_new (PanelApplet* applet) {
 
 	g_signal_connect (GTK_MENU_BAR (self),
 					  "button_press_event",
-					  G_CALLBACK (panel_menu_bar_on_activate),
+					  G_CALLBACK (panel_menu_bar_on_button_press),
+					  self);
+	g_signal_connect (GTK_MENU_BAR (self),
+					  "key_press_event",
+					  G_CALLBACK (panel_menu_bar_on_key_press),
 					  self);
 
 	g_signal_connect (GTK_MENU_SHELL (self),
@@ -526,14 +606,14 @@ panel_menu_bar_new (PanelApplet* applet) {
 					  self);
 
     gtk_widget_set_tooltip_text (GTK_WIDGET (self), _(TOOLTIP_TEXT));
-	
+
 	/* get the applet configuration */
 	self->priv->prefs = applet_preferences_new (applet);
 
 	MenuBarPrefs *mb_prefs = self->priv->prefs->menu_bar_prefs;
 	g_signal_connect (G_OBJECT (self->priv->prefs),
 					  "prefs_changed",
-					  G_CALLBACK (panel_menu_bar_on_preferences_changed), 
+					  G_CALLBACK (panel_menu_bar_on_preferences_changed),
 					  self);
 
 	/* for each path in the config, make a browser object */
@@ -550,7 +630,7 @@ panel_menu_bar_new (PanelApplet* applet) {
     /* add the image to the menu item */
 	panel_menu_bar_update_image (self);
 
-	gtk_container_add (GTK_CONTAINER (applet), GTK_WIDGET (self));	
+	gtk_container_add (GTK_CONTAINER (applet), GTK_WIDGET (self));
 
 	/* make sure the text orientation is correct on startup */
 	self->priv->text_vertical = FALSE;
@@ -561,12 +641,14 @@ panel_menu_bar_new (PanelApplet* applet) {
 	/* setup global keybinding */
 	panel_menu_bar_add_keybinding (self);
 
-	self->priv->child_active = FALSE;
-
 	return self;
 }
 /******************************************************************************/
 static void panel_menu_bar_class_init (PanelMenuBarClass * klass) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	panel_menu_bar_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (PanelMenuBarPrivate));
 	G_OBJECT_CLASS (klass)->dispose = panel_menu_bar_dispose;
@@ -585,12 +667,20 @@ static void panel_menu_bar_class_init (PanelMenuBarClass * klass) {
 /******************************************************************************/
 static void
 panel_menu_bar_init (PanelMenuBar * self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	self->priv = PANEL_MENU_BAR_GET_PRIVATE (self);
 	return;
 }
 /******************************************************************************/
 static void
 panel_menu_bar_dispose (GObject *obj) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	PanelMenuBar *self;
 	PanelMenuBarClass *klass;
 /*	GObjectClass * parent_class;*/
@@ -605,6 +695,10 @@ panel_menu_bar_dispose (GObject *obj) {
 /******************************************************************************/
 GType
 panel_menu_bar_get_type (void) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	static GType panel_menu_bar_type_id = 0;
 	if (G_UNLIKELY (panel_menu_bar_type_id == 0)) {
 		static const GTypeInfo g_define_type_info = {sizeof (PanelMenuBarClass),

@@ -30,4 +30,6 @@
 #define ICON_MENU_SIZE	 20
 #define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/file-browser-applet.glade"
 
+#define DEBUG 1
+
 #endif

@@ -27,8 +27,7 @@
 #define CONTEXT_MENU_H
 
 #include <gtk/gtk.h>
-#include "menu-browser.h"
 
-gboolean	context_menu_display	(const gchar *file_name, GdkEventButton *event, MenuBrowser *browser);
+gboolean	context_menu_display	(const gchar *file_name, GtkWidget *menu_item);
 
 #endif

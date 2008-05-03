@@ -69,6 +69,10 @@ static void applet_preferences_dispose (GObject *obj);
 /******************************************************************************/
 static void
 applet_preferences_on_show_icon_pressed (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	AppletPreferences *self = (AppletPreferences *)data;
 
 	/* get the new state from the widget and update the prefs structure */
@@ -94,6 +98,10 @@ applet_preferences_on_show_icon_pressed (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_on_show_hidden_pressed (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	AppletPreferences *self = (AppletPreferences *)data;
 	/* get the new state from the widget and update the prefs structure. No
 	 * need to let the menu bar or browser object know */
@@ -107,9 +115,13 @@ applet_preferences_on_show_hidden_pressed (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_on_terminal_changed (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	gchar *tmp = NULL;
 	AppletPreferences *self = (AppletPreferences *)data;
-	
+
 	/* get the new state from the widget and update the prefs structure. No
 	 * need to let the menu bar or browser object know */
 	tmp = self->menu_bar_prefs->browser_prefs->terminal;
@@ -119,13 +131,17 @@ applet_preferences_on_terminal_changed (GtkWidget *widget, gpointer data) {
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-}	
+}
 /******************************************************************************/
 static void
 applet_preferences_on_editor_changed (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	gchar *tmp = NULL;
 	AppletPreferences *self = (AppletPreferences *)data;
-	
+
 	/* get the new state from the widget and update the prefs structure. No
 	 * need to let the menu bar or browser object know */
 	tmp = self->menu_bar_prefs->browser_prefs->editor;
@@ -135,10 +151,14 @@ applet_preferences_on_editor_changed (GtkWidget *widget, gpointer data) {
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-}	
+}
 /******************************************************************************/
 static void
 applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkWidget *file_chooser_dialog;
 	gchar *icon_path = DEFAULT_ICON_PATH;
 	AppletPreferences *self = (AppletPreferences *)data;
@@ -163,7 +183,7 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
 		gchar *new_icon;
 		new_icon = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
-		/* make sure the new icon is not the same as the old one */	
+		/* make sure the new icon is not the same as the old one */
 		if (g_ascii_strcasecmp (new_icon, self->menu_bar_prefs->icon)) {
 			/* update the prefs structure */
 			g_free (self->menu_bar_prefs->icon);
@@ -205,6 +225,10 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_save_to_gconf (AppletPreferences *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	PanelApplet *applet = self->priv->applet;
 	GError *error = NULL;
 	/* save the data in the prefs structure to the gconf schema (or whatever)*/
@@ -257,6 +281,10 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 /******************************************************************************/
 static void
 applet_preferences_dialog_response (GtkWidget *window, gint response, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	AppletPreferences *self = (AppletPreferences *)data;
 	/* figure out what button closed the dialog and take the appropriate action */
 	switch (response) {
@@ -285,6 +313,9 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 									  gchar				*path_string,
 									  gchar				*new_string,
 									  gpointer			data){
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
 
 	AppletPreferences	*self		= (AppletPreferences *)data;
 	GtkWidget			*tree_view	= self->priv->tree_view;
@@ -339,6 +370,10 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 										GtkTreePath		  *path,
 										GtkTreeViewColumn *col,
 										gpointer		   data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	AppletPreferences	*self	= (AppletPreferences *)data;
 	GtkTreeModel *model;
 	GtkTreeIter	 iter;
@@ -404,7 +439,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 			tmp = g_slist_nth (self->menu_bar_prefs->dirs, signal_data->instance);
 			g_free (tmp->data);
 			tmp->data = (gpointer)g_strdup (new_path);
-			
+
 			/* emit the signal so the panel menu bar updates itself */
 			g_signal_emit (G_OBJECT (data),
 						   applet_preferences_signals [PREFS_CHANGED],
@@ -422,6 +457,10 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 /******************************************************************************/
 static void
 applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkTreeModel *model;
 	GtkTreeIter   iter;
 	GtkWidget *file_chooser_dialog;
@@ -481,6 +520,10 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkTreeSelection	*selection;
 	GtkTreeModel		*model;
 	GtkTreeIter			iter;
@@ -531,6 +574,10 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkTreeSelection	*selection = NULL;
 	GtkTreeModel 		*model = NULL;
 	GtkTreeIter			iter, iter_next;
@@ -581,6 +628,10 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkTreeSelection	*selection	= NULL;
 	GtkTreeModel 		*model		= NULL;
 	GtkTreeIter			iter, iter_prev;
@@ -637,6 +688,10 @@ applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
 /******************************************************************************/
 static void
 applet_preferences_create_list_view (AppletPreferences *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkTreeIter			iter;
 	GtkListStore		*store;
 	GtkTreeViewColumn	*column;
@@ -700,12 +755,16 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 	/*put the selection in SINGLE mode */
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(self->priv->tree_view));
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-	
+
 	return;
 }
 /******************************************************************************/
 void
 applet_preferences_make_dialog (AppletPreferences *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	g_return_if_fail (self == NULL || IS_APPLET_PREFERENCES (self));
 
 	GtkWidget *window;
@@ -736,7 +795,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		gtk_entry_set_width_chars (GTK_ENTRY (terminal), 10);
 		gtk_entry_set_text (GTK_ENTRY (terminal),
 							mb_prefs->browser_prefs->terminal);
-		g_signal_connect (G_OBJECT (terminal),			
+		g_signal_connect (G_OBJECT (terminal),
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_terminal_changed),
 						  (gpointer)self);
@@ -746,7 +805,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		gtk_entry_set_width_chars (GTK_ENTRY (editor), 10);
 		gtk_entry_set_text (GTK_ENTRY (editor),
 							mb_prefs->browser_prefs->editor);
-		g_signal_connect (G_OBJECT (editor),			
+		g_signal_connect (G_OBJECT (editor),
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_editor_changed),
 						  (gpointer)self);
@@ -820,6 +879,10 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 /******************************************************************************/
 static MenuBarPrefs *
 applet_preferences_load_from_gconf (PanelApplet *applet) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GError *error = NULL;
 
 	MenuBarPrefs *mb_prefs  = g_new0 (MenuBarPrefs, 1);
@@ -829,7 +892,7 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 	 * instance. It also check to make sure the values were retrieved properly
 	 * AND that they are valid */
 	panel_applet_add_preferences (applet, "/schemas/apps/file-browser-applet/prefs", &error);
-	if (utils_check_gerror (&error)) return NULL;	
+	if (utils_check_gerror (&error)) return NULL;
 
 	/* show hidden files? */
 	mb_prefs->browser_prefs->show_hidden = panel_applet_gconf_get_bool (applet,
@@ -926,6 +989,10 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 /******************************************************************************/
 AppletPreferences*
 applet_preferences_new (PanelApplet* applet) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	AppletPreferences *self;
 	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
 	self = g_object_newv (TYPE_APPLET_PREFERENCES, 0, NULL);
@@ -940,6 +1007,10 @@ applet_preferences_new (PanelApplet* applet) {
 /******************************************************************************/
 static void
 applet_preferences_class_init (AppletPreferencesClass * klass) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	applet_preferences_parent_class = g_type_class_peek_parent (klass);
 	g_type_class_add_private (klass, sizeof (AppletPreferencesPrivate));
 	G_OBJECT_CLASS (klass)->dispose = applet_preferences_dispose;
@@ -964,6 +1035,10 @@ applet_preferences_class_init (AppletPreferencesClass * klass) {
 /******************************************************************************/
 static void
 applet_preferences_init (AppletPreferences * self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	self->priv = APPLET_PREFERENCES_GET_PRIVATE (self);
 }
 /******************************************************************************/
@@ -977,6 +1052,10 @@ applet_preferences_dispose (GObject * obj) {
 /******************************************************************************/
 GType
 applet_preferences_get_type (void) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	static GType applet_preferences_type_id = 0;
 	if (G_UNLIKELY (applet_preferences_type_id == 0)) {
 		static const GTypeInfo g_define_type_info = { sizeof (AppletPreferencesClass),

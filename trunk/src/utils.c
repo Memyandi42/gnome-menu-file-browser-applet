@@ -28,10 +28,13 @@
 
 /******************************************************************************/
 gboolean
-utils_check_gerror (GError **error)
-{
+utils_check_gerror (GError **error) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	if (*error)
-	{		
+	{
 		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
 		utils_show_dialog ("Application Error",
 						   (*error)->message,
@@ -44,8 +47,11 @@ utils_check_gerror (GError **error)
 }
 /******************************************************************************/
 void
-utils_show_dialog (gchar *title, gchar *message, GtkMessageType type)
-{
+utils_show_dialog (gchar *title, gchar *message, GtkMessageType type) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GtkWidget *dialog = gtk_message_dialog_new (NULL,
 												0,
 												type,
@@ -58,7 +64,7 @@ utils_show_dialog (gchar *title, gchar *message, GtkMessageType type)
     g_signal_connect (G_OBJECT (dialog), "delete_event",
                       G_CALLBACK (gtk_widget_destroy), dialog);
 	g_signal_connect_swapped (G_OBJECT (dialog),
-							  "response", 
+							  "response",
 							  G_CALLBACK (gtk_widget_destroy),
 							  dialog);
 	gtk_widget_show_all (dialog);
@@ -68,6 +74,10 @@ utils_show_dialog (gchar *title, gchar *message, GtkMessageType type)
 /******************************************************************************/
 GtkWidget*
 utils_get_scaled_image_from_file (gchar *file_name, int size) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 		GdkPixbuf *orig   = gdk_pixbuf_new_from_file (file_name, NULL);
 		if (orig == NULL) return NULL;
 
@@ -83,6 +93,10 @@ utils_get_scaled_image_from_file (gchar *file_name, int size) {
 /******************************************************************************/
 GSList *
 g_slist_swap_data (GSList *list, guint index) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	gpointer tmp   = NULL;
 	GSList *first  = g_slist_nth (list, index);
 	GSList *second = first->next;
@@ -96,11 +110,19 @@ g_slist_swap_data (GSList *list, guint index) {
 gint
 utils_sort_alpha (const gchar **s1,
 				  const gchar **s2) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	return g_utf8_collate ((gchar *)*s1, (gchar *)*s2);
 }
 /******************************************************************************/
 gchar *
 utils_clamp_file_name (const gchar *file_name, int length, gboolean *clamped) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 /* clamped is true if the string is actually clamped */
 	gchar *tmp, *ret;
 

@@ -34,7 +34,11 @@
 /******************************************************************************/
 gboolean
 vfs_file_is_executable (const gchar *file_name) {
-	gchar *mime_type = gnome_vfs_get_mime_type (file_name);	
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+	gchar *mime_type = gnome_vfs_get_mime_type (file_name);
 	gboolean is_executable = FALSE;
 	is_executable =  g_file_test (file_name, G_FILE_TEST_IS_EXECUTABLE) &&
 					!g_file_test (file_name, G_FILE_TEST_IS_DIR) &&
@@ -46,20 +50,45 @@ vfs_file_is_executable (const gchar *file_name) {
 /******************************************************************************/
 gboolean
 vfs_file_is_desktop (const gchar *file_name) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	return g_str_has_suffix (file_name, ".desktop");
+}
+/******************************************************************************/
+gboolean
+vfs_file_is_directory (const gchar *file_name) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+	GnomeVFSResult	 		vfs_result;
+	GnomeVFSFileInfo		vfs_file_info;
+	gboolean res;
+
+	vfs_result = gnome_vfs_get_file_info (file_name,
+										  &vfs_file_info,
+										  GNOME_VFS_FILE_INFO_FOLLOW_LINKS);
+	res = (vfs_file_info.type == GNOME_VFS_FILE_TYPE_DIRECTORY);
+	return res;
 }
 /******************************************************************************/
 gchar *
 vfs_get_mime_application (const gchar *file_name_and_path) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GnomeVFSMimeApplication *mime_application = NULL;
 	gchar *mime_type = NULL;
 	gchar *file_mime_app_exec = NULL;
-	
-	mime_type		 = gnome_vfs_get_mime_type (file_name_and_path);	
+
+	mime_type		 = gnome_vfs_get_mime_type (file_name_and_path);
 	mime_application = gnome_vfs_mime_get_default_application (mime_type);
 
 	if (mime_application) {
-		file_mime_app_exec = g_strdup ((gchar *)mime_application->command);	
+		file_mime_app_exec = g_strdup ((gchar *)mime_application->command);
 	}
 
 	g_free (mime_type);
@@ -78,6 +107,9 @@ vfs_get_dir_contents (GPtrArray *files,
 					  GPtrArray *dirs,
 					  gboolean show_hidden,
 					  gchar *path) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
 
 	GnomeVFSDirectoryHandle *vfs_dir_handle = NULL;
 	GnomeVFSResult	 		vfs_result;
@@ -86,7 +118,7 @@ vfs_get_dir_contents (GPtrArray *files,
 
 	/*make struct for getting file info, open the dir for reading and get the first entry*/
 	vfs_file_info = gnome_vfs_file_info_new();
-	
+
 	vfs_result = gnome_vfs_directory_open (&vfs_dir_handle,
 										   path,
 /*										   GNOME_VFS_FILE_INFO_GET_MIME_TYPE |*/
@@ -98,7 +130,7 @@ vfs_get_dir_contents (GPtrArray *files,
 		vfs_result = gnome_vfs_directory_read_next (vfs_dir_handle,
 													vfs_file_info);
 		/* if it opened OK and while its not empty, keep reading items */
-		while (vfs_result == GNOME_VFS_OK) {	
+		while (vfs_result == GNOME_VFS_OK) {
 			/*if it's not a hidden file or were showing hidden files...*/
 			if ((g_ascii_strncasecmp (vfs_file_info->name, ".", 1) != 0 || show_hidden) &&
 				 g_ascii_strcasecmp (vfs_file_info->name, ".") != 0 &&
@@ -126,7 +158,7 @@ vfs_get_dir_contents (GPtrArray *files,
 							 error);
 	}
 	/**************************** Finished reading dir contents ************************/
-	
+
 	/*sort the arrays containing the directory and file listings*/
 	g_ptr_array_sort (dirs, (GCompareFunc)&utils_sort_alpha);
 	g_ptr_array_sort (files, (GCompareFunc)&utils_sort_alpha);
@@ -138,6 +170,10 @@ vfs_get_dir_contents (GPtrArray *files,
 /******************************************************************************/
 gboolean
 vfs_launch_desktop_file (const gchar *file_name) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	if (!vfs_file_is_desktop (file_name)) {
 		return FALSE;
 	}
@@ -155,10 +191,14 @@ vfs_launch_desktop_file (const gchar *file_name) {
 /******************************************************************************/
 void
 vfs_launch_app (gchar **args, const gchar *working_dir) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	GError *error = NULL;
 	gint child_pid;
 	gboolean ret;
-	
+
 	ret = g_spawn_async_with_pipes (working_dir,
 									args,
 									NULL,
@@ -183,6 +223,10 @@ vfs_launch_app (gchar **args, const gchar *working_dir) {
 /******************************************************************************/
 void
 vfs_edit_file (const gchar *file_name_and_path, gchar *editor_bin) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	gchar **args = NULL;
 	gchar *arg = NULL;
 	gchar *working_dir = NULL;
@@ -193,7 +237,7 @@ vfs_edit_file (const gchar *file_name_and_path, gchar *editor_bin) {
 	arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
 	args = g_strsplit (arg, "\1", 0);
 	vfs_launch_app (args, working_dir);
-	
+
 	g_free (arg);
 	for (i = 0; args[i]; i++) {
 		g_free (args[i]);
@@ -204,18 +248,25 @@ vfs_edit_file (const gchar *file_name_and_path, gchar *editor_bin) {
 /******************************************************************************/
 void
 vfs_launch_terminal (const gchar *path, gchar *terminal_bin) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
 
 	gchar **args = NULL;
-		
+
 	args = g_strsplit (terminal_bin, " ", 0);
-	
+
 	vfs_launch_app (args, path);
-	g_free (args);	
+	g_free (args);
 
 }
 /******************************************************************************/
 void
 vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
 	gchar **args = NULL;
 	gchar *arg = NULL;
 	gchar *file_mime_app_exec = NULL;
@@ -263,7 +314,7 @@ vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
 	}
 	if (DEBUG) g_printf ("%s\n", file_name_and_path);
 	vfs_launch_app (args, working_dir);
-	
+
 	g_free (arg);
 	for (i = 0; args[i]; i++) {
 		g_free (args[i]);
@@ -276,13 +327,20 @@ vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
 /******************************************************************************/
 void
 vfs_trash_file (gchar *file_name) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+	if (!vfs_file_exists (file_name)) {
+		return;
+	}
+
 	int i = 1;
 	const gchar *home = g_get_home_dir();
 	gchar *file = g_path_get_basename (file_name);
 	gchar *new_file_name = g_strdup_printf ("%s/.Trash/%s",
 											home,
 											file);
-
 	while (GNOME_VFS_ERROR_FILE_EXISTS == gnome_vfs_move (file_name,
 														  new_file_name,
 														  FALSE)) {

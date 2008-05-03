@@ -54,7 +54,7 @@ file_browser_applet_display_properties_dialog (GtkWidget *widget, PanelMenuBar *
 	return FALSE;
 }
 /******************************************************************************/
-static gboolean 
+static gboolean
 file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
 	if (1) {
@@ -62,13 +62,13 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 
 		gnome_help_display_desktop_on_screen (
 			  NULL,
-			  "file-browser-applet", 
-			  "file-browser-applet", 
-			  NULL, 
+			  "file-browser-applet",
+			  "file-browser-applet",
+			  NULL,
 			  gtk_widget_get_screen (widget),
 			  &error);
 
-		if (error) {       
+		if (error) {
 			utils_show_dialog ("Error",
 							   "Could not display help.",
 							   GTK_MESSAGE_ERROR);
@@ -101,7 +101,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		NULL
 	};
 	const gchar *translator_credits = _("translator_credits");
-	
+
 	file = gnome_program_locate_file (NULL, GNOME_FILE_DOMAIN_PIXMAP, "file-browser-applet.png", TRUE, NULL);
 	if (file != NULL) {
 		pixbuf = gdk_pixbuf_new_from_file (file, NULL);
@@ -151,8 +151,8 @@ file_browser_applet_create (PanelApplet *applet) {
 							 panel_menu_bar);
 
 	gtk_widget_show_all (GTK_WIDGET(applet));
-	gtk_main ();	
-	
+	gtk_main ();
+
     return TRUE;
 }
 /******************************************************************************/
@@ -172,6 +172,6 @@ PANEL_APPLET_BONOBO_FACTORY (APPLET_FACTORY_IID,
 			     			PANEL_TYPE_APPLET,
 							"file-browser-applet",
 							"0",
-							file_browser_applet_factory, 
+							file_browser_applet_factory,
 							NULL)
 /******************************************************************************/

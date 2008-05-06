@@ -243,7 +243,8 @@ menu_browser_on_item_button_press (GtkWidget *menu_item,
 #ifdef DEBUG
 g_printf ("In %s\n", __FUNCTION__);
 #endif
-	g_return_if_fail (IS_MENU_BROWSER (self));
+	if (!IS_MENU_BROWSER (self)) return FALSE;
+
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item),
 											 G_OBJECT_DATA_NAME);
 
@@ -324,11 +325,11 @@ g_printf ("In %s\n", __FUNCTION__);
 	else {
 		path = (gchar*)g_object_get_data (G_OBJECT (menu_item),
 										  G_OBJECT_DATA_NAME);
-		if ((vfs_file_is_directory (path) && GTK_MENU_ITEM (menu_item)->submenu == NULL) ||
+/*		if ((vfs_file_is_directory (path) && GTK_MENU_ITEM (menu_item)->submenu == NULL) ||
 			(!vfs_file_is_directory (path) && GTK_MENU_ITEM (menu_item)->submenu)){
 			return FALSE;
 		}
-	}
+*/	}
 
 	if (vfs_file_exists (path)) {
 		if (event->keyval == GDK_KP_Space ||
@@ -397,11 +398,11 @@ g_printf ("In %s\n", __FUNCTION__);
 	else {
 		path = (gchar*)g_object_get_data (G_OBJECT (menu_item),
 										  G_OBJECT_DATA_NAME);
-		if ((vfs_file_is_directory (path) && GTK_MENU_ITEM (menu_item)->submenu == NULL) ||
+/*		if ((vfs_file_is_directory (path) && GTK_MENU_ITEM (menu_item)->submenu == NULL) ||
 			(!vfs_file_is_directory (path) && GTK_MENU_ITEM (menu_item)->submenu)){
 			return FALSE;
 		}
-	}
+*/	}
 
 	if (vfs_file_exists (path)) {
 		if (event->button == 1) {
@@ -771,6 +772,51 @@ g_printf ("In %s\n", __FUNCTION__);
 	return menu_browser_type_id;
 }
 /******************************************************************************/
+#ifdef NEW_MENU_SIGNAL
+static void
+menu_browser_add_main_menu_header (GtkWidget *menu,
+								   gchar *path,
+								   MenuBrowser *self) {
+#ifdef DEBUG
+g_printf ("In %s\n", __FUNCTION__);
+#endif
+
+	g_return_if_fail (IS_MENU_BROWSER (self));
+
+	GtkWidget *menu_item = NULL;
+	GtkWidget *separator = NULL;
+	GtkWidget *menu_item_icon = NULL;
+	gchar *dir = g_path_get_basename (path);
+
+	separator = gtk_separator_menu_item_new();
+	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu),
+							separator);
+
+	menu_item = gtk_image_menu_item_new_with_label (dir);
+
+	GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
+	if (GTK_IS_LABEL (label)) {
+		gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);	
+		gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
+	}
+	if (strlen (dir) > MAX_FILE_NAME_LENGTH) {
+		gtk_widget_set_tooltip_text (menu_item, dir);
+	}
+	g_free(dir);
+
+	menu_item_icon = gtk_image_new_from_icon_name (self->priv->dir_mime_icon_name,
+												   GTK_ICON_SIZE_MENU);
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+								   menu_item_icon);
+	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu),
+							menu_item);
+	g_object_set_data (G_OBJECT (menu_item),
+					   G_OBJECT_DATA_NAME,
+					   path);
+	gtk_widget_show_all (menu);
+}
+#endif
+/******************************************************************************/
 static gboolean
 menu_browser_activate_main_menu (MenuBrowser *self) {
 #ifdef DEBUG
@@ -786,6 +832,13 @@ g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (self));
 	menu_browser_populate_menu (GTK_WIDGET (self), self);
+#ifdef NEW_MENU_SIGNAL
+	gchar *path = g_object_get_data (G_OBJECT (self),
+									 G_OBJECT_DATA_NAME);
+	menu_browser_add_main_menu_header (menu,
+									   path,
+									   self);
+#endif
 	gtk_menu_reposition (GTK_MENU (menu));
 	return TRUE;
 }

@@ -119,7 +119,7 @@ g_printf ("In %s\n", __FUNCTION__);
 		event_time = event->time;
 	}
 	else {
-		event_button = 0;
+		event_button = 3;
 		event_time = gtk_get_current_event_time();
 	}
 

@@ -42,8 +42,6 @@ G_BEGIN_DECLS
 #define IS_MENU_BROWSER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_MENU_BROWSER))
 #define MENU_BROWSER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_MENU_BROWSER, MenuBrowserClass))
 /******************************************************************************/
-#define MAX_FILE_NAME_LENGTH 30 /* What's a good value here??? */
-/******************************************************************************/
 typedef struct _MenuBrowser MenuBrowser;
 typedef struct _MenuBrowserClass MenuBrowserClass;
 typedef struct _MenuBrowserPrivate MenuBrowserPrivate;

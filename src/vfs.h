@@ -31,8 +31,6 @@
 
 #include "config.h"
 
-#define DEBUG 1
-
 gboolean vfs_file_is_executable		(const gchar *file_name);
 gboolean vfs_file_is_desktop		(const gchar *file_name);
 gboolean vfs_file_exists			(const gchar *file_name);

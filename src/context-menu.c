@@ -33,9 +33,7 @@
 static void
 context_menu_add_delete_item (const gchar *file_name,
 							  GtkWidget *menu) {
-#ifdef DEBUG
-g_printf ("In %s\n", __FUNCTION__);
-#endif
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 							  
 	GtkWidget *menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_DELETE, NULL);
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
@@ -52,9 +50,7 @@ g_printf ("In %s\n", __FUNCTION__);
 static void
 context_menu_add_fake_items (const gchar *file_name,
 							 GtkWidget *menu) {
-#ifdef DEBUG
-g_printf ("In %s\n", __FUNCTION__);
-#endif
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *menu_item;
 	
@@ -78,9 +74,7 @@ g_printf ("In %s\n", __FUNCTION__);
 static void
 context_menu_populate (const gchar *file_name,
 					   GtkWidget *menu) {
-#ifdef DEBUG
-g_printf ("In %s\n", __FUNCTION__);
-#endif
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	context_menu_add_delete_item (file_name, menu);
 	context_menu_add_fake_items (file_name, menu);
@@ -89,9 +83,7 @@ g_printf ("In %s\n", __FUNCTION__);
 static void
 context_menu_clean_up (GtkMenuShell *menu,
 					   GtkWidget *browser) {
-#ifdef DEBUG
-g_printf ("In %s\n", __FUNCTION__);
-#endif
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (browser));
 	gtk_menu_shell_deactivate (GTK_MENU_SHELL (parent));
@@ -105,9 +97,7 @@ g_printf ("In %s\n", __FUNCTION__);
 gboolean
 context_menu_display (const gchar *file_name,
 					  GtkWidget *menu_item) {
-#ifdef DEBUG
-g_printf ("In %s\n", __FUNCTION__);
-#endif
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	int event_button;
 	int event_time;
@@ -152,13 +142,12 @@ GtkWidget *panel = gtk_widget_get_parent (GTK_WIDGET (applet));
 					event_time);
 
 /*gtk_grab_add (GTK_WIDGET (menu));*/
-
-/*gdk_pointer_grab (GTK_WIDGET (menu)->window,*/
-/*				  TRUE,*/
-/*				  0,*/
-/*				  NULL,*/
-/*				  NULL,*/
-/*				  GDK_CURRENT_TIME);*/
+/*gdk_pointer_grab (GTK_WIDGET (menu)->window,
+				  TRUE,
+				  0,
+				  NULL,
+				  NULL,
+				  GDK_CURRENT_TIME);*/
 
 	return TRUE;
 }

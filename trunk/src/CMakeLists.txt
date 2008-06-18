@@ -21,6 +21,9 @@ PKGCONFIG (libglade-2.0
 		   LIBGLADE_LINK_FLAGS
 		   LIBGLADE_CFLAGS)
 
+INCLUDE_DIRECTORIES (/usr/local/include/gtkhotkey-1.0)
+LINK_DIRECTORIES (/usr/local/lib)
+
 SET (EXEC file-browser-applet)
 SET (SRCS main.c
 	 panel-menu-bar.c
@@ -35,7 +38,7 @@ ADD_EXECUTABLE (${EXEC} ${SRCS})
 
 # it seems to link file without the dozens of libs this introduces!?
 #TARGET_LINK_LIBRARIES (${EXEC} ${LIBPANEL_LINK_FLAGS} ${LIBGLADE_LINK_FLAGS} ${LIBDESKTOP_LINK_FLAGS})
-SET (LIBS panel-applet-2 glade-2.0 gnome-desktop-2 gnomevfs-2)
+SET (LIBS panel-applet-2 glade-2.0 gnome-desktop-2 gnomevfs-2 gtkhotkey)
 TARGET_LINK_LIBRARIES (${EXEC} ${LIBS})
 
 INSTALL (TARGETS ${EXEC} DESTINATION "${CMAKE_INSTALL_LIB_DIR}/gnome-panel")

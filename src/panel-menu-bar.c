@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gdk/gdkkeysyms.h>
+#include <gtkhotkey.h>
 #include "panel-menu-bar.h"
 #include "preferences.h"
 #include "menu-browser.h"
@@ -242,18 +243,36 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 }
 /******************************************************************************/
 static void
+panel_menu_bar_on_hotkey_press (GtkHotkeyInfo *hot_key_info,
+								guint event_time,
+								PanelMenuBar *self) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	MenuBrowser *menu_browser = (MenuBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
+
+	GTK_MENU_SHELL (self)->active = TRUE;
+	gtk_menu_shell_set_take_focus (GTK_MENU_SHELL (self), TRUE);
+	gtk_menu_shell_select_item (GTK_MENU_SHELL (self),
+								GTK_WIDGET (menu_browser));
+}
+/******************************************************************************/
+static void
 panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, 0));
-	GtkBindingSet *binding_set;
-	binding_set = gtk_binding_set_by_class (MENU_BROWSER_GET_CLASS (menu_browser));
-	gtk_binding_entry_add_signal (binding_set,
-								  GDK_b,
-								  GDK_SUPER_MASK,
-								  "activate",
-								  0);
+	GError *error = NULL;
 
+	GtkHotkeyInfo *hot_key_info = gtk_hotkey_info_new ("file-browser-applet",
+													   "file-browser-applet",
+                                                       "<Super>h",
+													   NULL);
+
+	g_signal_connect (G_OBJECT (hot_key_info),
+					  "activated",
+					  G_CALLBACK (panel_menu_bar_on_hotkey_press),
+					  self);
+
+	gtk_hotkey_info_bind (hot_key_info, &error);
 }
 /******************************************************************************/
 static void
@@ -354,10 +373,8 @@ panel_menu_bar_add_entry (PanelMenuBar *self,
 static void
 panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 									   PrefsChangedSignalData *signal_data,
-									   gpointer data) {
+									   PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
-	PanelMenuBar *self = (PanelMenuBar *)data;
 
 	switch (signal_data->signal_id) {
 		case PREFS_SIGNAL_TERMINAL :
@@ -531,6 +548,7 @@ panel_menu_bar_on_key_press (GtkWidget *widget,
 									  GDK_CURRENT_TIME);
 		return TRUE;
 	}
+	g_object_set (G_OBJECT (self), "has-tooltip", FALSE, NULL);
 	return FALSE;
 }
 /******************************************************************************/

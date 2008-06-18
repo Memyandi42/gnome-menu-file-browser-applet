@@ -34,9 +34,9 @@
 
 /******************************************************************************/
 struct _AppletPreferencesPrivate {
-	GtkWidget	*window;
-	PanelApplet *applet;
-	GtkWidget	*tree_view;
+	GtkWidget*	window;
+	PanelApplet*applet;
+	GtkWidget*	tree_view;
 };
 /******************************************************************************/
 #define APPLET_PREFERENCES_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_APPLET_PREFERENCES, AppletPreferencesPrivate))
@@ -65,25 +65,23 @@ static guint applet_preferences_signals[LAST_SIGNAL] = { 0 };
 /*static GtkWidget *revert_button = NULL;*/
 /******************************************************************************/
 static gpointer applet_preferences_parent_class = NULL;
-static void applet_preferences_dispose (GObject *obj);
+static void applet_preferences_dispose (GObject* obj);
 /******************************************************************************/
 static void
-applet_preferences_on_show_icon_pressed (GtkWidget *widget, gpointer data) {
+applet_preferences_on_show_icon_pressed (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
-	AppletPreferences *self = (AppletPreferences *)data;
 
 	/* get the new state from the widget and update the prefs structure */
 	self->menu_bar_prefs->show_icon = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
 
-	PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+	PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 	signal_data->signal_id = PREFS_SIGNAL_SHOW_ICON;
 	signal_data->instance  = -1;
 	signal_data->label 	  = NULL;
 	signal_data->path 	  = NULL;
 
 	/* emit the signal so the panel menu bar updates itself */
-	g_signal_emit (G_OBJECT (data),
+	g_signal_emit (G_OBJECT (self),
 				   applet_preferences_signals [PREFS_CHANGED],
 				   0,
 				   signal_data);
@@ -95,10 +93,9 @@ applet_preferences_on_show_icon_pressed (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_show_hidden_pressed (GtkWidget *widget, gpointer data) {
+applet_preferences_on_show_hidden_pressed (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	AppletPreferences *self = (AppletPreferences *)data;
 	/* get the new state from the widget and update the prefs structure. No
 	 * need to let the menu bar or browser object know */
 	self->menu_bar_prefs->browser_prefs->show_hidden = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
@@ -110,11 +107,10 @@ applet_preferences_on_show_hidden_pressed (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_terminal_changed (GtkWidget *widget, gpointer data) {
+applet_preferences_on_terminal_changed (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	gchar *tmp = NULL;
-	AppletPreferences *self = (AppletPreferences *)data;
 
 	/* get the new state from the widget and update the prefs structure. No
 	 * need to let the menu bar or browser object know */
@@ -128,11 +124,10 @@ applet_preferences_on_terminal_changed (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_editor_changed (GtkWidget *widget, gpointer data) {
+applet_preferences_on_editor_changed (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	gchar *tmp = NULL;
-	AppletPreferences *self = (AppletPreferences *)data;
 
 	/* get the new state from the widget and update the prefs structure. No
 	 * need to let the menu bar or browser object know */
@@ -146,12 +141,12 @@ applet_preferences_on_editor_changed (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
+applet_preferences_on_icon_select (GtkWidget* button, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *file_chooser_dialog;
 	gchar *icon_path = DEFAULT_ICON_PATH;
-	AppletPreferences *self = (AppletPreferences *)data;
+
 	/* set up a file chooser dialog so we can choose the new icon. An icon
 	 * chooser would be better, but that widget is deprecated in the Gnome UI
 	 * lib and GTK equivalent doesn't exist yet */
@@ -171,7 +166,7 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 								   icon_path);
 	/* check the reply */
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
-		gchar *new_icon;
+		gchar* new_icon;
 		new_icon = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
 		/* make sure the new icon is not the same as the old one */
 		if (g_ascii_strcasecmp (new_icon, self->menu_bar_prefs->icon)) {
@@ -180,7 +175,7 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 			self->menu_bar_prefs->icon = new_icon;
 
 			/* update the button's icon */
-			GtkWidget *icon = gtk_button_get_image (GTK_BUTTON (button));
+			GtkWidget* icon = gtk_button_get_image (GTK_BUTTON (button));
 			gtk_widget_destroy (icon);
 			icon = utils_get_scaled_image_from_file (self->menu_bar_prefs->icon,
 													 ICON_BUTTON_SIZE);
@@ -189,14 +184,14 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 			}
 			gtk_button_set_image (GTK_BUTTON (button), icon);
 
-			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 			signal_data->signal_id = PREFS_SIGNAL_ICON_CHANGED;
 			signal_data->instance  = -1;
 			signal_data->label 	   = NULL;
 			signal_data->path 	   = NULL;
 
 			/* emit the signal so the panel menu bar updates itself */
-			g_signal_emit (G_OBJECT (data),
+			g_signal_emit (G_OBJECT (self),
 						   applet_preferences_signals [PREFS_CHANGED],
 						   0,
 						   signal_data);
@@ -214,11 +209,11 @@ applet_preferences_on_icon_select (GtkWidget *button, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_save_to_gconf (AppletPreferences *self) {
+applet_preferences_save_to_gconf (AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	PanelApplet *applet = self->priv->applet;
-	GError *error = NULL;
+	GError* error = NULL;
 	/* save the data in the prefs structure to the gconf schema (or whatever)*/
 	/* show hidden files? */
 	panel_applet_gconf_set_bool (applet,
@@ -268,10 +263,9 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 }
 /******************************************************************************/
 static void
-applet_preferences_dialog_response (GtkWidget *window, gint response, gpointer data) {
+applet_preferences_dialog_response (GtkWidget* window, gint response, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	AppletPreferences *self = (AppletPreferences *)data;
 	/* figure out what button closed the dialog and take the appropriate action */
 	switch (response) {
 		case RESPONSE_REVERT:
@@ -298,10 +292,9 @@ static void
 applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 									  gchar				*path_string,
 									  gchar				*new_string,
-									  gpointer			data){
+									  AppletPreferences* self){
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	AppletPreferences	*self		= (AppletPreferences *)data;
 	GtkWidget			*tree_view	= self->priv->tree_view;
 	GtkTreeModel		*model;
 	GtkTreeIter			iter;
@@ -326,7 +319,7 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 						-1);
 
 	/* create the data structure with the event info to pass to panel_menu_bar */
-	PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+	PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 	signal_data->signal_id = PREFS_SIGNAL_DIR_CHANGED;
 	signal_data->instance  = atoi (path_string);
 	signal_data->label 	   = g_strdup (new_string);
@@ -339,7 +332,7 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 	tmp->data = (gpointer)g_strdup (new_string);
 
 	/* emit the signal so the panel menu bar updates itself */
-	g_signal_emit (G_OBJECT (data),
+	g_signal_emit (G_OBJECT (self),
 				   applet_preferences_signals [PREFS_CHANGED],
 				   0,
 				   signal_data);
@@ -353,14 +346,13 @@ static void
 applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 										GtkTreePath		  *path,
 										GtkTreeViewColumn *col,
-										gpointer		   data) {
+										AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	AppletPreferences	*self	= (AppletPreferences *)data;
-	GtkTreeModel *model;
-	GtkTreeIter	 iter;
-	GtkWidget	 *file_chooser_dialog;
-	gchar		 *old_path = NULL;
+	GtkTreeModel* model;
+	GtkTreeIter	  iter;
+	GtkWidget*	  file_chooser_dialog;
+	gchar*		  old_path = NULL;
 
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW (tree_view));
 
@@ -390,7 +382,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 	/* run the dialog */
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
 		/* get the new path*/
-		gchar *new_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
+		gchar* new_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
 		/* only update data if it's not the same as the old one */
 		if (g_ascii_strcasecmp (old_path, new_path)) {
 			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
@@ -399,14 +391,14 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 
 
 			/* the label associated with the selection */
-			gchar *label = NULL;
+			gchar* label = NULL;
 			gtk_tree_model_get (model,
 								&iter,
 								LABEL_COLUMN, &label,
 								-1);
 
 			/* get the instance from the iterator */
-			gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+			gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
 			/* create the data structure with the event info to pass to panel_menu_bar */
 			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
@@ -417,13 +409,13 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 			g_free (instance);
 
 			/* update this item from the list holding the path prefs */
-			GSList *tmp = NULL;
+			GSList* tmp = NULL;
 			tmp = g_slist_nth (self->menu_bar_prefs->dirs, signal_data->instance);
 			g_free (tmp->data);
 			tmp->data = (gpointer)g_strdup (new_path);
 
 			/* emit the signal so the panel menu bar updates itself */
-			g_signal_emit (G_OBJECT (data),
+			g_signal_emit (G_OBJECT (self),
 						   applet_preferences_signals [PREFS_CHANGED],
 						   0,
 						   signal_data);
@@ -438,14 +430,13 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 }
 /******************************************************************************/
 static void
-applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
+applet_preferences_on_add_dir_clicked (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GtkTreeModel *model;
-	GtkTreeIter   iter;
-	GtkWidget *file_chooser_dialog;
-	AppletPreferences *self = (AppletPreferences *)data;
-	GtkWidget *tree_view = self->priv->tree_view;
+	GtkTreeModel* model;
+	GtkTreeIter	  iter;
+	GtkWidget*	  file_chooser_dialog;
+	GtkWidget*	  tree_view = self->priv->tree_view;
 
 	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select Folder To Add",
 													   NULL,
@@ -456,7 +447,7 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 													   GTK_RESPONSE_ACCEPT,
 													   NULL);
 	/* Set the starting path */
-	gchar *start_path = g_strdup_printf ("%s/*", g_get_home_dir ());
+	gchar* start_path = g_strdup_printf ("%s/*", g_get_home_dir ());
 	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog),
 								   start_path);
 	g_free (start_path);
@@ -464,8 +455,8 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 	/* check the reply */
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
 		/* get the new path, and make the label from it */
-		gchar *dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
-		gchar *label = g_path_get_basename (dir);
+		gchar* dir = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
+		gchar* label = g_path_get_basename (dir);
 		/* get the view's model, add a row and set the values */
 		model = gtk_tree_view_get_model (GTK_TREE_VIEW(tree_view));
 		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
@@ -475,7 +466,7 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 							-1);
 
 		/* create the data structure with the event info to pass to panel_menu_bar */
-		PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+		PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 		signal_data->signal_id = PREFS_SIGNAL_DIR_ADD;
 		signal_data->instance  = -1;
 		signal_data->label 	   = label;
@@ -486,7 +477,7 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 		self->menu_bar_prefs->labels = g_slist_append (self->menu_bar_prefs->labels, g_strdup(label));
 
 		/* emit the signal so the panel menu bar updates itself */
-		g_signal_emit (G_OBJECT (data),
+		g_signal_emit (G_OBJECT (self),
 					   applet_preferences_signals [PREFS_CHANGED],
 					   0,
 					   signal_data);
@@ -499,13 +490,12 @@ applet_preferences_on_add_dir_clicked (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
+applet_preferences_on_rem_dir_clicked (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkTreeSelection	*selection;
 	GtkTreeModel		*model;
 	GtkTreeIter			iter;
-	AppletPreferences	*self = (AppletPreferences *)data;
 	GtkWidget			*tree_view = self->priv->tree_view;
 
 	/* get the current selection */
@@ -516,12 +506,12 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 
 		/* get the instance from the iterator */
-		gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+		gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
 		gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 
 		/* create the data structure with the event info to pass to panel_menu_bar */
-		PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+		PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 		signal_data->signal_id = PREFS_SIGNAL_DIR_DEL;
 		signal_data->instance  = atoi (instance);
 		signal_data->label 	   = NULL;
@@ -529,7 +519,7 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 		g_free (instance);
 
 		/* remove this item from the list holding the path/label prefs */
-		GSList *tmp = NULL;
+		GSList* tmp = NULL;
 		tmp = g_slist_nth (self->menu_bar_prefs->dirs, signal_data->instance);
 		g_free (tmp->data);
 		self->menu_bar_prefs->dirs = g_slist_delete_link (self->menu_bar_prefs->dirs, tmp);
@@ -538,7 +528,7 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 		self->menu_bar_prefs->labels = g_slist_delete_link (self->menu_bar_prefs->labels, tmp);
 
 		/* emit the signal so the panel menu bar updates itself */
-		g_signal_emit (G_OBJECT (data),
+		g_signal_emit (G_OBJECT (self),
 				applet_preferences_signals [PREFS_CHANGED],
 				0,
 				signal_data);
@@ -551,13 +541,12 @@ applet_preferences_on_rem_dir_clicked (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
+applet_preferences_on_down_dir_clicked (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkTreeSelection	*selection = NULL;
 	GtkTreeModel 		*model = NULL;
 	GtkTreeIter			iter, iter_next;
-	AppletPreferences	*self = (AppletPreferences *)data;
 	GtkWidget			*tree_view = self->priv->tree_view;
 
 	/* get the current selection */
@@ -571,14 +560,14 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 		if (gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter_next)){
 
 			/* get the instance from the iterator */
-			gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+			gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
 			gtk_list_store_swap (GTK_LIST_STORE (model),
 								 &iter,
 								 &iter_next);
 
 			/* create the data structure with the event info to pass to panel_menu_bar */
-			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 			signal_data->signal_id = PREFS_SIGNAL_DIR_MOVE_DOWN;
 			signal_data->instance  = atoi (instance);
 			signal_data->label 	   = NULL;
@@ -590,7 +579,7 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 			g_slist_swap_data (self->menu_bar_prefs->labels, signal_data->instance);
 
 			/* emit the signal so the panel menu bar updates itself */
-			g_signal_emit (G_OBJECT (data),
+			g_signal_emit (G_OBJECT (self),
 					applet_preferences_signals [PREFS_CHANGED],
 					0,
 					signal_data);
@@ -603,14 +592,13 @@ applet_preferences_on_down_dir_clicked (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
+applet_preferences_on_up_dir_clicked (GtkWidget* widget, AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkTreeSelection	*selection	= NULL;
 	GtkTreeModel 		*model		= NULL;
 	GtkTreeIter			iter, iter_prev;
 	GtkTreePath			*path;
-	AppletPreferences	*self		= (AppletPreferences *)data;
 	GtkWidget			*tree_view	= self->priv->tree_view;
 
 	/* get the current selection */
@@ -628,14 +616,14 @@ applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
 			gtk_tree_model_get_iter (model, &iter_prev, path);
 
 			/* get the instance from the iterator */
-			gchar *instance = gtk_tree_model_get_string_from_iter (model, &iter);
+			gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
 			gtk_list_store_swap (GTK_LIST_STORE (model),
 								 &iter,
 								 &iter_prev);
 
 			/* create the data structure with the event info to pass to panel_menu_bar */
-			PrefsChangedSignalData *signal_data = g_new0 (PrefsChangedSignalData, 1);
+			PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
 			signal_data->signal_id = PREFS_SIGNAL_DIR_MOVE_UP;
 			signal_data->instance  = atoi (instance);
 			signal_data->label 	   = NULL;
@@ -647,7 +635,7 @@ applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
 			g_slist_swap_data (self->menu_bar_prefs->labels, signal_data->instance - 1);
 
 			/* emit the signal so the panel menu bar updates itself */
-			g_signal_emit (G_OBJECT (data),
+			g_signal_emit (G_OBJECT (self),
 						   applet_preferences_signals [PREFS_CHANGED],
 						   0,
 						   signal_data);
@@ -661,7 +649,7 @@ applet_preferences_on_up_dir_clicked (GtkWidget *widget, gpointer data) {
 }
 /******************************************************************************/
 static void
-applet_preferences_create_list_view (AppletPreferences *self) {
+applet_preferences_create_list_view (AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkTreeIter			iter;
@@ -677,8 +665,8 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 							    G_TYPE_STRING);
 
 	/* fill the model with data */
-	GSList *tmp_dir   = self->menu_bar_prefs->dirs;
-	GSList *tmp_label = self->menu_bar_prefs->labels;
+	GSList* tmp_dir   = self->menu_bar_prefs->dirs;
+	GSList* tmp_label = self->menu_bar_prefs->labels;
 	while (tmp_label && tmp_dir) {
 		gtk_list_store_append (store, &iter);
 		gtk_list_store_set (store, &iter,
@@ -703,7 +691,7 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 	g_signal_connect (G_OBJECT (renderer),
 					  "edited",
 					  G_CALLBACK (applet_preferences_label_cell_edited),
-					  (gpointer) self);
+					  self);
 
 	/* Create a column, associating the "text" attribute of the
 	* cell_renderer to the first column of the model */
@@ -718,7 +706,7 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 	g_signal_connect (G_OBJECT (self->priv->tree_view),
 					  "row-activated",
 					  G_CALLBACK (applet_preferences_path_cell_activated),
-					  (gpointer) self);
+					  self);
 	column = gtk_tree_view_column_new_with_attributes ("Path", renderer,
 													   "text", PATH_COLUMN,
 													   NULL);
@@ -732,33 +720,33 @@ applet_preferences_create_list_view (AppletPreferences *self) {
 }
 /******************************************************************************/
 void
-applet_preferences_make_dialog (AppletPreferences *self) {
+applet_preferences_make_dialog (AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (self == NULL || IS_APPLET_PREFERENCES (self));
 
-	GtkWidget *window;
-    GtkWidget *show_icon;
-    GtkWidget *icon_button;
-    GtkWidget *show_hidden;
-    GtkWidget *terminal;
-    GtkWidget *editor;
-	MenuBarPrefs *mb_prefs = self->menu_bar_prefs;
+	GtkWidget* window;
+    GtkWidget* show_icon;
+    GtkWidget* icon_button;
+    GtkWidget* show_hidden;
+    GtkWidget* terminal;
+    GtkWidget* editor;
+	MenuBarPrefs* mb_prefs = self->menu_bar_prefs;
 
 	if (self->priv->window == NULL) {
-		GladeXML *xml = glade_xml_new (GLADEUI_PATH, NULL, NULL);
+		GladeXML* xml = glade_xml_new (GLADEUI_PATH, NULL, NULL);
 		g_return_if_fail (xml != NULL);
 		window = glade_xml_get_widget (xml, "preferences_dialog");
 
 		g_signal_connect (G_OBJECT (GTK_DIALOG (window)),
 						  "response",
 						  G_CALLBACK (applet_preferences_dialog_response),
-						  (gpointer) self);
+						  self);
 
 		g_signal_connect (G_OBJECT (window),
 						  "delete_event",
 						  G_CALLBACK (gtk_widget_hide),
-						  (gpointer) self);
+						  self);
 
 		/***** terminal *****/
 		terminal = glade_xml_get_widget (xml, "terminal_entry");
@@ -768,7 +756,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		g_signal_connect (G_OBJECT (terminal),
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_terminal_changed),
-						  (gpointer)self);
+						  self);
 
 		/***** editor *****/
 		editor = glade_xml_get_widget (xml, "editor_entry");
@@ -778,7 +766,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		g_signal_connect (G_OBJECT (editor),
 						  "changed",
 						  G_CALLBACK (applet_preferences_on_editor_changed),
-						  (gpointer)self);
+						  self);
 
 		/***** show hidden *****/
 		show_hidden = glade_xml_get_widget (xml, "show_hidden_check");
@@ -787,7 +775,7 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		g_signal_connect (G_OBJECT (show_hidden),
 						  "toggled",
 						  G_CALLBACK (applet_preferences_on_show_hidden_pressed),
-						  (gpointer)self);
+						  self);
 
 		/***** icon *****/
 		show_icon = glade_xml_get_widget (xml, "show_icon_check");
@@ -796,10 +784,10 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		g_signal_connect (G_OBJECT (show_icon),
 						  "toggled",
 						  G_CALLBACK (applet_preferences_on_show_icon_pressed),
-						  (gpointer)self);
+						  self);
 
 		icon_button = glade_xml_get_widget (xml, "icon_button");
-		GtkWidget *icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_BUTTON_SIZE);
+		GtkWidget* icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_BUTTON_SIZE);
 		if (icon == NULL) {
 			icon = gtk_image_new_from_icon_name ("user-home", GTK_ICON_SIZE_BUTTON);
 		}
@@ -807,35 +795,35 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 		g_signal_connect (G_OBJECT (icon_button),
 						  "released",
 						  G_CALLBACK (applet_preferences_on_icon_select),
-						  (gpointer)self);
+						  self);
 
 		/***** dirs/labels **/
 		self->priv->tree_view = glade_xml_get_widget (xml, "directories_tree");
 		applet_preferences_create_list_view (self);
 
 		/***** more buttons ******/
-		GtkWidget *add_button  = glade_xml_get_widget (xml, "directory_add_button");
-		GtkWidget *rem_button  = glade_xml_get_widget (xml, "directory_remove_button");
-		GtkWidget *up_button   = glade_xml_get_widget (xml, "move_up_button");
-		GtkWidget *down_button = glade_xml_get_widget (xml, "move_down_button");
+		GtkWidget* add_button  = glade_xml_get_widget (xml, "directory_add_button");
+		GtkWidget* rem_button  = glade_xml_get_widget (xml, "directory_remove_button");
+		GtkWidget* up_button   = glade_xml_get_widget (xml, "move_up_button");
+		GtkWidget* down_button = glade_xml_get_widget (xml, "move_down_button");
 
 
 		g_signal_connect (G_OBJECT (add_button),
 						  "released",
 						  G_CALLBACK (applet_preferences_on_add_dir_clicked),
-						  (gpointer) self);
+						  self);
 		g_signal_connect (G_OBJECT (rem_button),
 						  "released",
 						  G_CALLBACK (applet_preferences_on_rem_dir_clicked),
-						  (gpointer) self);
+						  self);
 		g_signal_connect (G_OBJECT (up_button),
 						  "released",
 						  G_CALLBACK (applet_preferences_on_up_dir_clicked),
-						  (gpointer) self);
+						  self);
 		g_signal_connect (G_OBJECT (down_button),
 						  "released",
 						  G_CALLBACK (applet_preferences_on_down_dir_clicked),
-						  (gpointer) self);
+						  self);
 
 		/***** the end ******/
 		self->priv->window = window;
@@ -847,13 +835,13 @@ applet_preferences_make_dialog (AppletPreferences *self) {
 	return;
 }
 /******************************************************************************/
-static MenuBarPrefs *
-applet_preferences_load_from_gconf (PanelApplet *applet) {
+static MenuBarPrefs*
+applet_preferences_load_from_gconf (PanelApplet* applet) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GError *error = NULL;
+	GError* error = NULL;
 
-	MenuBarPrefs *mb_prefs  = g_new0 (MenuBarPrefs, 1);
+	MenuBarPrefs* mb_prefs  = g_new0 (MenuBarPrefs, 1);
 	mb_prefs->browser_prefs = g_new0 (BrowserPrefs, 1);
 
 	/* this loads the default key's/values into the gconf entry for this applet
@@ -920,7 +908,7 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 									 &error);
 	}
 	/* directory list */
-	GSList *dirs = panel_applet_gconf_get_list (applet,
+	GSList* dirs = panel_applet_gconf_get_list (applet,
 											   KEY_DIR,
 											   GCONF_VALUE_STRING,
 											   &error);
@@ -935,7 +923,7 @@ applet_preferences_load_from_gconf (PanelApplet *applet) {
 									 &error);
 	}
 	/* labels list */
-	GSList *labels = panel_applet_gconf_get_list (applet,
+	GSList* labels = panel_applet_gconf_get_list (applet,
 											     KEY_LABELS,
 											     GCONF_VALUE_STRING,
 											     &error);
@@ -959,7 +947,7 @@ AppletPreferences*
 applet_preferences_new (PanelApplet* applet) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	AppletPreferences *self;
+	AppletPreferences* self;
 	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
 	self = g_object_newv (TYPE_APPLET_PREFERENCES, 0, NULL);
 
@@ -972,7 +960,7 @@ applet_preferences_new (PanelApplet* applet) {
 }
 /******************************************************************************/
 static void
-applet_preferences_class_init (AppletPreferencesClass * klass) {
+applet_preferences_class_init (AppletPreferencesClass* klass) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	applet_preferences_parent_class = g_type_class_peek_parent (klass);
@@ -998,15 +986,15 @@ applet_preferences_class_init (AppletPreferencesClass * klass) {
 }
 /******************************************************************************/
 static void
-applet_preferences_init (AppletPreferences * self) {
+applet_preferences_init (AppletPreferences* self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	self->priv = APPLET_PREFERENCES_GET_PRIVATE (self);
 }
 /******************************************************************************/
 static void
-applet_preferences_dispose (GObject * obj) {
-	AppletPreferences * self;
+applet_preferences_dispose (GObject* obj) {
+	AppletPreferences* self;
 	self = APPLET_PREFERENCES (obj);
 	(self->priv->window == NULL ? NULL : (self->priv->window = (g_object_unref (self->priv->window), NULL)));
 	G_OBJECT_CLASS (applet_preferences_parent_class)->dispose (obj);

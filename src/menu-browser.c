@@ -751,15 +751,12 @@ menu_browser_add_main_menu_header (GtkWidget *menu,
 /******************************************************************************/
 static gboolean
 menu_browser_activate_main_menu (MenuBrowser *self) {
-
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	if (!IS_MENU_BROWSER (self)) return FALSE;
 
-	if (self->priv->parent_menu_shell == NULL) {
-		self->priv->parent_menu_shell =
+	self->priv->parent_menu_shell =
 			GTK_MENU_SHELL (gtk_widget_get_parent (GTK_WIDGET (self)));
-	}
 
 	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (self));
 	menu_browser_populate_menu (GTK_WIDGET (self), self);

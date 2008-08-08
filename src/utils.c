@@ -31,8 +31,7 @@ gboolean
 utils_check_gerror (GError **error) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	if (*error)
-	{
+	if (*error) {
 		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
 		utils_show_dialog ("Application Error",
 						   (*error)->message,

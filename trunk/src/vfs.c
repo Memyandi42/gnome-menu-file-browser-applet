@@ -43,20 +43,17 @@ vfs_file_is_executable (const gchar *file_name) {
 
 	GFile *file = g_file_new_for_path (file_name);
 	GFileInfo* file_info =  g_file_query_info (file,
-											   "standard::*",
+											   G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE,
 											   0,
 											   NULL,
 											   &error);
-	if (error) {
-		g_printf ("error: %s\n", error->message);
-		g_error_free (error);
-		error = NULL;
-	}
 
-	const gchar *content_type = g_file_info_get_content_type (file_info);
-	gboolean is_executable = g_content_type_can_be_executable (content_type);
+	if (utils_check_gerror (&error)) {return FALSE;}
 
-	return is_executable;
+	return (g_file_info_get_attribute_boolean (file_info,
+											  G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)) &&
+				!vfs_file_is_directory (file_name); 
+
 /*
 	gchar *mime_type = gnome_vfs_get_mime_type (file_name);
 	gboolean is_executable = FALSE;
@@ -73,11 +70,9 @@ gboolean
 vfs_file_is_desktop (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GDesktopAppInfo *info = NULL;
-	info = g_desktop_app_info_new_from_filename (file_name); 
-	gboolean is_desktop_file = !(info == NULL);
-
-	return is_desktop_file;
+	GDesktopAppInfo *desktop_app_info = NULL;
+	desktop_app_info = g_desktop_app_info_new_from_filename (file_name); 
+	return !(desktop_app_info == NULL);
 
 	/*
 	return g_str_has_suffix (file_name, ".desktop");
@@ -117,6 +112,21 @@ gchar *
 vfs_get_mime_application (const gchar *file_name_and_path) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
+	GError *error = NULL;
+
+	GFile *file = g_file_new_for_path (file_name_and_path);
+	GFileInfo* file_info =  g_file_query_info (file,
+											   "standard::*",
+											   0,
+											   NULL,
+											   &error);
+	if (utils_check_gerror (&error)) {return NULL;}
+
+	GAppInfo *app_info = g_app_info_get_default_for_type (g_file_info_get_content_type (file_info), FALSE);
+
+	return g_app_info_get_executable (app_info);
+
+/*
 	GnomeVFSMimeApplication *mime_application = NULL;
 	gchar *mime_type = NULL;
 	gchar *file_mime_app_exec = NULL;
@@ -132,6 +142,7 @@ vfs_get_mime_application (const gchar *file_name_and_path) {
 	g_free (mime_application);
 
 	return file_mime_app_exec;
+*/
 }
 /******************************************************************************/
 gboolean
@@ -354,10 +365,13 @@ vfs_trash_file (gchar *file_name) {
 
 	GError *error = NULL;
 	GFile *file = g_file_new_for_path (file_name);
+
+	/* Try moving it to the trash */
 	g_file_trash (file,
 				  NULL,
 				  &error);
 
+	/* Let the user know if we failed. */
 	if (utils_check_gerror (&error)) {
 		gchar *message = g_strdup_printf ("Error: Failed to move \"%s\" to Trash.",
 										  file_name);

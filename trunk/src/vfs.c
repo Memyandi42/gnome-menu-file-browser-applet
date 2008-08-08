@@ -26,6 +26,9 @@
 #include "vfs.h"
 #include "utils.h"
 
+#include <gio/gio.h>
+#include <gio/gdesktopappinfo.h>
+
 #include <glib/gprintf.h>
 #include <libgnomevfs/gnome-vfs.h>
 #include <libgnomevfs/gnome-vfs-mime-handlers.h>
@@ -36,6 +39,25 @@ gboolean
 vfs_file_is_executable (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
+	GError *error = NULL;
+
+	GFile *file = g_file_new_for_path (file_name);
+	GFileInfo* file_info =  g_file_query_info (file,
+											   "standard::*",
+											   0,
+											   NULL,
+											   &error);
+	if (error) {
+		g_printf ("error: %s\n", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+
+	const gchar *content_type = g_file_info_get_content_type (file_info);
+	gboolean is_executable = g_content_type_can_be_executable (content_type);
+
+	return is_executable;
+/*
 	gchar *mime_type = gnome_vfs_get_mime_type (file_name);
 	gboolean is_executable = FALSE;
 	is_executable =  g_file_test (file_name, G_FILE_TEST_IS_EXECUTABLE) &&
@@ -44,19 +66,41 @@ vfs_file_is_executable (const gchar *file_name) {
 					 g_str_has_prefix (mime_type, "text/x-"));
 	g_free (mime_type);
 	return is_executable;
+*/
 }
 /******************************************************************************/
 gboolean
 vfs_file_is_desktop (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
+	GDesktopAppInfo *info = NULL;
+	info = g_desktop_app_info_new_from_filename (file_name); 
+	gboolean is_desktop_file = !(info == NULL);
+
+	return is_desktop_file;
+
+	/*
 	return g_str_has_suffix (file_name, ".desktop");
+	*/
 }
 /******************************************************************************/
 gboolean
 vfs_file_is_directory (const gchar *file_name) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);;
 
+	GError *error = NULL;
+
+	GFile *file = g_file_new_for_path (file_name);
+	GFileInfo* file_info =  g_file_query_info (file,
+											   "standard::*",
+											   0,
+											   NULL,
+											   &error);
+	GFileType file_type = g_file_info_get_file_type (file_info);
+
+	return (file_type == G_FILE_TYPE_DIRECTORY);
+
+/*
 	GnomeVFSResult	 		vfs_result;
 	GnomeVFSFileInfo		vfs_file_info;
 	gboolean res;
@@ -66,6 +110,7 @@ vfs_file_is_directory (const gchar *file_name) {
 										  GNOME_VFS_FILE_INFO_FOLLOW_LINKS);
 	res = (vfs_file_info.type == GNOME_VFS_FILE_TYPE_DIRECTORY);
 	return res;
+*/
 }
 /******************************************************************************/
 gchar *
@@ -307,6 +352,22 @@ void
 vfs_trash_file (gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
+	GError *error = NULL;
+	GFile *file = g_file_new_for_path (file_name);
+	g_file_trash (file,
+				  NULL,
+				  &error);
+
+	if (utils_check_gerror (&error)) {
+		gchar *message = g_strdup_printf ("Error: Failed to move \"%s\" to Trash.",
+										  file_name);
+		utils_show_dialog ("Error: Failed to move tile to Trash",
+						   message,
+						   GTK_MESSAGE_ERROR);
+		g_free (message);
+	}
+
+/*
 	if (!vfs_file_exists (file_name)) {
 		return;
 	}
@@ -328,5 +389,6 @@ vfs_trash_file (gchar *file_name) {
 	}
 	g_free (file);
 	g_free (new_file_name);
+*/
 }
 /******************************************************************************/

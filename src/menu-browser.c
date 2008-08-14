@@ -25,10 +25,8 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <libgnomeui/libgnomeui.h>
-#include <libgnomevfs/gnome-vfs.h>
-#include <libgnomevfs/gnome-vfs-mime-handlers.h>
 #include <libgnome/gnome-desktop-item.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "menu-browser.h"
 #include "utils.h"
@@ -45,7 +43,6 @@ struct _MenuBrowserPrivate {
 	GtkWidget		*menu;
 	GtkWidget		*menu_item_label;
 	GtkMenuShell	*parent_menu_shell;
-	GtkIconTheme	*icon_theme;
 	GPtrArray		*tmp_array;
 };
 #define MENU_BROWSER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MENU_BROWSER, MenuBrowserPrivate))
@@ -168,12 +165,7 @@ menu_browser_add_default_file (gchar *file_name,
 	g_free (base_name);
 
 	/*lookup the mime icon name for this file type */
-	icon_name = gnome_icon_lookup_sync (self->priv->icon_theme,
-										NULL,
-										file_name,
-										NULL,
-										0,
-										NULL);
+	icon_name = vfs_get_mime_icon_for_file (file_name);
 
 	/*get the icon widget based on the returned icon name*/
 	menu_item_icon = gtk_image_new_from_icon_name (icon_name,
@@ -580,7 +572,7 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 								  self);
 #endif
 	/* read the contents of the dir. */
-	error = vfs_get_dir_contents (files,
+	error = vfs_get_dir_listings (files,
 								  dirs,
 								  self->prefs->show_hidden,
 								  current_path);
@@ -788,16 +780,11 @@ menu_browser_new (const gchar* path,
 	}
 	self->prefs = prefs;
 
-	self->priv->icon_theme = gtk_icon_theme_get_default();
 	self->priv->tmp_array = g_ptr_array_new();
 
 	/* get the mime icon name for directories */
-	self->priv->dir_mime_icon_name = gnome_icon_lookup_sync (self->priv->icon_theme,
-																		   NULL,
-																		   path,
-																		   NULL,
-																		   0,
-																		   NULL);
+	self->priv->dir_mime_icon_name = vfs_get_mime_icon_for_file (path);
+
 	GtkWidget *item_label = gtk_label_new (label);
 	gtk_misc_set_alignment (GTK_MISC (item_label), 0.0, 0.5);
 	gtk_container_add (GTK_CONTAINER (self), item_label);

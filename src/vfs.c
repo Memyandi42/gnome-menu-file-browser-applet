@@ -40,9 +40,7 @@ vfs_file_is_executable (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GError *error = NULL;
-
-	GFile *file = g_file_new_for_path (file_name);
-	GFileInfo* file_info =  g_file_query_info (file,
+	GFileInfo* file_info =  g_file_query_info (g_file_new_for_path (file_name),
 											   G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE,
 											   0,
 											   NULL,
@@ -70,9 +68,7 @@ gboolean
 vfs_file_is_desktop (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GDesktopAppInfo *desktop_app_info = NULL;
-	desktop_app_info = g_desktop_app_info_new_from_filename (file_name); 
-	return !(desktop_app_info == NULL);
+	return !(g_desktop_app_info_new_from_filename (file_name) == NULL);
 
 	/*
 	return g_str_has_suffix (file_name, ".desktop");
@@ -84,16 +80,13 @@ vfs_file_is_directory (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);;
 
 	GError *error = NULL;
-
-	GFile *file = g_file_new_for_path (file_name);
-	GFileInfo* file_info =  g_file_query_info (file,
+	GFileInfo* file_info =  g_file_query_info (g_file_new_for_path (file_name),
 											   "standard::*",
 											   0,
 											   NULL,
 											   &error);
-	GFileType file_type = g_file_info_get_file_type (file_info);
 
-	return (file_type == G_FILE_TYPE_DIRECTORY);
+	return (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY);
 
 /*
 	GnomeVFSResult	 		vfs_result;
@@ -113,18 +106,16 @@ vfs_get_mime_application (const gchar *file_name_and_path) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GError *error = NULL;
-
-	GFile *file = g_file_new_for_path (file_name_and_path);
-	GFileInfo* file_info =  g_file_query_info (file,
+	GFileInfo* file_info =  g_file_query_info (g_file_new_for_path (file_name_and_path),
 											   "standard::*",
 											   0,
 											   NULL,
 											   &error);
 	if (utils_check_gerror (&error)) {return NULL;}
 
-	GAppInfo *app_info = g_app_info_get_default_for_type (g_file_info_get_content_type (file_info), FALSE);
-
-	return g_app_info_get_executable (app_info);
+	return g_app_info_get_executable (
+				g_app_info_get_default_for_type (
+					g_file_info_get_content_type (file_info), FALSE));
 
 /*
 	GnomeVFSMimeApplication *mime_application = NULL;
@@ -313,16 +304,8 @@ vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
 	working_dir = g_path_get_dirname (file_name_and_path);
 	is_executable = vfs_file_is_executable (file_name_and_path);
 
-	/* FIXME: sigh!!! "#" makes gnome_vfs_get_mime_type crash */
-	if (!g_strrstr (file_name_and_path, "#")) {
-		file_mime_app_exec = vfs_get_mime_application (file_name_and_path);
-	}
-	else {
-		utils_show_dialog ("Error: gnome-vfs bug",
-						   "Some gnome-vfs functions cannot handle fine names that include the \"#\" character.",
-						   GTK_MESSAGE_ERROR);
-		return;
-	}
+	file_mime_app_exec = vfs_get_mime_application (file_name_and_path);
+
 	/* if it's a binary file run it*/
 	if (is_executable) {
 		arg = g_strdup_printf ("%s", file_name_and_path);

@@ -2,7 +2,7 @@
  * File:				menu-browser.c
  * Created:				September 2005
  * Created by:			Axel von Bertoldi
- * Last Modified:		January 2008
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005-2008		Axel von Bertoldi
  *
@@ -25,8 +25,8 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <libgnome/gnome-desktop-item.h>
 #include <gdk/gdkkeysyms.h>
+#include <string.h>
 
 #include "menu-browser.h"
 #include "utils.h"
@@ -39,7 +39,6 @@
 #define G_OBJECT_DATA_NAME "item_path"
 /******************************************************************************/
 struct _MenuBrowserPrivate {
-	gchar			*dir_mime_icon_name;
 	GtkWidget		*menu;
 	GtkWidget		*menu_item_label;
 	GtkMenuShell	*parent_menu_shell;
@@ -100,34 +99,17 @@ menu_browser_add_desktop_file (gchar *file_name, GtkWidget *menu, MenuBrowser *s
 		return NULL;
 	}
 
-	GnomeDesktopItem	*ditem = NULL;
-	GError				*error = NULL;
-	gchar				*icon_name = NULL;
-	const gchar			*app_name = NULL;
-	GtkWidget			*icon = NULL;
-	GtkWidget			*menu_item = NULL;
-	GtkIconTheme		*icon_theme = gtk_icon_theme_get_default();
+	const gchar *app_name = NULL;
+	GtkWidget	*icon = NULL;
+	GtkWidget	*menu_item = NULL;
 
-	ditem = gnome_desktop_item_new_from_file (file_name, 0, &error);
+	app_name = vfs_get_desktop_app_name (file_name);
+	icon = vfs_get_icon_for_file (file_name);
 
-	if (utils_check_gerror (&error) || ditem == NULL) {
-		gnome_desktop_item_unref (ditem);
-		return NULL;
-	}
-
-	icon_name = gnome_desktop_item_get_icon (ditem, icon_theme);
-	app_name = gnome_desktop_item_get_string (ditem, GNOME_DESKTOP_ITEM_NAME);
-
-	if (icon_name && app_name) {
+	if (app_name && icon) {
 		menu_item = gtk_image_menu_item_new_with_label (app_name);
-
-		/* This sucks. Should really use gtk_image_new_from_stock */
-		icon = utils_get_scaled_image_from_file (icon_name, ICON_MENU_SIZE);
-
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item), icon);
-		g_free (icon_name);
 	}
-	gnome_desktop_item_unref (ditem);
 	return menu_item;
 }
 /******************************************************************************/
@@ -141,7 +123,6 @@ menu_browser_add_default_file (gchar *file_name,
 
 	GtkWidget	*menu_item = NULL;
 	GtkWidget	*menu_item_icon = NULL;
-	gchar		*icon_name = NULL;
 	gchar		*base_name = g_path_get_basename (file_name);
 
 	/*make a menu item for this dir*/
@@ -164,17 +145,11 @@ menu_browser_add_default_file (gchar *file_name,
 	}
 	g_free (base_name);
 
-	/*lookup the mime icon name for this file type */
-	icon_name = vfs_get_mime_icon_for_file (file_name);
-
-	/*get the icon widget based on the returned icon name*/
-	menu_item_icon = gtk_image_new_from_icon_name (icon_name,
-												   GTK_ICON_SIZE_MENU);
+	menu_item_icon = vfs_get_icon_for_file (file_name);
 
 	/*stick the icon in the menu item, the menu item in the menu and show it all*/
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 									menu_item_icon);
-	g_free (icon_name);
 	return menu_item;
 }
 /******************************************************************************/
@@ -385,7 +360,6 @@ menu_browser_add_menu_header (GtkWidget *menu,
 	g_return_if_fail (IS_MENU_BROWSER (self));
 	GtkWidget *menu_item = NULL;
 	GtkWidget *separator = NULL;
-	GtkWidget *menu_item_icon = NULL;
 	gchar *dir = g_path_get_basename (path);
 
 	menu_item = gtk_image_menu_item_new_with_label (dir);
@@ -400,11 +374,9 @@ menu_browser_add_menu_header (GtkWidget *menu,
 	}
 	g_free(dir);
 
-	menu_item_icon = gtk_image_new_from_icon_name (self->priv->dir_mime_icon_name,
-												   GTK_ICON_SIZE_MENU);
-
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-								   menu_item_icon);
+								   vfs_get_icon_for_file (path));
+
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu),
 						   menu_item);
@@ -435,7 +407,6 @@ menu_browser_add_folders (GtkWidget		*menu,
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
 	GtkWidget	*menu_item = NULL;
-	GtkWidget	*menu_item_icon = NULL;
 	GtkWidget	*child_menu = NULL;
 	gchar		*file_name_and_path = NULL;
 	gchar		*dir = NULL;
@@ -460,12 +431,9 @@ menu_browser_add_folders (GtkWidget		*menu,
 		}
 
 		/*get the icon widget based on the returned icon name (always the same icon, can speed up here)*/
-		menu_item_icon = gtk_image_new_from_icon_name (self->priv->dir_mime_icon_name,
-													   GTK_ICON_SIZE_MENU);
-
 		/*stick the icon in the menu item, the menu item in the menu and show it all*/
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-										menu_item_icon);
+									   vfs_get_icon_for_file (file_name_and_path));
 
 		gtk_menu_shell_append (GTK_MENU_SHELL (menu),
 							   menu_item);
@@ -665,7 +633,6 @@ menu_browser_dispose (GObject * obj) {
 
 	(self->priv->menu == NULL ? NULL : (self->priv->menu = (gtk_widget_destroy (self->priv->menu), NULL)));
 	(self->priv->menu_item_label == NULL ? NULL : (self->priv->menu_item_label = (gtk_widget_destroy (self->priv->menu_item_label), NULL)));
-	(self->priv->dir_mime_icon_name == NULL ? NULL : (self->priv->dir_mime_icon_name = (g_free (self->priv->dir_mime_icon_name), NULL)));
 	(self->priv->tmp_array == NULL ? NULL : (self->priv->tmp_array = (g_ptr_array_free (self->priv->tmp_array, TRUE), NULL)));
 
 	/* do NOT enable this. Ever! */
@@ -728,10 +695,9 @@ menu_browser_add_main_menu_header (GtkWidget *menu,
 	}
 	g_free(dir);
 
-	menu_item_icon = gtk_image_new_from_icon_name (self->priv->dir_mime_icon_name,
-												   GTK_ICON_SIZE_MENU);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-								   menu_item_icon);
+								   vfs_get_icon_for_file (path));
+
 	gtk_menu_shell_prepend (GTK_MENU_SHELL (menu),
 							menu_item);
 	g_object_set_data (G_OBJECT (menu_item),
@@ -781,9 +747,6 @@ menu_browser_new (const gchar* path,
 	self->prefs = prefs;
 
 	self->priv->tmp_array = g_ptr_array_new();
-
-	/* get the mime icon name for directories */
-	self->priv->dir_mime_icon_name = vfs_get_mime_icon_for_file (path);
 
 	GtkWidget *item_label = gtk_label_new (label);
 	gtk_misc_set_alignment (GTK_MISC (item_label), 0.0, 0.5);

@@ -2,7 +2,7 @@
  * File:				main.c
  * Created:				September 2005
  * Created by:			Axel von Bertoldi
- * Last Modified:		January 2008
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005-2008		Axel von Bertoldi
  *
@@ -26,8 +26,8 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gtk/gtk.h>
-#include <libgnomevfs/gnome-vfs.h>
 #include <panel-applet.h>
+#include <string.h>
 
 #include "panel-menu-bar.h"
 #include "utils.h"
@@ -135,7 +135,6 @@ BonoboUIVerb file_browser_applet_menu_verbs [] = {
 /******************************************************************************/
 static gboolean
 file_browser_applet_create (PanelApplet *applet) {
-    gnome_vfs_init ();
 
 	PanelMenuBar* panel_menu_bar = panel_menu_bar_new (applet);
 

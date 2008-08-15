@@ -1,6 +1,6 @@
 /*
  * File:				vfs.c
- * Created:				February 2008
+ * Created:				August 2008
  * Created by:			Axel von Bertoldi
  * Last Modified:		March 2008
  * Last Modified by:	Axel von Bertoldi
@@ -26,12 +26,10 @@
 #include "vfs.h"
 #include "utils.h"
 
+#include <string.h>
 #include <gio/gio.h>
 #include <gio/gdesktopappinfo.h>
-#include <libgnomeui/libgnomeui.h>
-
 #include <glib/gprintf.h>
-#include <libgnome/gnome-desktop-item.h>
 
 GtkIconTheme *icon_theme = NULL;
 
@@ -40,14 +38,11 @@ gboolean
 vfs_file_is_executable (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GError *error = NULL;
 	GFileInfo* file_info =  g_file_query_info (g_file_new_for_path (file_name),
 											   G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE,
 											   0,
 											   NULL,
-											   &error);
-
-	if (utils_check_gerror (&error)) {return FALSE;}
+											   NULL);
 
 	return (g_file_info_get_attribute_boolean (file_info,
 											  G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE)) &&
@@ -65,30 +60,29 @@ gboolean
 vfs_file_is_directory (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);;
 
-	GError *error = NULL;
 	GFileInfo* file_info =  g_file_query_info (g_file_new_for_path (file_name),
 											   "standard::*",
 											   0,
 											   NULL,
-											   &error);
+											   NULL);
 
 	return (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY);
 }
 /******************************************************************************/
+/* Gets the executable file name of the application associated  with the passed
+ * file*/
 gchar *
 vfs_get_mime_application (const gchar *file_name_and_path) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GError *error = NULL;
 	GFileInfo* file_info =  g_file_query_info (g_file_new_for_path (file_name_and_path),
 											   "standard::*",
 											   0,
 											   NULL,
-											   &error);
-	if (utils_check_gerror (&error)) {return NULL;}
+											   NULL);
 
-	return g_app_info_get_executable (
-				g_app_info_get_default_for_type (
+	return (gchar *)g_app_info_get_executable (
+					g_app_info_get_default_for_type (
 					g_file_info_get_content_type (file_info), FALSE));
 }
 /******************************************************************************/
@@ -97,6 +91,8 @@ vfs_file_exists (const gchar *file_name) {
 	return g_file_test (file_name, G_FILE_TEST_EXISTS);
 }
 /******************************************************************************/
+/* Gets the contents of a directory. Puts the files and directories in separate
+ * arrays, and sorts them both. */
 gchar *
 vfs_get_dir_listings (GPtrArray *files,
 					  GPtrArray *dirs,
@@ -162,16 +158,15 @@ vfs_launch_desktop_file (const gchar *file_name) {
 	if (!vfs_file_is_desktop (file_name)) {
 		return FALSE;
 	}
-	GError *error = NULL;
-	GnomeDesktopItem *ditem = gnome_desktop_item_new_from_file (file_name, 0, &error);
 
-	gnome_desktop_item_launch  (ditem,
-								NULL,
-								GNOME_DESKTOP_ITEM_LAUNCH_ONLY_ONE,
-								&error);
-	utils_check_gerror (&error);
-	gnome_desktop_item_unref (ditem);
-	return TRUE;
+	GDesktopAppInfo *info = NULL;
+	if ((info = g_desktop_app_info_new_from_filename (file_name)) != NULL) {
+		return g_app_info_launch (G_APP_INFO (info),
+								  NULL,
+								  NULL,
+								  NULL);
+		}
+	return FALSE;
 }
 /******************************************************************************/
 void
@@ -315,18 +310,98 @@ vfs_trash_file (gchar *file_name) {
 	}
 }
 /******************************************************************************/
-gchar *
-vfs_get_mime_icon_for_file (const gchar *file_name) {
+/******************************************************************************/
+/* Blatantly stolen (and modified) from nautilus-mime-application-chooser.c.
+ * Returns a pixmap of the image associated with the passed file. .desktop
+ * files will generally be handles by the G_IS_FILE_ICON section. Theme images
+ * are handles by the G_IS_THEMED_ICON section where we first do some shit I
+ * don't understand and if that fails, we ask gtk_icon_theme_choose_icon to
+ * figure out wat icon to use. */
+static GdkPixbuf *
+vfs_get_pixbuf_for_icon (GIcon *icon) {
+	GdkPixbuf  *pixbuf = NULL;
+	gchar *filename;
 
+	if (G_IS_THEMED_ICON (icon)) {
+		const gchar * const *names = g_themed_icon_get_names (G_THEMED_ICON (icon));
+
+		if (names != NULL && names[0] != NULL) {
+			gchar *icon_no_extension = g_strdup (names[0]);
+			gchar *p = strrchr (icon_no_extension, '.');
+			if (p &&
+				(strcmp (p, ".png") == 0 ||
+				 strcmp (p, ".xpm") == 0 ||
+				 strcmp (p, ".svg") == 0)) {
+				*p = 0;
+			}
+
+			pixbuf = gtk_icon_theme_load_icon (icon_theme,
+											   icon_no_extension,
+											   ICON_MENU_SIZE,
+											   0,
+											   NULL);
+			g_free (icon_no_extension);
+		}
+
+		if (pixbuf == NULL) {
+			GtkIconInfo *icon_info = gtk_icon_theme_choose_icon (icon_theme,
+																 (const gchar **)names,
+																 ICON_MENU_SIZE,
+																 0);
+			pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
+		}
+	}
+	else if (G_IS_FILE_ICON (icon)) {
+		filename = g_file_get_path (g_file_icon_get_file (G_FILE_ICON (icon)));
+		if (filename) {
+			pixbuf = gdk_pixbuf_new_from_file_at_size (filename,
+													   ICON_MENU_SIZE,
+													   ICON_MENU_SIZE,
+													   NULL);
+		}
+		g_free (filename);
+	}
+	return pixbuf;
+}
+/******************************************************************************/
+/* Returns the image associated with a file. Works on both normal and desktop
+ * files. */
+GtkWidget *
+vfs_get_icon_for_file (const gchar *file_name) {
 	if (icon_theme == NULL) {
 		icon_theme = gtk_icon_theme_get_default();
 	}
 
-	return gnome_icon_lookup_sync (icon_theme,
-								   NULL,
-								   file_name,
-								   NULL,
-								   0,
-								   NULL);
+	GIcon *icon = NULL;
+	GdkPixbuf *icon_pixbuf = NULL; 
+
+	/* try for desktop file */
+	if (vfs_file_is_desktop (file_name)) {
+		GDesktopAppInfo *info = g_desktop_app_info_new_from_filename (file_name);
+		icon = g_app_info_get_icon (G_APP_INFO (info));
+	}	/* not a desktop file */
+	else {
+		GFileInfo* file_info = g_file_query_info (g_file_new_for_path (file_name),
+												  G_FILE_ATTRIBUTE_STANDARD_ICON,
+												  0,
+												  NULL,
+												  NULL);	
+		icon = g_file_info_get_icon (file_info);
+	}
+
+	if (icon != NULL) {
+		icon_pixbuf = vfs_get_pixbuf_for_icon (icon);
+	}
+
+	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
+	g_object_unref (icon_pixbuf);
+
+	return icon_widget; 
+}
+/******************************************************************************/
+const gchar *
+vfs_get_desktop_app_name (const gchar *file_name) {
+	GDesktopAppInfo *info = g_desktop_app_info_new_from_filename (file_name);
+	return g_app_info_get_name (G_APP_INFO (info));
 }
 /******************************************************************************/

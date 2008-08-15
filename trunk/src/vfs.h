@@ -2,7 +2,7 @@
  * File:				vfs.h
  * Created:				February 2008
  * Created by:			Axel von Bertoldi
- * Last Modified:		March 2008
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005-2008		Axel von Bertoldi
  *
@@ -32,19 +32,20 @@
 #include "config.h"
 
 /******************************************************************************/
-gboolean vfs_file_is_executable		(const gchar *file_name);
-gboolean vfs_file_is_desktop		(const gchar *file_name);
-gboolean vfs_file_exists			(const gchar *file_name);
-gboolean vfs_file_is_directory		(const gchar *file_name);
-gchar*	 vfs_get_mime_application	(const gchar *file_name_and_path);
-gchar*	 vfs_get_dir_listings		(GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, gchar *path);
-gboolean vfs_launch_desktop_file	(const gchar *file_name);
-void	 vfs_launch_app				(gchar **args, const gchar *working_dir);
-void	 vfs_edit_file				(const gchar *file_name_and_path, gchar *editor_bin);
-void	 vfs_launch_terminal		(const gchar *path, gchar *terminal_bin);
-void	 vfs_open_file				(const gchar *file_name_and_path, gint exec_action);
-void	 vfs_trash_file				(gchar *file_name);
-gchar*	 vfs_get_mime_icon_for_file (const gchar *file_name);
+gboolean	vfs_file_is_executable	 (const gchar *file_name);
+gboolean	vfs_file_is_desktop		 (const gchar *file_name);
+gboolean	vfs_file_exists			 (const gchar *file_name);
+gboolean	vfs_file_is_directory	 (const gchar *file_name);
+gchar*		vfs_get_mime_application (const gchar *file_name_and_path);
+gchar*		vfs_get_dir_listings	 (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, gchar *path);
+gboolean	vfs_launch_desktop_file	 (const gchar *file_name);
+void		vfs_launch_app			 (gchar **args, const gchar *working_dir);
+void		vfs_edit_file			 (const gchar *file_name_and_path, gchar *editor_bin);
+void		vfs_launch_terminal		 (const gchar *path, gchar *terminal_bin);
+void		vfs_open_file			 (const gchar *file_name_and_path, gint exec_action);
+void	 	vfs_trash_file			 (gchar *file_name);
+GtkWidget*	vfs_get_icon_for_file	 (const gchar *file_name);
+const gchar*vfs_get_desktop_app_name (const gchar *file_name);
 /******************************************************************************/
 
 #endif

@@ -24,7 +24,6 @@ PKGCONFIG (gio-unix-2.0
 INCLUDE_DIRECTORIES (/usr/local/include/gtkhotkey-1.0)
 LINK_DIRECTORIES (/usr/local/lib)
 
-SET (EXEC file-browser-applet)
 SET (SRCS main.c
 	 panel-menu-bar.c
  	 menu-browser.c
@@ -41,7 +40,4 @@ ADD_EXECUTABLE (${EXEC} ${SRCS})
 SET (LIBS panel-applet-2 glade-2.0 gtkhotkey gio-2.0)
 TARGET_LINK_LIBRARIES (${EXEC} ${LIBS})
 
-INSTALL (TARGETS ${EXEC} DESTINATION "${CMAKE_INSTALL_LIB_DIR}/gnome-panel")
-
-#FIXME this tries to configure the glade xml file path 
-#CONFIGURE_FILE (${FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h ${FILE_BROWSER_APPLET_SOURCE_DIR}/src/preferences.h)
+INSTALL (TARGETS ${EXEC} DESTINATION "${CMAKE_INSTALL_LIB_DIR}/${EXEC}")

@@ -324,31 +324,30 @@ vfs_get_pixbuf_for_icon (GIcon *icon) {
 
 	if (G_IS_THEMED_ICON (icon)) {
 		const gchar * const *names = g_themed_icon_get_names (G_THEMED_ICON (icon));
-
-		if (names != NULL && names[0] != NULL) {
-			gchar *icon_no_extension = g_strdup (names[0]);
-			gchar *p = strrchr (icon_no_extension, '.');
-			if (p &&
-				(strcmp (p, ".png") == 0 ||
-				 strcmp (p, ".xpm") == 0 ||
-				 strcmp (p, ".svg") == 0)) {
-				*p = 0;
-			}
-
-			pixbuf = gtk_icon_theme_load_icon (icon_theme,
-											   icon_no_extension,
-											   ICON_MENU_SIZE,
-											   0,
-											   NULL);
-			g_free (icon_no_extension);
-		}
+		GtkIconInfo *icon_info = gtk_icon_theme_choose_icon (icon_theme,
+															 (const gchar **)names,
+															 ICON_MENU_SIZE,
+															 0);
+		pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
 
 		if (pixbuf == NULL) {
-			GtkIconInfo *icon_info = gtk_icon_theme_choose_icon (icon_theme,
-																 (const gchar **)names,
-																 ICON_MENU_SIZE,
-																 0);
-			pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
+			if (names != NULL && names[0] != NULL) {
+				gchar *icon_no_extension = g_strdup (names[0]);
+				gchar *p = strrchr (icon_no_extension, '.');
+				if (p &&
+					(strcmp (p, ".png") == 0 ||
+					 strcmp (p, ".xpm") == 0 ||
+					 strcmp (p, ".svg") == 0)) {
+					*p = 0;
+				}
+
+				pixbuf = gtk_icon_theme_load_icon (icon_theme,
+												   icon_no_extension,
+												   ICON_MENU_SIZE,
+												   0,
+												   NULL);
+				g_free (icon_no_extension);
+			}
 		}
 	}
 	else if (G_IS_FILE_ICON (icon)) {

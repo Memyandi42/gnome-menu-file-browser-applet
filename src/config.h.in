@@ -31,5 +31,7 @@
 #define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/file-browser-applet.glade"
 
 #define DEBUG 0
+#define ENABLE_HELP_DOC 1
+#define ENABLE_CONTEXT_MENU 1
 
 #endif

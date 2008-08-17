@@ -182,13 +182,14 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 static gboolean
 menu_browser_on_file_right_click (const gchar *file_name_and_path, GtkWidget *menu_item) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
+#ifdef ENABLE_CONTEXT_MENU
 	return context_menu_display (file_name_and_path, menu_item);
-/*
+#else
 	utils_show_dialog ("Error: Action not implemented.",
 					   "Right click on file action not yet implemented\n",
 					   GTK_MESSAGE_INFO);
-*/
+	return TRUE;
+#endif
 }
 /******************************************************************************/
 /* This is for mouse button presses */

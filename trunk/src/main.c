@@ -94,6 +94,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		"Contributions by:",
 		"Ivan N. Zlatev <contact@i-nz.net>",
 		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
+		"Deji Akingunola",
 		NULL
 	};
 	const gchar *documenters [] = {

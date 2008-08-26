@@ -116,11 +116,13 @@ context_menu_display (const gchar *file_name,
 	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item),
 											  "menu_browser");
 
-GtkWidget *parent_menu = gtk_widget_get_parent (GTK_WIDGET (menu_item));
+/*
 GtkWidget *panel_menu_bar = gtk_widget_get_parent (GTK_WIDGET (browser));
+GtkWidget *parent_menu = gtk_widget_get_parent (GTK_WIDGET (menu_item));
 GtkMenuShell *panel_menu_bar_shell = GTK_MENU_SHELL (panel_menu_bar);
 GtkWidget *applet = gtk_widget_get_parent (GTK_WIDGET (panel_menu_bar));
 GtkWidget *panel = gtk_widget_get_parent (GTK_WIDGET (applet));
+*/
 
 	GtkWidget *menu = gtk_menu_new ();
 

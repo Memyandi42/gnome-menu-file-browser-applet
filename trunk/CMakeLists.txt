@@ -73,7 +73,7 @@ ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="file-browser-applet"
 									   --pkglicense="GPLv2"
 									   --maintainer="bertoldia@gmail.com"
 									   --pkggroup="GNOME Desktop Environment"
-									   --requires="libpanel-applet2-0, libgnomevfs2-0, libgnome-desktop-2, libglade2-0")
+									   --requires="libpanel-applet2-0, libglade2-0")
 
 ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   cmake_install.cmake

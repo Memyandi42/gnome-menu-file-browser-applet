@@ -98,6 +98,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		NULL
 	};
 	const gchar *documenters [] = {
+		"You!!! That's right! You can help!
 /*		"Axel von Bertoldi", */
 		NULL
 	};

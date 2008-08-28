@@ -26,12 +26,13 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define ICON_BUTTON_SIZE 24
-#define ICON_MENU_SIZE	 20
+#define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
+#define ICON_MENU_SIZE	 20	/* Damn! Hard-coded pixels! */
 #define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/file-browser-applet.glade"
 
 #define DEBUG 0
-#define ENABLE_HELP_DOC 1
-#define ENABLE_CONTEXT_MENU 1
+#define ENABLE_HELP_DOC
+#define ENABLE_CONTEXT_MENU
+#cmakedefine USING_GTK_HOTKEY
 
 #endif

@@ -26,11 +26,14 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <gdk/gdkkeysyms.h>
-#include <gtkhotkey.h>
 #include "panel-menu-bar.h"
 #include "preferences.h"
 #include "menu-browser.h"
 #include "utils.h"
+
+#ifdef USING_GTK_HOTKEY 
+#include <gtkhotkey.h>
+#endif
 
 /******************************************************************************/
 #define PANEL_MENU_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PANEL_MENU_BAR, PanelMenuBarPrivate))
@@ -242,6 +245,7 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 	return;
 }
 /******************************************************************************/
+#ifdef USING_GTK_HOTKEY
 static void
 panel_menu_bar_on_hotkey_press (GtkHotkeyInfo *hot_key_info,
 								guint event_time,
@@ -274,6 +278,7 @@ panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 
 	gtk_hotkey_info_bind (hot_key_info, &error);
 }
+#endif
 /******************************************************************************/
 static void
 panel_menu_bar_update_entry (PanelMenuBar *self,
@@ -623,8 +628,10 @@ panel_menu_bar_new (PanelApplet* applet) {
 	/* get a handle to the applet context menu */
 	self->priv->bonobo_control = panel_applet_get_control (applet);
 
+#ifdef USING_GTK_HOTKEY
 	/* setup global keybinding */
 	panel_menu_bar_add_keybinding (self);
+#endif
 
 	return self;
 }

@@ -15,7 +15,7 @@ Optionally requires libgtkhotkey-1.0 for keyboard activation.
 
 You will also need the following packages installed to compile this program:
 pkg-config
-CMake >= 2.6
+CMake >= 2.4.7
 
 Configuration
 *************

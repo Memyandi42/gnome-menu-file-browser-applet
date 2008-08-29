@@ -6,6 +6,10 @@ Version 0.5.8
 	* Added optional keyboard activation (a.k.a. hotkey). libgtkhotkey required for this functionality.
 	* Fixed size of icons in menu items to 20px.
 	* Improved keyboard navigation (a lot).
+	* Better long file name ellipsize
+	* Added optional keyboard activation (a.k.a. hotkey). libgtkhotkey is
+	  required for this functionality. Activation is currently bound to
+	  <Super>h
 
 Version 0.5.6
 *************

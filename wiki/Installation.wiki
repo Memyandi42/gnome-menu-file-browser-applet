@@ -12,7 +12,7 @@ dependencies) for the following packages installed to compile this program:
 
 You will also need the following packages installed to compile this program:
   * pkg-config
-  * cmake >= 2.4.7
+  * CMake >= 2.4.7
 
 =Configuration=
 

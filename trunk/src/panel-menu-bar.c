@@ -2,7 +2,7 @@
  * File:				panel-menu-bar.c
  * Created:				October 2007
  * Created by:			Axel von Bertoldi
- * Last Modified:		January 2008
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005-2008		Axel von Bertoldi
  *
@@ -31,7 +31,7 @@
 #include "menu-browser.h"
 #include "utils.h"
 
-#ifdef USING_GTK_HOTKEY 
+#ifdef ENABLE_GTK_HOTKEY 
 #include <gtkhotkey.h>
 #endif
 
@@ -245,7 +245,7 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 	return;
 }
 /******************************************************************************/
-#ifdef USING_GTK_HOTKEY
+#ifdef ENABLE_GTK_HOTKEY
 static void
 panel_menu_bar_on_hotkey_press (GtkHotkeyInfo *hot_key_info,
 								guint event_time,
@@ -628,7 +628,7 @@ panel_menu_bar_new (PanelApplet* applet) {
 	/* get a handle to the applet context menu */
 	self->priv->bonobo_control = panel_applet_get_control (applet);
 
-#ifdef USING_GTK_HOTKEY
+#ifdef ENABLE_GTK_HOTKEY
 	/* setup global keybinding */
 	panel_menu_bar_add_keybinding (self);
 #endif

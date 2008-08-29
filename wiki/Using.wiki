@@ -1,9 +1,11 @@
 Instructions for using menu-file-browser-applet
 
+=Adding the applet to the Panel=
 To load and use the applet, right click on the GNOME panel and select 'Add to Panel...' Select the File Browser entry from the dialog and click 'Add' (as shown below).
 
 [http://gnome-menu-file-browser-applet.googlecode.com/svn/web/running.png]
 
+=Configuring the applet=
 To configure the applet, right click on it and select Preferences from the menu. 
 
 Note: Pressing the Close button will save your changes permanently. Closing the window any other way (i.e. pressing Esc.) will not.  

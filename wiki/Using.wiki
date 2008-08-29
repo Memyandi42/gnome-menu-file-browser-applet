@@ -11,3 +11,6 @@ To configure the applet, right click on it and select Preferences from the menu.
 Note: Pressing the Close button will save your changes permanently. Closing the window any other way (i.e. pressing Esc.) will not.  
 
 [http://gnome-menu-file-browser-applet.googlecode.com/svn/web/preferences.png]
+
+=Using=
+You can activate the applet with a mouse left click of, if hotkey is enabled, by pressing <Super>h.

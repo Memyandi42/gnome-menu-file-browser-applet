@@ -1,0 +1,38 @@
+/*
+ * File:				config.h
+ * Created:				March 2008
+ * Created by:			Axel von Bertoldi
+ * Last Modified:		August 2008
+ * Last Modified by:	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to:
+ * The Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor
+ * Boston, MA 02110-1301, USA.
+ */
+
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
+#define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
+#define ICON_MENU_SIZE	 20	/* Damn! Hard-coded pixels! */
+#define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/file-browser-applet.glade"
+
+#define DEBUG 0
+#cmakedefine ENABLE_HELP_DOC
+#cmakedefine ENABLE_CONTEXT_MENU
+#cmakedefine ENABLE_GTK_HOTKEY
+
+#endif

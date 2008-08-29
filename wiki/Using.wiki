@@ -4,7 +4,7 @@ To load and use the applet, right click on the GNOME panel and select 'Add to Pa
 
 [http://gnome-menu-file-browser-applet.googlecode.com/svn/web/running.png]
 
-To configure the applet, right click on it's handlebar and select Preferences from the menu. 
+To configure the applet, right click on it and select Preferences from the menu. 
 
 Note: Pressing the Close button will save your changes permanently. Closing the window any other way (i.e. pressing Esc.) will not.  
 

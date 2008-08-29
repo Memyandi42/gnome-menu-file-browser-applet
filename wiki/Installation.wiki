@@ -24,14 +24,14 @@ There are 4 configuration options available:
 
 CMAKE_INSTALL_PATH specifies the installation prefix and currently only affects
 installation of the icons which are installed in
- - CMAKE_INSTALL_PATH/share/pixmaps
- - CMAKE_INSTALL_PATH/share/icons/hicolor/128x128/apps.
- - CMAKE_INSTALL_PATH/lib/bonobo/servers
+ * CMAKE_INSTALL_PATH/share/pixmaps
+ * CMAKE_INSTALL_PATH/share/icons/hicolor/128x128/apps.
+ * CMAKE_INSTALL_PATH/lib/bonobo/servers
 The default is /usr.
 
 CMAKE_INSTALL_LIB_DIR specifies the installation prefix of the binary
 application file which is installed in
- - CMAKE_INSTALL_LIB_DIR/file-browser-applet/
+ * CMAKE_INSTALL_LIB_DIR/file-browser-applet/
 The default is CMAKE_INSTALL_PATH/lib.
 
 CMAKE_INSTALL_GCONF_SCHEMA_DIR specifies the installation prefix of the gconf schema

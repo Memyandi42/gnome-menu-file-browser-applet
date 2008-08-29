@@ -2,9 +2,9 @@
  * File:				config.h
  * Created:				March 2008
  * Created by:			Axel von Bertoldi
- * Last Modified:		March 2008
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -31,8 +31,8 @@
 #define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/file-browser-applet.glade"
 
 #define DEBUG 0
-#define ENABLE_HELP_DOC
-#define ENABLE_CONTEXT_MENU
-#cmakedefine USING_GTK_HOTKEY
+#cmakedefine ENABLE_HELP_DOC
+#cmakedefine ENABLE_CONTEXT_MENU
+#cmakedefine ENABLE_GTK_HOTKEY
 
 #endif

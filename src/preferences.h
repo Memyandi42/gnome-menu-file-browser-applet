@@ -2,9 +2,9 @@
  * File:				preferences.h
  * Created:				April 2006
  * Created by:			Axel von Bertoldi
- * Last Modified:		October 2007
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
- * (C) 2005,2006,2007	Axel von Bertoldi
+ * (C) 2005-2008		Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free

@@ -2,7 +2,7 @@
  * File:				utils.h
  * Created:				August 2007
  * Created by:			Axel von Bertoldi
- * Last Modified:		January 2008
+ * Last Modified:		August 2008
  * Last Modified by:	Axel von Bertoldi
  * (C) 2005-2008		Axel von Bertoldi
  *

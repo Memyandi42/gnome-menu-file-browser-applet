@@ -46,7 +46,7 @@ utils_check_gerror (GError **error) {
 }
 /******************************************************************************/
 void
-utils_show_dialog (gchar *title, gchar *message, GtkMessageType type) {
+utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *dialog = gtk_message_dialog_new (NULL,

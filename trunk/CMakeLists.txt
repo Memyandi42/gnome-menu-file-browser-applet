@@ -7,26 +7,37 @@ SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -g -Wall -ansi")
 SET (EXEC file-browser-applet)
 
 #install path options
-IF (NOT DEFINED CMAKE_INSTALL_PATH)
-	SET (CMAKE_INSTALL_PATH "/usr")
-ENDIF (NOT DEFINED CMAKE_INSTALL_PATH)
-MESSAGE ("Using CMAKE_INSTALL_PATH=${CMAKE_INSTALL_PATH}")
-
-IF (NOT DEFINED CMAKE_INSTALL_LIB_DIR)
-	SET (CMAKE_INSTALL_LIB_DIR "${CMAKE_INSTALL_PATH}/lib/${EXEC}")
-ENDIF (NOT DEFINED CMAKE_INSTALL_LIB_DIR)
-MESSAGE ("Using CMAKE_INSTALL_LIB_DIR=${CMAKE_INSTALL_LIB_DIR}")
-
-IF(NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
-	SET(CMAKE_INSTALL_GCONF_SCHEMA_DIR "${CMAKE_INSTALL_PATH}/share/gconf/schemas")
+################################################################################
+IF (NOT DEFINED CMAKE_INSTALL_PREFIX)
+	SET (CMAKE_INSTALL_PREFIX "/usr")
+ENDIF (NOT DEFINED CMAKE_INSTALL_PREFIX)
+MESSAGE ("Using CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
+################################################################################
+IF (NOT DEFINED CMAKE_INSTALL_LIB_PREFIX)
+	SET (CMAKE_INSTALL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF (NOT DEFINED CMAKE_INSTALL_LIB_PREFIX)
+MESSAGE ("Using CMAKE_INSTALL_LIB_PREFIX=${CMAKE_INSTALL_LIB_PREFIX}")
+################################################################################
+IF (NOT DEFINED CMAKE_INSTALL_LIB_EXEC_DIR)
+	SET (CMAKE_INSTALL_LIB_EXEC_DIR "${CMAKE_INSTALL_LIB_PREFIX}/${EXEC}")
+ENDIF (NOT DEFINED CMAKE_INSTALL_LIB_EXEC_DIR)
+MESSAGE ("Using CMAKE_INSTALL_LIB_EXEC_DIR=${CMAKE_INSTALL_LIB_EXEC_DIR}")
+################################################################################
+IF (NOT DEFINED CMAKE_INSTALL_BONOBO_DIR)
+	SET (CMAKE_INSTALL_BONOBO_DIR "${CMAKE_INSTALL_LIB_PREFIX}/bonobo/servers")
+ENDIF (NOT DEFINED CMAKE_INSTALL_BONOBO_DIR)
+MESSAGE ("Using CMAKE_INSTALL_BONOBO_DIR=${CMAKE_INSTALL_BONOBO_DIR}")
+################################################################################
+IF (NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
+	SET(CMAKE_INSTALL_GCONF_SCHEMA_DIR "${CMAKE_INSTALL_PREFIX}/share/gconf/schemas")
 ENDIF(NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
 MESSAGE ("Using CMAKE_INSTALL_GCONF_SCHEMA_DIR=${CMAKE_INSTALL_GCONF_SCHEMA_DIR}")
-
-IF(NOT DEFINED CMAKE_INSTALL_GLADEUI_DIR)
-	SET(CMAKE_INSTALL_GLADEUI_DIR "${CMAKE_INSTALL_PATH}/share/file-browser-applet/glade")
+################################################################################
+IF (NOT DEFINED CMAKE_INSTALL_GLADEUI_DIR)
+	SET(CMAKE_INSTALL_GLADEUI_DIR "${CMAKE_INSTALL_PREFIX}/share/${EXEC}/glade")
 ENDIF(NOT DEFINED CMAKE_INSTALL_GLADEUI_DIR)
 MESSAGE ("Using CMAKE_INSTALL_GLADEUI_DIR=${CMAKE_INSTALL_GLADEUI_DIR}")
-
+################################################################################
 
 SUBDIRS (src
 		 data
@@ -50,7 +61,7 @@ SET (CPACK_PACKAGE_VERSION_MINOR 5)
 SET (CPACK_PACKAGE_VERSION_PATCH 8)
 SET (CPACK_GENERATOR TGZ)
 SET (CPACK_SOURCE_PACKAGE_FILE_NAME
-	"file-browser-applet-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+	"${EXEC}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET (CPACK_SOURCE_GENERATOR TGZ)
 SET (CPACK_SOURCE_IGNORE_FILES
 	 "CMakeFiles"
@@ -63,11 +74,10 @@ SET (CPACK_SOURCE_IGNORE_FILES
 	 "/*.tar.gz"
 	 ".svn"
 	 "install_manifest.txt"
-	 "install_manifest.txt"
 )
 INCLUDE (CPack)
 
-ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="file-browser-applet"
+ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"
 									   --pkgversion="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
 									   --install=0
 									   --deldoc=1
@@ -89,7 +99,7 @@ ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   pixmaps/CMakeFiles
 									   pixmaps/cmake_install.cmake
 									   pixmaps/Makefile
-									   src/file-browser-applet
+									   src/${EXEC}
 									   src/cmake_install.cmake
 									   src/CMakeFiles
 									   src/Makefile)

@@ -32,7 +32,7 @@
 #include "config.h"
 
 gboolean	utils_check_gerror (GError **error);
-void		utils_show_dialog (gchar *title, gchar *message, GtkMessageType type);
+void		utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type);
 GtkWidget*	utils_get_scaled_image_from_file (gchar *file_name, int size);
 GSList*		g_slist_swap_data (GSList *list, guint index);
 gint		utils_sort_alpha (const gchar **s1, const gchar **s2);

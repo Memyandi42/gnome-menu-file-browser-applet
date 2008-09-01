@@ -28,7 +28,7 @@
 
 #define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
 #define ICON_MENU_SIZE	 20	/* Damn! Hard-coded pixels! */
-#define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/file-browser-applet.glade"
+#define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/${EXEC}.glade"
 
 #define DEBUG 0
 #cmakedefine ENABLE_HELP_DOC

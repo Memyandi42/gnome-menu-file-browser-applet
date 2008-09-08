@@ -81,57 +81,22 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
 
 	gint				i;
-	gboolean			text_vertical = FALSE;
-	gdouble				text_angle;
-	gfloat				text_xalign;
-	gfloat				text_yalign;
-	GtkWidget			*menu_browser = NULL;
-	GtkRequisition		requisition;
-	GtkPackDirection	pack_direction;
+	PangoEllipsizeMode	ellipsize_mode = PANGO_ELLIPSIZE_NONE;
+	GtkPackDirection	pack_direction = GTK_PACK_DIRECTION_LTR;
 
 	/* update the panel's orientation */
 	self->priv->orientation = orientation;
 
-	/* set the default (horizontal panel) pack and text direction */
-	pack_direction = GTK_PACK_DIRECTION_LTR;
-	text_angle  = 0.0;
-	text_xalign = 0.0;
-	text_yalign = 0.5;
-
-	/* iterate through each menu_item in the menu bar and check it's width */
-	for (i=0; i < self->priv->file_browsers->len; i++) {
-		menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
-		gtk_widget_size_request (menu_browser,
-								 &requisition);
-		/* if any of the menu_items are wider that the panel, set the text to be rotated */
-		if ((!self->priv->text_vertical & (requisition.width  > self->priv->panel_size)) ||
-			( self->priv->text_vertical & (requisition.height > self->priv->panel_size))) {
-			text_vertical = TRUE;
-		}
-	}
-	self->priv->text_vertical = text_vertical;
 	/* set the text and pack direction and */
 	switch (orientation) {
 		case PANEL_APPLET_ORIENT_UP:
 		case PANEL_APPLET_ORIENT_DOWN:
-			self->priv->text_vertical = FALSE;
+			/* handled by defaults */
 			break;
 		case PANEL_APPLET_ORIENT_RIGHT:
-			pack_direction = GTK_PACK_DIRECTION_TTB;
-			if (text_vertical) {
-				pack_direction = GTK_PACK_DIRECTION_BTT;
-				text_angle = 90.0;
-			}
-				text_xalign = 0.5;
-				text_yalign = 0.0;
-			break;
 		case PANEL_APPLET_ORIENT_LEFT:
 			pack_direction = GTK_PACK_DIRECTION_TTB;
-			if (text_vertical) {
-				text_angle = 270.0;
-			}
-				text_xalign = 0.5;
-				text_yalign = 0.0;
+			ellipsize_mode = PANGO_ELLIPSIZE_END;
 			break;
 		default:
 			g_assert_not_reached ();
@@ -141,14 +106,14 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 	gtk_menu_bar_set_pack_direction (GTK_MENU_BAR (self), pack_direction);
 	gtk_menu_bar_set_child_pack_direction (GTK_MENU_BAR (self), pack_direction);
 
-	/* update the menu_item text direction */
+	/* update the menu_item ellipsizing */
 	for (i=0; i < self->priv->file_browsers->len; i++) {
-		menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
-		GtkWidget *label = GTK_BIN (menu_browser)->child;
-		gtk_label_set_angle (GTK_LABEL (label), text_angle);
-		gtk_misc_set_alignment (GTK_MISC (label), text_xalign, text_yalign);
+		GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
+		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_browser));
+		if (GTK_IS_LABEL (label)) {
+			gtk_label_set_ellipsize (GTK_LABEL (label), ellipsize_mode);
+		}
 	}
-	return;
 }
 /******************************************************************************/
 static void	/* Taken from the Main Menu Bar Applet */

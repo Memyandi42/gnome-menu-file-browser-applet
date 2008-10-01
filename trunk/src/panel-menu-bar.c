@@ -61,12 +61,11 @@ enum {
 static gpointer panel_menu_bar_parent_class = NULL;
 static void panel_menu_bar_dispose (GObject * obj);
 /******************************************************************************/
-/******************************************************************************/
 void
 panel_menu_bar_edit_prefs (PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	AppletPreferences *prefs = self->priv->prefs;
 	applet_preferences_make_dialog (prefs);
@@ -78,7 +77,7 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 							  PanelMenuBar		*self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	gint				i;
 	PangoEllipsizeMode	ellipsize_mode = PANGO_ELLIPSIZE_NONE;
@@ -123,7 +122,7 @@ panel_menu_bar_size_allocate (GtkWidget *widget,
 
 	PanelMenuBar *self = (PanelMenuBar *)widget;
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	/* WTF!? */
 	allocation->x = 0;
@@ -156,7 +155,7 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 								  PanelMenuBar				*self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	GtkRcStyle *rc_style;
 	GtkStyle *style;
@@ -195,7 +194,7 @@ static void
 panel_menu_bar_update_image (PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	GtkWidget *image = NULL;
 	AppletPreferences *a_prefs = self->priv->prefs;
@@ -227,7 +226,7 @@ panel_menu_bar_on_hotkey_press (GtkHotkeyInfo *hot_key_info,
 								PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	MenuBrowser *menu_browser = (MenuBrowser *)(g_ptr_array_index (self->priv->file_browsers, 0));
 
@@ -241,7 +240,7 @@ static void
 panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	GError *error = NULL;
 
@@ -264,7 +263,7 @@ panel_menu_bar_update_entry (PanelMenuBar *self,
 							 PrefsChangedSignalData *signal_data) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
 
@@ -279,7 +278,7 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 						   PrefsChangedSignalData *signal_data) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	int new_pos;
 	GtkWidget *menu_browser = NULL;
@@ -325,7 +324,7 @@ panel_menu_bar_remove_entry (PanelMenuBar *self,
 							 gint instance) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, instance));
 
@@ -346,7 +345,7 @@ panel_menu_bar_add_entry (PanelMenuBar *self,
 						  gchar *path) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	GtkWidget *menu_browser = menu_browser_new (path,
 												label,
@@ -368,7 +367,7 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 									   PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	switch (signal_data->signal_id) {
 		case PREFS_SIGNAL_TERMINAL :
@@ -485,7 +484,7 @@ panel_menu_bar_on_deactivate (GtkWidget *widget,
 							  PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
 }
@@ -496,7 +495,7 @@ panel_menu_bar_on_button_press (GtkWidget *widget,
 								PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_val_if_fail (self == NULL || IS_PANEL_MENU_BAR (self), TRUE);
+	g_return_val_if_fail (IS_PANEL_MENU_BAR (self), TRUE);
 
 	GtkMenuShell *menu_shell = GTK_MENU_SHELL (self);
 
@@ -534,7 +533,7 @@ panel_menu_bar_on_key_press (GtkWidget *widget,
 								PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_val_if_fail (self == NULL || IS_PANEL_MENU_BAR (self), TRUE);
+	g_return_val_if_fail (IS_PANEL_MENU_BAR (self), TRUE);
 
 	if ((event->keyval == GDK_Menu) ||
 			 (event->keyval == GDK_F10 &&
@@ -556,12 +555,9 @@ PanelMenuBar*
 panel_menu_bar_new (PanelApplet* applet) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
+	g_return_val_if_fail (PANEL_IS_APPLET (applet), NULL);
 
-	PanelMenuBar *self;
-
-	g_return_val_if_fail (applet == NULL || PANEL_IS_APPLET (applet), NULL);
-	self = g_object_newv (TYPE_PANEL_MENU_BAR, 0, NULL);
+	PanelMenuBar *self = g_object_newv (TYPE_PANEL_MENU_BAR, 0, NULL);
 
 	g_signal_connect (GTK_MENU_BAR (self),
 					  "button_press_event",
@@ -656,7 +652,7 @@ static void
 panel_menu_bar_init (PanelMenuBar * self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	g_return_if_fail (self == NULL || IS_PANEL_MENU_BAR (self));
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	self->priv = PANEL_MENU_BAR_GET_PRIVATE (self);
 	return;
@@ -666,11 +662,10 @@ static void
 panel_menu_bar_dispose (GObject *obj) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	PanelMenuBar *self;
 	PanelMenuBarClass *klass;
 /*	GObjectClass * parent_class;*/
 
-	self = PANEL_MENU_BAR (obj);
+	PanelMenuBar *self = PANEL_MENU_BAR (obj);
 	(self->priv->applet == NULL ? NULL : (self->priv->applet = (g_object_unref (self->priv->applet), NULL)));
 	(self->priv->file_browsers == NULL ? NULL : (self->priv->file_browsers = (gpointer)(g_ptr_array_free (self->priv->file_browsers, TRUE))));
 	klass = PANEL_MENU_BAR_CLASS (g_type_class_peek (TYPE_PANEL_MENU_BAR));

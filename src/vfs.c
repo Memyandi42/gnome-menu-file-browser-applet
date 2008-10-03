@@ -105,7 +105,20 @@ vfs_get_mime_application (const gchar *file_name) {
 /******************************************************************************/
 gboolean
 vfs_file_exists (const gchar *file_name) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 	return g_file_test (file_name, G_FILE_TEST_EXISTS);
+}
+/******************************************************************************/
+void
+vfs_get_dir_listings_async_cancel (GCancellable *cancellable) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+g_printf ("In %s START	\n", __FUNCTION__);
+	if (G_IS_CANCELLABLE (cancellable)) {
+		g_cancellable_cancel (cancellable);
+		g_object_unref (cancellable);
+	}	
+g_printf ("In %s END\n", __FUNCTION__);
 }
 /******************************************************************************/
 inline gint
@@ -113,43 +126,40 @@ vfs_sort_alpha (const VfsFileInfo **i1, const VfsFileInfo **i2) {
 	return g_utf8_collate ((gchar *)(*i1)->display_name, (gchar *)(*i2)->display_name);
 }
 /******************************************************************************/
-/* Gets the contents of a directory. Puts the files and directories in separate
- * arrays, and sorts them both. The caller must free the return value. */
-gchar*
-vfs_get_dir_listings (GPtrArray *files,
-					  GPtrArray *dirs,
-					  gboolean show_hidden,
-					  const gchar *path) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+static void
+vfs_enumerate_children_callback (GObject		*source_object,
+								 GAsyncResult	*result,
+								 gpointer		data) {
+ 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GError *error = NULL;
-	GFile *file = NULL;
-	GFileInfo *file_info = NULL;
-	GFileEnumerator *enumerator = NULL;
+g_printf ("In %s START\n", __FUNCTION__);
 
-	file = g_file_new_for_path (path);
-	/* get ALL the info about the files */
-	enumerator = g_file_enumerate_children (file,
-											 "*",
-											 0,
-											 NULL,
-											 &error);
-	/* did we read the dir correctly? */
-	if (error) {
-		gchar *error_msg = g_strdup (error->message);
-		g_error_free (error);
-		error = NULL;
-		return error_msg;
-	}
+	EnumerateData	*enum_data = (EnumerateData *)data;
+	GError			*error = NULL;
+	GFileInfo		*file_info = NULL;
+	GPtrArray		*files_array = g_ptr_array_new();
+	GPtrArray		*dirs_array = g_ptr_array_new();
+	gchar			*error_msg = NULL;
+
+	GFileEnumerator	*enumerator = g_file_enumerate_children_finish (G_FILE (source_object),
+																	result,
+																	&error);
 
 	while ((file_info = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL) {
+	
+		/* bail if the operation was cancelled */
+		if (g_cancellable_is_cancelled (enum_data->cancellable)) {
+			break;
+		}	
+	
 		/* skip the file if it's hidden and we aren't showing hidden files */
-		if (g_file_info_get_is_hidden (file_info) && !show_hidden) {
+		if (g_file_info_get_is_hidden (file_info) && !enum_data->show_hidden) {
 			continue;
 		}
+		
 		VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
 
-		vfs_file_info->file_name = g_strdup_printf ("%s/%s", path, g_file_info_get_name (file_info));
+		vfs_file_info->file_name = g_strdup_printf ("%s/%s", enum_data->path, g_file_info_get_name (file_info));
 		vfs_file_info->is_desktop = vfs_file_is_desktop (vfs_file_info->file_name);
 
 		/* get the file's human readable name, including if it's a desktop file */
@@ -167,26 +177,63 @@ vfs_get_dir_listings (GPtrArray *files,
 
 		/* add it to the array */
 		if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
-			g_ptr_array_add (dirs, (gpointer)vfs_file_info);
+			g_ptr_array_add (dirs_array, (gpointer)vfs_file_info);
 		}
 		else {
-			g_ptr_array_add (files, (gpointer)vfs_file_info);
+			g_ptr_array_add (files_array, (gpointer)vfs_file_info);
 		}
 	}
-	g_object_unref (enumerator);
 
 	/* always check for errors */
 	if (error) {
-		gchar *error_msg = g_strdup (error->message);
+		error_msg = g_strdup (error->message);
 		g_error_free (error);
 		error = NULL;
-		return error_msg;
 	}
+	
+	g_ptr_array_sort (dirs_array, (GCompareFunc)&vfs_sort_alpha);
+	g_ptr_array_sort (files_array, (GCompareFunc)&vfs_sort_alpha);
 
-	g_ptr_array_sort (dirs, (GCompareFunc)&vfs_sort_alpha);
-	g_ptr_array_sort (files, (GCompareFunc)&vfs_sort_alpha);
+	menu_browser_populate_menu_async_callback (enum_data->menu_browser,
+											   enum_data->path,
+											   enum_data->menu,
+											   dirs_array,
+											   files_array,
+											   error_msg);
 
-	return NULL;
+	g_object_unref (enumerator);
+	g_object_unref (enum_data->cancellable);
+	g_object_unref (source_object);
+	g_free (enum_data);
+g_printf ("In %s END\n", __FUNCTION__);
+}
+/******************************************************************************/
+void
+vfs_get_dir_listings_async (gchar *path,
+							GtkWidget *menu,
+							gboolean show_hidden,
+							MenuBrowser *menu_browser,
+							GCancellable *cancellable) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	g_return_if_fail (IS_MENU_BROWSER (menu_browser));
+
+	EnumerateData *enum_data = g_new0 (EnumerateData, 1);
+	enum_data->path = path;
+	enum_data->menu = menu;
+	enum_data->show_hidden = show_hidden;
+	enum_data->cancellable = cancellable;
+	enum_data->menu_browser = menu_browser;
+
+	GFile *file = g_file_new_for_path (path);
+
+	g_file_enumerate_children_async (file,
+									 "*",
+									 0,
+									 G_PRIORITY_DEFAULT,
+									 cancellable,
+									 vfs_enumerate_children_callback,
+									 (gpointer)enum_data);
 }
 /******************************************************************************/
 void
@@ -433,6 +480,7 @@ vfs_get_icon_for_file (const gchar *file_name) {
 	g_object_unref (icon_pixbuf);
 	g_object_unref (icon);
 	g_object_unref (file_info);
+
 	g_object_unref (file);
 	return icon_widget; 
 }

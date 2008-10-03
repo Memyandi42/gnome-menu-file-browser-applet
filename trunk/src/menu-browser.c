@@ -91,6 +91,7 @@ menu_browser_clean_up (MenuBrowser *self) {
 
 	menu_browser_clear_menu (GTK_WIDGET (self));
 }
+/******************************************************************************/
 static void
 menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);

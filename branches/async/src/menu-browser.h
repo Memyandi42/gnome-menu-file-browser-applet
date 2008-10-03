@@ -59,9 +59,10 @@ enum {
 	EXEC_RUN
 };
 /******************************************************************************/
-GtkWidget* menu_browser_new (const gchar *path, const gchar *label, BrowserPrefs *prefs);
-void	   menu_browser_update (MenuBrowser *self, gchar *path, gchar *label);
-GType	   menu_browser_get_type (void);
+GtkWidget*	menu_browser_new (const gchar *path, const gchar *label, BrowserPrefs *prefs);
+void		menu_browser_update (MenuBrowser *self, gchar *path, gchar *label);
+GType		menu_browser_get_type (void);
+void		menu_browser_populate_menu_async_callback (MenuBrowser *self, gchar *path, GtkWidget *menu, GPtrArray *dirs_array, GPtrArray *files_array, gchar *error_msg);
 /******************************************************************************/
 
 G_END_DECLS

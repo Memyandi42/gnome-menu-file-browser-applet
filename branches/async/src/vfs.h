@@ -35,20 +35,33 @@
 
 /******************************************************************************/
 typedef struct _VfsFileInfo VfsFileInfo;
+typedef struct _EnumerateData EnumerateData;
 /******************************************************************************/
+/* hold all the info we need on a file to make a menu item */
 struct _VfsFileInfo {
-	gchar		*display_name; /* need to free this */
-	gchar		*file_name; /* need to free this */
-	GtkWidget	*icon; /* don't need to free this */
+	gchar		*display_name;	/* need to free this */
+	gchar		*file_name;		/* need to free this */
+	GtkWidget	*icon;			/* don't need to free this */
 	gboolean	is_desktop;
 	gboolean	is_executable;
+};
+/* Data to pass to */
+struct _EnumerateData {
+	gchar *path;				/* free this??? */
+	GtkWidget *menu;			/* free this??? */
+	gboolean show_hidden;		/* free this??? */
+	MenuBrowser *menu_browser;	/* free this??? */
+	GCancellable *cancellable;	/* free this??? */
 };
 /******************************************************************************/
 gboolean	vfs_file_is_executable	 (const gchar *file_name);
 gboolean	vfs_file_is_desktop		 (const gchar *file_name);
 gboolean	vfs_file_is_directory	 (const gchar *file_name);
 gboolean	vfs_file_exists			 (const gchar *file_name);
-gchar*		vfs_get_dir_listings	 (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, const gchar *path);
+
+void		vfs_get_dir_listings_async_cancel (GCancellable *cancellable);
+void		vfs_get_dir_listings_async (gchar *path, GtkWidget *menu, gboolean show_hidden, MenuBrowser *menu_browser, GCancellable *cancellable);
+
 void		vfs_launch_desktop_file	 (const gchar *file_name);
 void		vfs_edit_file			 (const gchar *file_name_and_path, gchar *editor_bin);
 void		vfs_launch_terminal		 (const gchar *path, const gchar *terminal_bin);

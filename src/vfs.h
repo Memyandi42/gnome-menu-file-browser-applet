@@ -35,20 +35,17 @@
 
 /******************************************************************************/
 typedef struct _VfsFileInfo VfsFileInfo;
-typedef struct _LaunchAppInfo LaunchAppInfo;
+typedef struct _Action Action;
 /******************************************************************************/
 struct _VfsFileInfo {
 	gchar		*display_name; /* need to free this */
 	gchar		*file_name; /* need to free this */
 	GtkWidget	*icon; /* don't need to free this */
-	gboolean	is_desktop;
 	gboolean	is_executable;
 };
-struct _LaunchAppInfo {
-	gchar *exec;	/* the app to launch. can include args in here too, even file names. */
-	gchar *args;		/* arguments for app */
-	gchar *file;	/* the file to open if any */
-	gchar *wd;		/* working directory */	
+struct _Action {
+	gchar *command;
+	gchar *file_name;
 };
 /******************************************************************************/
 gboolean	vfs_file_is_executable	 (const gchar *file_name);
@@ -56,21 +53,14 @@ gboolean	vfs_file_is_desktop		 (const gchar *file_name);
 gboolean	vfs_file_is_directory	 (const gchar *file_name);
 gboolean	vfs_file_exists			 (const gchar *file_name);
 gchar*		vfs_get_dir_listings	 (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, const gchar *path);
-void		vfs_launch_desktop_file	 (const gchar *file_name);
-void		vfs_edit_file			 (const gchar *file_name, gchar *editor_bin);
-void		vfs_launch_terminal		 (const gchar *path, const gchar *terminal_bin);
-void		vfs_open_file			 (const gchar *file_name, gint exec_action);
+gboolean	vfs_open_with_default_handler (const gchar *file_name);
+gboolean	vfs_launch_application (const gchar *cmd, const gchar *file_name);
+gboolean	vfs_launch_desktop_file	 (const gchar *file_name);
 void	 	vfs_trash_file			 (const gchar *file_name);
+void		vfs_run_action (Action *action);
 GtkWidget*	vfs_get_icon_for_file	 (const gchar *file_name);
-gchar*		vfs_get_desktop_app_name (const gchar *file_name);
-const gchar*vfs_get_app_name_for_file_info (GFileInfo *file_info);
-
-GList*		vfs_get_all_mime_applications (const gchar *file_name);
 GtkWidget*	vfs_get_icon_for_app_info 	  (GAppInfo *app_info);
-const gchar*vfs_get_exec_for_app_info	  (GAppInfo *app_info);
-const gchar*vfs_get_app_name_for_app_info (GAppInfo *app_info);
-
-void		vfs_launch_appication (LaunchAppInfo *app_info);
+GList*		vfs_get_all_mime_applications (const gchar *file_name);
 /******************************************************************************/
 
 #endif

@@ -40,17 +40,14 @@ context_menu_add_create_archive (const gchar *file_name, GtkWidget *menu) {
 								   								 GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 	
-	LaunchAppInfo *app_info = g_new0 (LaunchAppInfo, 1);
-	
-	app_info->exec = g_strdup ("file-roller");
-	app_info->args = g_strdup ("-d");
-	app_info->file = g_strdup (file_name);
-	app_info->wd = NULL;
+	Action *action = g_new0 (Action, 1);
+	action->command = g_strdup ("file-roller -d");
+	action->file_name = g_strdup (file_name);
 
 	g_signal_connect_swapped (G_OBJECT (menu_item),
 							  "activate",
-							  G_CALLBACK (vfs_launch_appication),
-							  (gpointer) app_info);
+							  G_CALLBACK (vfs_run_action),
+							  (gpointer) action);
 }
 /******************************************************************************/
 static void
@@ -69,21 +66,18 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 							   sub_menu);
 
 	while (apps != NULL) {
-		menu_item = gtk_image_menu_item_new_with_label (vfs_get_app_name_for_app_info (apps->data));
+		menu_item = gtk_image_menu_item_new_with_label (g_app_info_get_name (apps->data));
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 									   vfs_get_icon_for_app_info (apps->data));
 
-		LaunchAppInfo *app_info = g_new0 (LaunchAppInfo, 1);
-	
-		app_info->exec = g_strdup (vfs_get_exec_for_app_info (apps->data));
-		app_info->args = NULL;
-		app_info->file = g_strdup (file_name);
-		app_info->wd = g_path_get_dirname (file_name);
+		Action *action = g_new0 (Action, 1);
+		action->command = g_strdup (g_app_info_get_executable (apps->data));
+		action->file_name = g_strdup (file_name);
 
 		g_signal_connect_swapped (GTK_MENU_ITEM (menu_item),
 								  "activate",
-								  G_CALLBACK (vfs_launch_appication),
-								  (gpointer) app_info);
+								  G_CALLBACK (vfs_run_action),
+								  (gpointer) action);
 
 		gtk_menu_shell_append (GTK_MENU_SHELL (sub_menu), menu_item);
 
@@ -109,6 +103,7 @@ context_menu_add_delete_item (const gchar *file_name, GtkWidget *menu) {
 							  (gpointer) file_name);
 }
 /******************************************************************************/
+/*
 static void
 context_menu_add_fake_items (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
@@ -130,6 +125,7 @@ context_menu_add_fake_items (const gchar *file_name, GtkWidget *menu) {
 	menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_CDROM, NULL);
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 }
+*/
 /******************************************************************************/
 
 static void

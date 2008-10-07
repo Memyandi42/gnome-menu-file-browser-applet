@@ -97,7 +97,8 @@ menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
-	vfs_launch_terminal (path, self->prefs->terminal);
+	/*vfs_launch_terminal (path, self->prefs->terminal);*/
+	vfs_launch_application (self->prefs->terminal, path);
 }
 /******************************************************************************/
 static void
@@ -106,13 +107,8 @@ menu_browser_on_file_left_click (const gchar *file_name_and_path, MenuBrowser *s
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	/* try launching the desktop file first */
-	if (vfs_file_is_desktop (file_name_and_path)) {
-		vfs_launch_desktop_file (file_name_and_path);
-	}
-	else {
-		vfs_open_file (file_name_and_path, EXEC_OPEN);
-	}
+	/*vfs_open_file (file_name_and_path, EXEC_OPEN);*/
+	vfs_open_with_default_handler (file_name_and_path);
 }
 /******************************************************************************/
 static void
@@ -121,7 +117,7 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	vfs_edit_file (file_name_and_path, self->prefs->editor);
+	vfs_launch_application (self->prefs->editor, file_name_and_path);
 }
 /******************************************************************************/
 static gboolean

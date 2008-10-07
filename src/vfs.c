@@ -82,7 +82,7 @@ vfs_file_is_desktop (const gchar *file_name) {
 /* Gets the executable file name of the application associated  with the passed
  * file. The caller must free the returned value. */
 gchar*
-vfs_get_mime_application (const gchar *file_name) {
+vfs_get_default_mime_application (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GFile*	   file = g_file_new_for_path (file_name);
@@ -206,6 +206,56 @@ vfs_launch_desktop_file (const gchar *file_name) {
 }
 /******************************************************************************/
 void
+vfs_launch_appication (LaunchAppInfo *app_info) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	GError *error = NULL;
+	gint child_pid;
+
+
+	app_info->exec = g_strdelimit (app_info->exec, " ", '\1');
+	if (app_info->args) app_info->args = g_strdelimit (app_info->args, " ", '\1'); else app_info->args = "";
+	if (app_info->file) app_info->file = g_strdelimit (app_info->file, " ", '\1'); else app_info->file = "";
+
+	gchar *command_str = g_strconcat (app_info->exec, "\1",
+									  app_info->args, "\1",
+									  app_info->file,
+									  NULL);
+
+g_printf ("In %s lauching=%s\n", __FUNCTION__, command_str);
+	
+	gchar** args = g_strsplit (command_str, "\1", 0);
+
+	g_spawn_async_with_pipes (app_info->wd,
+							  args,
+							  NULL,
+							  G_SPAWN_SEARCH_PATH,
+							  NULL,
+							  NULL,
+							  &child_pid,
+							  NULL,
+							  NULL,
+							  NULL,
+							  &error);
+
+	if (utils_check_gerror (&error)) {
+		gchar *tmp = g_strdup_printf ("Error: Failed to launch \"%s\".", args[0]);
+		utils_show_dialog ("Error: Failed to launch application",
+						   tmp,
+						   GTK_MESSAGE_ERROR);
+		g_free (tmp);
+	}
+	
+	g_free (command_str);
+	g_strfreev (args);
+	g_free (app_info->exec);
+	g_free (app_info->args);
+	g_free (app_info->file);
+	g_free (app_info->wd);
+	g_free (app_info);
+}
+/******************************************************************************/
+void
 vfs_launch_app (char **args, const gchar *working_dir) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
@@ -235,13 +285,12 @@ vfs_launch_app (char **args, const gchar *working_dir) {
 }
 /******************************************************************************/
 void
-vfs_edit_file (const gchar *file_name_and_path, gchar *editor_bin) {
+vfs_edit_file (const gchar *file_name, gchar *app_exec) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-
-	gchar* working_dir = g_path_get_dirname (file_name_and_path);
-	gchar* arg = g_strdelimit (editor_bin, " ", '\1');
-	arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
+	gchar* working_dir = g_path_get_dirname (file_name);
+	gchar* arg = g_strdelimit (app_exec, " ", '\1');
+	arg = g_strconcat (arg, "\1", file_name, NULL);
 	gchar** args = g_strsplit (arg, "\1", 0);
 	vfs_launch_app (args, working_dir);
 
@@ -269,34 +318,34 @@ vfs_launch_terminal (const gchar *path, const gchar *terminal_bin) {
 }
 /******************************************************************************/
 void
-vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
+vfs_open_file (const gchar *file_name, gint exec_action) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	gchar **args = NULL;
 	gchar *arg = NULL;
 
-	gchar* working_dir = g_path_get_dirname (file_name_and_path);
-	gboolean is_executable = vfs_file_is_executable (file_name_and_path);
+	gchar* working_dir = g_path_get_dirname (file_name);
+	gboolean is_executable = vfs_file_is_executable (file_name);
 
-	gchar* file_mime_app_exec = vfs_get_mime_application (file_name_and_path);
+	gchar* file_mime_app_exec = vfs_get_default_mime_application (file_name);
 
 	/* if it's a binary file run it*/
 	if (is_executable) {
-		arg = g_strdup_printf ("%s", file_name_and_path);
+		arg = g_strdup_printf ("%s", file_name);
 		args = g_strsplit (arg, "\1", 0);
 	}
 	else {
 		if (file_mime_app_exec) {
 			arg = g_strdelimit (file_mime_app_exec, " ", '\1');
-			arg = g_strconcat (arg, "\1", file_name_and_path, NULL);
+			arg = g_strconcat (arg, "\1", file_name, NULL);
 			args = g_strsplit (arg, "\1", 0);
 			if (DEBUG) g_printf ("%s ", file_mime_app_exec);
 		}
 		else {
-			if (DEBUG) g_printf ("Error: failed to get mime application for %s\n", file_name_and_path);
+			if (DEBUG) g_printf ("Error: failed to get mime application for %s\n", file_name);
 			gchar *message = g_strdup_printf ("Cannot open %s:\n"
 											  "No application is known for this kind of file.",
-											  file_name_and_path);
+											  file_name);
 
 			utils_show_dialog ("Error: no application found",
 										   message,
@@ -305,7 +354,7 @@ vfs_open_file (const gchar *file_name_and_path, gint exec_action) {
 			return;
 		}
 	}
-	if (DEBUG) g_printf ("%s\n", file_name_and_path);
+	if (DEBUG) g_printf ("%s\n", file_name);
 	vfs_launch_app (args, working_dir);
 
 	int i;
@@ -445,4 +494,51 @@ vfs_get_desktop_app_name (const gchar *file_name) {
 	g_object_unref (info);
 	return ret;
 }
+/******************************************************************************/
+GList*
+vfs_get_all_mime_applications (const gchar *file_name) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	GFile*	   file = g_file_new_for_path (file_name);
+	GFileInfo* file_info =  g_file_query_info (file,
+											   "standard::*",
+											   0,
+											   NULL,
+											   NULL);
+
+	const gchar* content_type = g_file_info_get_content_type (file_info);
+	GList *app_infos = g_app_info_get_all_for_type (content_type);
+	
+	g_object_unref (file_info);
+	g_object_unref (file);
+
+	return app_infos;
+}
+/******************************************************************************/
+const gchar *
+vfs_get_app_name_for_app_info (GAppInfo *app_info) {
+	return g_app_info_get_name (app_info);
+}
+/******************************************************************************/
+GtkWidget*
+vfs_get_icon_for_app_info  (GAppInfo *app_info) {
+	
+	GdkPixbuf *icon_pixbuf = NULL; 
+
+	GIcon *icon = g_app_info_get_icon (app_info);
+
+	if (icon != NULL) {
+		icon_pixbuf = vfs_get_pixbuf_for_icon (icon);
+	}
+
+	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
+	g_object_unref (icon_pixbuf);
+
+	return icon_widget;
+}
+/******************************************************************************/
+const gchar*
+vfs_get_exec_for_app_info (GAppInfo *app_info) {
+	return g_app_info_get_executable (app_info);
+};
 /******************************************************************************/

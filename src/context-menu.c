@@ -31,10 +31,72 @@
 
 /******************************************************************************/
 static void
-context_menu_add_delete_item (const gchar *file_name,
-							  GtkWidget *menu) {
+context_menu_add_create_archive (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-							  
+
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_label ("Create Archive");
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+								   gtk_image_new_from_icon_name ("package",
+								   								 GTK_ICON_SIZE_MENU));
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+	
+	LaunchAppInfo *app_info = g_new0 (LaunchAppInfo, 1);
+	
+	app_info->exec = g_strdup ("file-roller");
+	app_info->args = g_strdup ("-d");
+	app_info->file = g_strdup (file_name);
+	app_info->wd = NULL;
+
+	g_signal_connect_swapped (G_OBJECT (menu_item),
+							  "activate",
+							  G_CALLBACK (vfs_launch_appication),
+							  (gpointer) app_info);
+}
+/******************************************************************************/
+static void
+context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	GList *root = vfs_get_all_mime_applications (file_name);
+	GList *apps = root;
+	
+	if (root == NULL) return;
+
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_label ("Open With");
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+	GtkWidget *sub_menu = gtk_menu_new ();
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
+							   sub_menu);
+
+	while (apps != NULL) {
+		menu_item = gtk_image_menu_item_new_with_label (vfs_get_app_name_for_app_info (apps->data));
+		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+									   vfs_get_icon_for_app_info (apps->data));
+
+		LaunchAppInfo *app_info = g_new0 (LaunchAppInfo, 1);
+	
+		app_info->exec = g_strdup (vfs_get_exec_for_app_info (apps->data));
+		app_info->args = NULL;
+		app_info->file = g_strdup (file_name);
+		app_info->wd = g_path_get_dirname (file_name);
+
+		g_signal_connect_swapped (GTK_MENU_ITEM (menu_item),
+								  "activate",
+								  G_CALLBACK (vfs_launch_appication),
+								  (gpointer) app_info);
+
+		gtk_menu_shell_append (GTK_MENU_SHELL (sub_menu), menu_item);
+
+		g_object_unref (apps->data);
+		apps = apps->next;
+	}
+	g_list_free (apps);
+}
+/******************************************************************************/
+static void
+context_menu_add_delete_item (const gchar *file_name, GtkWidget *menu) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+						  
 	GtkWidget *menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_DELETE, NULL);
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 	
@@ -48,8 +110,7 @@ context_menu_add_delete_item (const gchar *file_name,
 }
 /******************************************************************************/
 static void
-context_menu_add_fake_items (const gchar *file_name,
-							 GtkWidget *menu) {
+context_menu_add_fake_items (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *menu_item;
@@ -72,17 +133,17 @@ context_menu_add_fake_items (const gchar *file_name,
 /******************************************************************************/
 
 static void
-context_menu_populate (const gchar *file_name,
-					   GtkWidget *menu) {
+context_menu_populate (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	context_menu_add_delete_item (file_name, menu);
-	context_menu_add_fake_items (file_name, menu);
+	context_menu_add_open_with_item	(file_name, menu);
+	context_menu_add_delete_item	(file_name, menu);
+	context_menu_add_create_archive	(file_name, menu);
+	/*context_menu_add_fake_items (file_name, menu);*/
 }
 /******************************************************************************/
 static void
-context_menu_clean_up (GtkMenuShell *menu,
-					   GtkWidget *browser) {
+context_menu_clean_up (GtkMenuShell *menu, GtkWidget *browser) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (browser));
@@ -95,8 +156,7 @@ context_menu_clean_up (GtkMenuShell *menu,
 }
 /******************************************************************************/
 gboolean
-context_menu_display (const gchar *file_name,
-					  GtkWidget *menu_item) {
+context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	int event_button;

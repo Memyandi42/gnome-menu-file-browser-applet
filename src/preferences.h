@@ -86,6 +86,7 @@ struct _AppletPreferences {
 };
 struct _AppletPreferencesClass {
 	GObjectClass parent;
+	void (*prefs_changed)(AppletPreferences *a_prefs, PrefsChangedSignalData *signal_data);
 };
 struct _PrefsChangedSignalData {
 	gint	signal_id;

@@ -1000,9 +1000,8 @@ applet_preferences_class_init (AppletPreferencesClass* klass) {
 	applet_preferences_signals [PREFS_CHANGED] =
 		g_signal_new ("prefs_changed",
     	              G_TYPE_FROM_CLASS (klass),
-					  G_SIGNAL_NO_HOOKS,
-            	      /*G_STRUCT_OFFSET (AppletPreferencesClass, prefs_changed),*/
-					  0,
+					  G_SIGNAL_RUN_LAST,
+            	      G_STRUCT_OFFSET (AppletPreferencesClass, prefs_changed),
 					  NULL,
 					  NULL,
 				      g_cclosure_marshal_VOID__INT,

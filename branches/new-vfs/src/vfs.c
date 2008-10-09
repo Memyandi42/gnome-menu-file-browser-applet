@@ -357,66 +357,35 @@ vfs_get_pixbuf_for_icon (const GIcon *icon) {
 	return pixbuf;
 }
 /******************************************************************************/
-/*GtkWidget **/
-/*vfs_get_icon_for_file_new (const gchar *file_name) {*/
-
-	/*GFile *file = g_file_new_for_path (file_name);*/
-	/*GFileInfo *file_info = g_file_query_info (file,*/
-											  /*G_FILE_ATTRIBUTE_STANDARD_ICON,*/
-											  /*0,*/
-											  /*NULL,*/
-											  /*NULL);	*/
-
-	/*GIcon *icon = g_file_info_get_icon (file_info);*/
-
-	/*must wait for GTK 2.14*/
-	/*GtkWidget *icon_widget = gtk_image_new_from_gicon (icon,*/
-													   /*GTK_ICON_SIZE_MENU);*/
-	/*g_object_unref (file);*/
-	/*g_object_unref (file_info);*/
-	/*g_object_unref (icon);*/
-
-	/*return icon_widget;*/
-/*}*/
-/******************************************************************************/
-/* Returns the image associated with a file. Works on both normal and desktop
- * files. The caller  must free the return value. */
 GtkWidget *
 vfs_get_icon_for_file (const gchar *file_name) {
-	if (icon_theme == NULL) {
-		icon_theme = gtk_icon_theme_get_default();
+
+	GIcon *icon = NULL; 
+	GtkWidget *icon_widget = NULL;
+	GDesktopAppInfo *app_info = g_desktop_app_info_new_from_filename (file_name);
+
+	if (app_info != NULL) {
+		icon = g_app_info_get_icon (G_APP_INFO (app_info));
+		icon_widget = gtk_image_new_from_gicon (icon,
+												GTK_ICON_SIZE_MENU);
+		g_object_unref (app_info);
 	}
-
-	GIcon *icon = NULL;
-	GdkPixbuf *icon_pixbuf = NULL; 
-	GFile* file = NULL;
-	GFileInfo* file_info = NULL;
-
-	/* try for desktop file */
-	if (vfs_file_is_desktop (file_name)) {
-		GDesktopAppInfo *info = g_desktop_app_info_new_from_filename (file_name);
-		icon = g_app_info_get_icon (G_APP_INFO (info));
-	}	/* not a desktop file */
 	else {
-		file = g_file_new_for_path (file_name),
-		file_info = g_file_query_info (file,
-									   G_FILE_ATTRIBUTE_STANDARD_ICON,
-									   0,
-									   NULL,
-									   NULL);	
+		GFile *file = g_file_new_for_path (file_name);
+		GFileInfo *file_info = g_file_query_info (file,
+											  G_FILE_ATTRIBUTE_STANDARD_ICON,
+											  0,
+											  NULL,
+											  NULL);	
+
 		icon = g_file_info_get_icon (file_info);
+		icon_widget = gtk_image_new_from_gicon (icon,
+												GTK_ICON_SIZE_MENU);
+		g_object_unref (file);
+		g_object_unref (file_info);
 	}
-
-	if (icon != NULL) {
-		icon_pixbuf = vfs_get_pixbuf_for_icon (icon);
-	}
-
-	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
-	g_object_unref (icon_pixbuf);
-	g_object_unref (icon);
-	g_object_unref (file_info);
-	g_object_unref (file);
-	return icon_widget; 
+	/*must wait for GTK 2.14*/
+	return icon_widget;
 }
 /******************************************************************************/
 GList*
@@ -441,18 +410,10 @@ vfs_get_all_mime_applications (const gchar *file_name) {
 /******************************************************************************/
 GtkWidget*
 vfs_get_icon_for_app_info  (GAppInfo *app_info) {
-	
-	GdkPixbuf *icon_pixbuf = NULL; 
 
 	GIcon *icon = g_app_info_get_icon (app_info);
-
-	if (icon != NULL) {
-		icon_pixbuf = vfs_get_pixbuf_for_icon (icon);
-	}
-
-	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
-	g_object_unref (icon_pixbuf);
-
+	GtkWidget *icon_widget = gtk_image_new_from_gicon (icon,
+													   GTK_ICON_SIZE_MENU);
 	return icon_widget;
 }
 /******************************************************************************/

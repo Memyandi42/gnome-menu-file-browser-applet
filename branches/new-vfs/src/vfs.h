@@ -59,6 +59,7 @@ gboolean	vfs_launch_desktop_file	 (const gchar *file_name);
 void	 	vfs_trash_file			 (const gchar *file_name);
 void		vfs_run_action (Action *action);
 GtkWidget*	vfs_get_icon_for_file	 (const gchar *file_name);
+GtkWidget*	vfs_get_icon_for_file_new(const gchar *file_name);
 GtkWidget*	vfs_get_icon_for_app_info 	  (GAppInfo *app_info);
 GList*		vfs_get_all_mime_applications (const gchar *file_name);
 /******************************************************************************/

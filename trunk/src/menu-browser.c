@@ -43,7 +43,7 @@ struct _MenuBrowserPrivate {
 	GtkWidget		*menu;
 	GtkWidget		*menu_item_label;
 	GtkMenuShell	*parent_menu_shell;
-	GPtrArray		*tmp_array;
+	GPtrArray		*garbage;
 };
 #define MENU_BROWSER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MENU_BROWSER, MenuBrowserPrivate))
 enum  {
@@ -58,21 +58,11 @@ static void
 menu_browser_clear_menu (GtkWidget *menu_item) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GtkWidget *menu = NULL;
-	if (1) {
-		menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
-		gtk_container_foreach (GTK_CONTAINER (menu),
-							   (GtkCallback) gtk_widget_destroy,
-							   NULL);
-	}
-	else {
-		GtkWidget *old_menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
-		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), NULL);
-		menu = gtk_menu_new ();
-		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
-								   menu);
-		gtk_widget_destroy (GTK_WIDGET (old_menu));
-	}
+	GtkWidget *menu = menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
+	gtk_container_foreach (GTK_CONTAINER (menu),
+						   (GtkCallback) gtk_widget_destroy,
+						   NULL);
+
 }
 /******************************************************************************/
 static void
@@ -82,12 +72,12 @@ menu_browser_clean_up (MenuBrowser *self) {
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
 	/* free the structure pointed to by each element */
-	g_ptr_array_foreach (self->priv->tmp_array,
+	g_ptr_array_foreach (self->priv->garbage,
 						 (GFunc)g_free,
 						 NULL);
 	/* delete and recreate the array */
-	g_ptr_array_free (self->priv->tmp_array, TRUE);
-	self->priv->tmp_array = g_ptr_array_new();
+	g_ptr_array_free (self->priv->garbage, TRUE);
+	self->priv->garbage = g_ptr_array_new();
 
 	menu_browser_clear_menu (GTK_WIDGET (self));
 }
@@ -97,7 +87,12 @@ menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
-	vfs_launch_terminal (path, self->prefs->terminal);
+
+	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
+	launch_info->command = g_strdup (self->prefs->terminal);
+	launch_info->file = g_strdup (path);
+
+	vfs_launch_application (launch_info);
 }
 /******************************************************************************/
 static void
@@ -106,13 +101,7 @@ menu_browser_on_file_left_click (const gchar *file_name_and_path, MenuBrowser *s
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	/* try launching the desktop file first */
-	if (vfs_file_is_desktop (file_name_and_path)) {
-		vfs_launch_desktop_file (file_name_and_path);
-	}
-	else {
-		vfs_open_file (file_name_and_path, EXEC_OPEN);
-	}
+	vfs_file_do_default_action (file_name_and_path);
 }
 /******************************************************************************/
 static void
@@ -121,7 +110,11 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	vfs_edit_file (file_name_and_path, self->prefs->editor);
+	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
+	launch_info->command = g_strdup (self->prefs->editor);
+	launch_info->file = g_strdup (file_name_and_path);
+
+	vfs_launch_application (launch_info);
 }
 /******************************************************************************/
 static gboolean
@@ -181,9 +174,7 @@ menu_browser_on_item_button_press (GtkWidget *menu_item,
 #endif
 /******************************************************************************/
 static gboolean
-menu_browser_on_menu_key_press (GtkWidget *menu,
-								GdkEventKey *event,
-								MenuBrowser *self) {
+menu_browser_on_menu_key_press (GtkWidget *menu, GdkEventKey *event, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_val_if_fail (IS_MENU_BROWSER (self), FALSE);
@@ -300,15 +291,12 @@ menu_browser_on_menu_button_press (GtkWidget *menu,
 /******************************************************************************/
 #ifndef NEW_MENU_SIGNAL
 static void
-menu_browser_add_menu_header (GtkWidget *menu,
-							  gchar *path,
-							  MenuBrowser *self) {
+menu_browser_add_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
 	GtkWidget *menu_item = NULL;
-	GtkWidget *separator = NULL;
 	gchar *dir = g_path_get_basename (path);
 
 	menu_item = gtk_image_menu_item_new_with_label (dir);
@@ -339,10 +327,8 @@ menu_browser_add_menu_header (GtkWidget *menu,
 					  G_CALLBACK (menu_browser_on_item_button_press),
 					  self);
 
-	separator = gtk_separator_menu_item_new();
-
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu),
-						   separator);
+						   gtk_separator_menu_item_new());
 }
 #endif
 /******************************************************************************/
@@ -354,18 +340,15 @@ menu_browser_add_folders (GtkWidget		*menu,
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
-	
-	VfsFileInfo *vfs_file_info = NULL;
-	GtkWidget	*menu_item = NULL;
-	GtkWidget	*child_menu = NULL;
+
 	int i;
 
 	for (i=0; i<dirs->len; i++) {
-		vfs_file_info = (VfsFileInfo*)g_ptr_array_index (dirs, i);
+		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (dirs, i);
 
 
 		/*make a menu item for this dir, limit the length of the text in the menu*/
-		menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);
+		GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);
 
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
 		if (GTK_IS_LABEL (label)) {
@@ -385,11 +368,10 @@ menu_browser_add_folders (GtkWidget		*menu,
 							   menu_item);
 
 		/*make the sub menu to show all the files in this dir*/
-		child_menu = gtk_menu_new ();
 		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
-								   child_menu);
+								   gtk_menu_new ());
 
-		g_ptr_array_add (self->priv->tmp_array, vfs_file_info->file_name);
+		g_ptr_array_add (self->priv->garbage, vfs_file_info->file_name);
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
 						   vfs_file_info->file_name);
@@ -415,16 +397,14 @@ menu_browser_add_files (GtkWidget	*menu,
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
-	
-	VfsFileInfo *vfs_file_info = NULL;
-	GtkWidget	*menu_item = NULL;
+
 	int i;
 
 	for (i=0; i<files->len; i++) {
-		vfs_file_info = (VfsFileInfo*)g_ptr_array_index (files, i);
+		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (files, i);
 
 		/*make a menu item for this dir*/
-		menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);
+		GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);
 	
 		/* set the ellipsizig and tooltip */
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
@@ -448,7 +428,7 @@ menu_browser_add_files (GtkWidget	*menu,
 									   vfs_file_info->icon);
 
 		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
-		g_ptr_array_add (self->priv->tmp_array, vfs_file_info->file_name);
+		g_ptr_array_add (self->priv->garbage, vfs_file_info->file_name);
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
 						   vfs_file_info->file_name);
@@ -462,8 +442,7 @@ menu_browser_add_files (GtkWidget	*menu,
 }
 /******************************************************************************/
 static void
-menu_browser_populate_menu (GtkWidget	*parent_menu_item,
-							MenuBrowser *self) {
+menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
@@ -554,9 +533,7 @@ menu_browser_populate_menu (GtkWidget	*parent_menu_item,
 }
 /******************************************************************************/
 void
-menu_browser_update (MenuBrowser *self,
-					 gchar* path,
-					 gchar* label) {
+menu_browser_update (MenuBrowser *self, gchar *path, gchar *label) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
@@ -571,7 +548,7 @@ menu_browser_update (MenuBrowser *self,
 }
 /******************************************************************************/
 static void
-menu_browser_class_init (MenuBrowserClass * klass) {
+menu_browser_class_init (MenuBrowserClass *klass) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	menu_browser_parent_class = g_type_class_peek_parent (klass);
@@ -580,7 +557,7 @@ menu_browser_class_init (MenuBrowserClass * klass) {
 }
 /******************************************************************************/
 static void
-menu_browser_init (MenuBrowser * self) {
+menu_browser_init (MenuBrowser *self) {
 	
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
@@ -588,7 +565,7 @@ menu_browser_init (MenuBrowser * self) {
 }
 /******************************************************************************/
 static void
-menu_browser_dispose (GObject * obj) {
+menu_browser_dispose (GObject *obj) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	MenuBrowser *self = MENU_BROWSER (obj);
@@ -596,7 +573,7 @@ menu_browser_dispose (GObject * obj) {
 
 	(self->priv->menu == NULL ? NULL : (self->priv->menu = (gtk_widget_destroy (self->priv->menu), NULL)));
 	(self->priv->menu_item_label == NULL ? NULL : (self->priv->menu_item_label = (gtk_widget_destroy (self->priv->menu_item_label), NULL)));
-	(self->priv->tmp_array == NULL ? NULL : (self->priv->tmp_array = (g_ptr_array_free (self->priv->tmp_array, TRUE), NULL)));
+	(self->priv->garbage == NULL ? NULL : (self->priv->garbage = (g_ptr_array_free (self->priv->garbage, TRUE), NULL)));
 
 	/* do NOT enable this. Ever! */
 	/*(self->priv->icon_theme == NULL ? NULL : (self->priv->icon_theme = (g_object_unref (self->priv->icon_theme), NULL)));*/
@@ -629,9 +606,7 @@ menu_browser_get_type (void) {
 /******************************************************************************/
 #ifdef NEW_MENU_SIGNAL
 static void
-menu_browser_add_main_menu_header (GtkWidget *menu,
-								   gchar *path,
-								   MenuBrowser *self) {
+menu_browser_add_main_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
@@ -707,7 +682,7 @@ menu_browser_new (const gchar* path,
 	}
 	self->prefs = prefs;
 
-	self->priv->tmp_array = g_ptr_array_new();
+	self->priv->garbage = g_ptr_array_new();
 
 	GtkWidget *item_label = gtk_label_new (label);
 	gtk_misc_set_alignment (GTK_MISC (item_label), 0.0, 0.5);

@@ -93,15 +93,15 @@ context_menu_add_archive_action (const gchar *file_name, GtkWidget *menu) {
 	gchar *archive_label = NULL;
 	gchar *archive_action = NULL;
 	if (is_archive (file_name)) {
-		archive_label = "Extract Here";
+		archive_label = "_Extract Here";
 		archive_action = "file-roller -h";
 	}
 	else {
-		archive_label = "Create Archive";
+		archive_label = "Create _Archive";
 		archive_action = "file-roller -d";
 	}
 
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_label (archive_label);
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (archive_label);
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_icon_name ("package",
 								   								 GTK_ICON_SIZE_MENU));
@@ -126,8 +126,12 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 	
 	if (root == NULL) return;
 
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_label ("Open With");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Open With");
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+								   gtk_image_new_from_stock (GTK_STOCK_OPEN,
+								   							 GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
 	GtkWidget *sub_menu = gtk_menu_new ();
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
 							   sub_menu);
@@ -158,11 +162,11 @@ static void
 context_menu_add_delete_item (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 						  
-	GtkWidget *menu_item = gtk_image_menu_item_new_from_stock (GTK_STOCK_DELETE, NULL);
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Move to Trash");
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+														gtk_image_new_from_stock (GTK_STOCK_DELETE,
+																				  GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-	
-	GtkWidget *item_label = GTK_BIN (menu_item)->child;
-	gtk_label_set_text (GTK_LABEL (item_label), "Move to Trash");
 	
 	g_signal_connect_swapped (G_OBJECT (menu_item),
 							  "activate",

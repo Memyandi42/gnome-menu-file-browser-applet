@@ -219,13 +219,15 @@ vfs_launch_application (LaunchInfo *launch_info) {
 		working_dir = g_strdup (g_get_home_dir ());
 	}
 
-
-	launch_info->command = g_strdelimit (launch_info->command, " ", '\1');
+	g_strdelimit (launch_info->command, " ", '\1');
 
 	gchar *arg = g_strconcat (launch_info->command, "\1",
 							  launch_info->file,
 							  NULL);
 	gchar** args = g_strsplit (arg, "\1", 0);
+
+	/* need to do this to convert the '\2's back into spaces. */
+	g_strdelimit (args[0], "\2", ' ');
 
 	g_spawn_async_with_pipes (working_dir,
 							  args,
@@ -429,6 +431,10 @@ vfs_file_do_default_action (const gchar *file_name) {
 	/* run it if its an executable */
 	else if (vfs_file_is_executable (file_name)) {
 		launch_info->command = g_strdup (file_name);
+		/* need to do this in case the path or filename has spaces in it since
+		 * the spaces are converted to '\1' in vfs_launch_application.
+		 * vfs_launch_application will convert the '\2' back to a space. */
+		g_strdelimit (launch_info->command, " ", '\2');
 		launch_info->file = NULL;
 	}
 	/* open it with the default mime app */

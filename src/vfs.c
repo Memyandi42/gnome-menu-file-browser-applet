@@ -108,8 +108,9 @@ vfs_file_exists (const gchar *file_name) {
 	return g_file_test (file_name, G_FILE_TEST_EXISTS);
 }
 /******************************************************************************/
+/* sort the structures based on the file's display_name */
 static inline gint
-vfs_sort_alpha (const VfsFileInfo **i1, const VfsFileInfo **i2) {
+vfs_sort_array (const VfsFileInfo **i1, const VfsFileInfo **i2) {
 	return g_utf8_collate ((gchar *)(*i1)->display_name, (gchar *)(*i2)->display_name);
 }
 /******************************************************************************/
@@ -132,22 +133,19 @@ vfs_get_dir_listings (GPtrArray *files,
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GError *error = NULL;
-	GFile *file = NULL;
-	GFileInfo *file_info = NULL;
-	GFileEnumerator *enumerator = NULL;
 
-	file = g_file_new_for_path (path);
+	GFile *file = g_file_new_for_path (path);
 	/* get ALL the info about the files */
-	enumerator = g_file_enumerate_children (file,
-											 /*"*",*/
-											 "standard::type,"
-											 "standard::is-hidden,"
-											 "standard::name,"
-											 "standard::display-name,"
-											 "access::can-execute",
-											 0,
-											 NULL,
-											 &error);
+	GFileEnumerator *enumerator = g_file_enumerate_children (file,
+															 /*"*",*/
+															 "standard::type,"
+															 "standard::is-hidden,"
+															 "standard::name,"
+															 "standard::display-name,"
+															 "access::can-execute",
+															 0,
+															 NULL,
+															 &error);
 	/* did we read the dir correctly? */
 	if (error) {
 		gchar *error_msg = g_strdup (error->message);
@@ -156,6 +154,7 @@ vfs_get_dir_listings (GPtrArray *files,
 		return error_msg;
 	}
 
+	GFileInfo *file_info = NULL;
 	while ((file_info = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL) {
 		/* skip the file if it's hidden and we aren't showing hidden files */
 		if (g_file_info_get_is_hidden (file_info) && !show_hidden) {
@@ -196,8 +195,8 @@ vfs_get_dir_listings (GPtrArray *files,
 		return error_msg;
 	}
 
-	g_ptr_array_sort (dirs, (GCompareFunc)&vfs_sort_alpha);
-	g_ptr_array_sort (files, (GCompareFunc)&vfs_sort_alpha);
+	g_ptr_array_sort (dirs, (GCompareFunc)&vfs_sort_array);
+	g_ptr_array_sort (files, (GCompareFunc)&vfs_sort_array);
 
 	return NULL;
 }

@@ -29,6 +29,32 @@
 #include "utils.h"
 
 /******************************************************************************/
+void
+garbage_init (Garbage *garabage) {
+	GPtrArray **_garbage = (GPtrArray**)garabage;
+	*_garbage = g_ptr_array_new();
+}
+/******************************************************************************/
+void
+garbage_empty (Garbage *garabage, gboolean reuse) {
+	GPtrArray **_garbage = (GPtrArray**)garabage;
+
+	g_ptr_array_foreach (*_garbage, (GFunc)g_free, NULL);
+	g_ptr_array_free (*_garbage, TRUE);
+	if (reuse) {
+		*_garbage = g_ptr_array_new();
+	}
+	else {
+		*_garbage = NULL;
+	}
+}
+/******************************************************************************/
+void
+garbage_add_item (Garbage garabage, gpointer item) {
+	GPtrArray *_garbage = (GPtrArray*)garabage;
+	g_ptr_array_add (_garbage, item);
+}
+/******************************************************************************/
 gboolean
 utils_check_gerror (GError **error) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
@@ -70,7 +96,7 @@ utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type
 }
 /******************************************************************************/
 GtkWidget*
-utils_get_scaled_image_from_file (gchar *file_name, int size) {
+utils_get_scaled_image_from_file (const gchar *file_name, int size) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 		GdkPixbuf *pixbuf   = gdk_pixbuf_new_from_file_at_size (file_name,
@@ -96,33 +122,5 @@ g_slist_swap_data (GSList *list, guint index) {
 	first->data  = second->data;
 	second->data = tmp;
 	return list;
-}
-/******************************************************************************/
-gint
-utils_sort_alpha (const gchar **s1,
-				  const gchar **s2) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
-	return g_utf8_collate ((gchar *)*s1, (gchar *)*s2);
-}
-/******************************************************************************/
-gchar *
-utils_clamp_file_name (const gchar *file_name, int length, gboolean *clamped) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
-/* clamped is true if the string is actually clamped */
-	gchar *tmp, *ret;
-
-	if (strlen (file_name) > length) {
-		tmp = g_strndup (file_name, length - 3);
-		ret = g_strdup_printf ("%s...", tmp);
-		g_free (tmp);
-		if (clamped != NULL) *clamped = TRUE;
-		return ret;
-	}
-	else {
-		if (clamped != NULL) *clamped = FALSE;
-		return g_strdup (file_name);
-	}
 }
 /******************************************************************************/

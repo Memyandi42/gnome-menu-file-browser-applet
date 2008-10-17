@@ -60,7 +60,7 @@ enum {
 };
 /******************************************************************************/
 GtkWidget* menu_browser_new (const gchar *path, const gchar *label, BrowserPrefs *prefs);
-void	   menu_browser_update (MenuBrowser *self, gchar *path, gchar *label);
+void	   menu_browser_update (MenuBrowser *self, const gchar *path, const gchar *label);
 GType	   menu_browser_get_type (void);
 /******************************************************************************/
 

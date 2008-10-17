@@ -31,11 +31,15 @@
 
 #include "config.h"
 
+typedef GPtrArray *Garbage;
+/******************************************************************************/
+void		garbage_empty (Garbage *garabage, gboolean reuse);
+void		garbage_init  (Garbage *garabage);
+void		garbage_add_item (Garbage garabage, gpointer item);
+/******************************************************************************/
 gboolean	utils_check_gerror (GError **error);
 void		utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type);
-GtkWidget*	utils_get_scaled_image_from_file (gchar *file_name, int size);
+GtkWidget*	utils_get_scaled_image_from_file (const gchar *file_name, int size);
 GSList*		g_slist_swap_data (GSList *list, guint index);
-gint		utils_sort_alpha (const gchar **s1, const gchar **s2);
-gchar*		utils_clamp_file_name (const gchar *file_name, int length, gboolean *clamped);
-
+/******************************************************************************/
 #endif

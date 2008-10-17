@@ -143,8 +143,6 @@ panel_menu_bar_size_allocate (GtkWidget *widget,
 	panel_menu_bar_change_orient (self->priv->applet,
 								  orientation,
 								  self);
-
-	return;
 }
 /******************************************************************************/
 static void	/* Taken from the Trash Applet */
@@ -187,7 +185,6 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 		default:
 			break;
 	}
-	return;
 }
 /******************************************************************************/
 static void
@@ -216,7 +213,6 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_browser),
 															icon);
 	}
-	return;
 }
 /******************************************************************************/
 #ifdef ENABLE_GTK_HOTKEY
@@ -270,7 +266,6 @@ panel_menu_bar_update_entry (PanelMenuBar *self,
 	menu_browser_update (MENU_BROWSER (menu_browser),
 						 signal_data->path,
 						 signal_data->label);
-	return;
 }
 /******************************************************************************/
 static void
@@ -316,7 +311,6 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 	else {
 		if (DEBUG) g_printf("shitzer\n");
 	}
-	return;
 }
 /******************************************************************************/
 static void
@@ -335,14 +329,12 @@ panel_menu_bar_remove_entry (PanelMenuBar *self,
 	else {
 		if (DEBUG) g_printf("shitzer\n");
 	}
-
-	return;
 }
 /******************************************************************************/
 static void
 panel_menu_bar_add_entry (PanelMenuBar *self,
-						  gchar *label,
-						  gchar *path) {
+						  const gchar *label,
+						  const gchar *path) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
@@ -358,7 +350,6 @@ panel_menu_bar_add_entry (PanelMenuBar *self,
 						   menu_browser);
 
 	gtk_widget_show_all (menu_browser);
-	return;
 }
 /******************************************************************************/
 static void
@@ -655,7 +646,6 @@ panel_menu_bar_init (PanelMenuBar * self) {
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	self->priv = PANEL_MENU_BAR_GET_PRIVATE (self);
-	return;
 }
 /******************************************************************************/
 static void
@@ -670,7 +660,6 @@ panel_menu_bar_dispose (GObject *obj) {
 	(self->priv->file_browsers == NULL ? NULL : (self->priv->file_browsers = (gpointer)(g_ptr_array_free (self->priv->file_browsers, TRUE))));
 	klass = PANEL_MENU_BAR_CLASS (g_type_class_peek (TYPE_PANEL_MENU_BAR));
 	G_OBJECT_CLASS (panel_menu_bar_parent_class)->dispose (obj);
-	return;
 }
 /******************************************************************************/
 GType

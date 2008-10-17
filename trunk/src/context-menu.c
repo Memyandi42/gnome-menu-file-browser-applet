@@ -92,6 +92,7 @@ context_menu_add_archive_action (const gchar *file_name, GtkWidget *menu) {
 
 	gchar *archive_label = NULL;
 	gchar *archive_action = NULL;
+
 	if (is_archive (file_name)) {
 		archive_label = "_Extract Here";
 		archive_action = "file-roller -h";

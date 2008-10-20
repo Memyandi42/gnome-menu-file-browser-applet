@@ -61,6 +61,28 @@ static char *archive_mime_types[] = {
 	NULL
 };
 /******************************************************************************/
+static void
+context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
+
+	if (!g_str_has_suffix (file_name, "tex")) return;
+
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("Build Latex Document");
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+								   gtk_image_new_from_icon_name ("build",
+								   								 GTK_ICON_SIZE_MENU));
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+	
+	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
+	launch_info->command = g_strdup ("rubber -f --inplace -d");
+	launch_info->file = g_strdup (file_name);
+
+	g_signal_connect_swapped (G_OBJECT (menu_item),
+							  "activate",
+							  G_CALLBACK (vfs_launch_application),
+							  (gpointer) launch_info);
+
+}
+/******************************************************************************/
 static gboolean
 is_archive (const gchar *file_name) {
 	gboolean ret = FALSE;
@@ -195,6 +217,7 @@ context_menu_populate (const gchar *file_name, GtkWidget *menu) {
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), gtk_separator_menu_item_new());
 	context_menu_add_delete_item	(file_name, menu);
 	context_menu_add_archive_action	(file_name, menu);
+	context_menu_add_compile_tex	(file_name, menu);
 	context_menu_add_close_item (menu);
 }
 /******************************************************************************/

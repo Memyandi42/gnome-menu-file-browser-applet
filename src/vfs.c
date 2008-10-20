@@ -165,12 +165,12 @@ vfs_get_dir_listings (GPtrArray *files,
 		vfs_file_info->file_name = g_strdup_printf ("%s/%s", path, g_file_info_get_name (file_info));
 
 		/* get the file's human readable name, including if it's a desktop file */
-		if (vfs_file_is_desktop (vfs_file_info->file_name)) {
-			vfs_file_info->display_name = vfs_get_desktop_app_name (vfs_file_info->file_name);
-		}
-		else {
-			vfs_file_info->display_name = g_strdup (g_file_info_get_display_name (file_info));
-		}
+
+		
+		vfs_file_info->display_name = (vfs_file_is_desktop (vfs_file_info->file_name)) ?
+									   vfs_get_desktop_app_name (vfs_file_info->file_name) :
+									   g_strdup (g_file_info_get_display_name (file_info));
+
 		vfs_file_info->is_executable = g_file_info_get_attribute_boolean (file_info,
 																		  G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE) &&
 											(g_file_info_get_file_type (file_info) != G_FILE_TYPE_DIRECTORY);
@@ -211,8 +211,9 @@ vfs_launch_application (LaunchInfo *launch_info) {
 	gchar *working_dir = NULL;
 
 	if (launch_info->file) {
-		if (vfs_file_is_directory (launch_info->file)) working_dir = g_strdup (launch_info->file);
-		else working_dir = g_path_get_dirname (launch_info->file);
+		working_dir = (vfs_file_is_directory (launch_info->file)) ? 
+					  g_strdup (launch_info->file) :
+					  g_path_get_dirname (launch_info->file);
 	}
 	else {
 		working_dir = g_strdup (g_get_home_dir ());
@@ -220,13 +221,22 @@ vfs_launch_application (LaunchInfo *launch_info) {
 
 	g_strdelimit (launch_info->command, " ", '\1');
 
-	gchar *arg = g_strconcat (launch_info->command, "\1",
-							  launch_info->file,
-							  NULL);
+	/* only add the file name as an argument if one was specified */
+	gchar *arg = (launch_info->file) ? 
+				 g_strconcat (launch_info->command, "\1", launch_info->file, NULL) :
+				 g_strdup (launch_info->command);
+
 	gchar** args = g_strsplit (arg, "\1", 0);
 
 	/* need to do this to convert the '\2's back into spaces. */
 	g_strdelimit (args[0], "\2", ' ');
+
+	/* remove trailing spaces from all args */
+	int i = 0;
+	while (args[i]) {
+		g_strchomp (args[i]);
+		i++;
+	}
 
 	g_spawn_async_with_pipes (working_dir,
 							  args,

@@ -61,12 +61,50 @@ static char *archive_mime_types[] = {
 	NULL
 };
 /******************************************************************************/
+/*
+static void
+context_menu_add_burn_callback (const gchar *file_name) {
+	GFile *source = g_file_new_for_path (file_name);
+	GFile *destination = g_file_new_for_uri ("burn:///");
+
+	GError *error = NULL;
+
+	g_file_copy (source,
+				 destination,
+				 G_FILE_COPY_OVERWRITE,
+				 NULL,
+				 NULL,
+				 NULL,
+				 &error);
+
+	utils_check_gerror (&error);
+}
+*/
+/******************************************************************************/
+static void
+context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Create CD/DVD");
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+								   gtk_image_new_from_icon_name ("nautilus-cd-burner",
+								   								 GTK_ICON_SIZE_MENU));
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
+	launch_info->command = g_strdup ("brasero");
+	launch_info->file = g_strdup (file_name);
+
+	g_signal_connect_swapped (G_OBJECT (menu_item),
+							  "activate",
+							  G_CALLBACK (vfs_launch_application),
+							  (gpointer) launch_info);
+}
+/******************************************************************************/
 static void
 context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
 
 	if (!g_str_has_suffix (file_name, "tex")) return;
 
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("Build Latex Document");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Build Latex Document");
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_icon_name ("build",
 								   								 GTK_ICON_SIZE_MENU));
@@ -80,7 +118,6 @@ context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
 							  "activate",
 							  G_CALLBACK (vfs_launch_application),
 							  (gpointer) launch_info);
-
 }
 /******************************************************************************/
 static gboolean
@@ -218,7 +255,8 @@ context_menu_populate (const gchar *file_name, GtkWidget *menu) {
 	context_menu_add_delete_item	(file_name, menu);
 	context_menu_add_archive_action	(file_name, menu);
 	context_menu_add_compile_tex	(file_name, menu);
-	context_menu_add_close_item (menu);
+	context_menu_add_burn			(file_name, menu);
+	context_menu_add_close_item		(menu);
 }
 /******************************************************************************/
 static void
@@ -241,8 +279,7 @@ context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 	int event_button;
 	int event_time;
 
-	GdkEventButton *event = g_object_get_data (G_OBJECT (menu_item),
-											   "button_event");
+	GdkEventButton *event = g_object_get_data (G_OBJECT (menu_item), "button_event");
 	if (event) {
 		event_button = event->button;
 		event_time = event->time;
@@ -252,8 +289,7 @@ context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 		event_time = gtk_get_current_event_time();
 	}
 
-	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item),
-											  "menu_browser");
+	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item), "menu_browser");
 
 /*
 GtkWidget *panel_menu_bar = gtk_widget_get_parent (GTK_WIDGET (browser));

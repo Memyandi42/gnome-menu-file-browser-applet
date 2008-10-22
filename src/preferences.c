@@ -91,7 +91,29 @@ applet_preferences_on_show_icon_pressed (GtkWidget* widget, AppletPreferences* s
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-	return;
+}
+/******************************************************************************/
+static void
+applet_preferences_on_horizontal_text_pressed (GtkWidget* widget, AppletPreferences* self) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	g_return_if_fail (IS_APPLET_PREFERENCES (self));
+
+	/* get the new state from the widget and update the prefs structure. No
+	 * need to let the menu bar or browser object know */
+	self->menu_bar_prefs->horizontal_text = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+
+	PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
+	signal_data->signal_id = PREFS_SIGNAL_HORIZONTAL_TEXT;
+	signal_data->instance  = -1;
+	signal_data->label 	  = NULL;
+	signal_data->path 	  = NULL;
+
+	/* emit the signal so the panel menu bar updates itself */
+	g_signal_emit (G_OBJECT (self),
+				   applet_preferences_signals [PREFS_CHANGED],
+				   0,
+				   signal_data);
 }
 /******************************************************************************/
 static void
@@ -107,7 +129,6 @@ applet_preferences_on_show_hidden_pressed (GtkWidget* widget, AppletPreferences*
 	/* update the state of the revert button. A pref has changed so the button
 	 * should now be sensitive  */
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-	return;
 }
 /******************************************************************************/
 static void
@@ -257,6 +278,13 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 								 self->menu_bar_prefs->show_icon,
 								 &error);
 	utils_check_gerror (&error);
+	/* horizontal text? */
+	panel_applet_gconf_set_bool (applet,
+								 KEY_HORIZONTAL_TEXT,
+								 self->menu_bar_prefs->horizontal_text,
+								 &error);
+	utils_check_gerror (&error);
+
 	/* directory list */
 	panel_applet_gconf_set_list (applet,
 								 KEY_DIR,
@@ -271,7 +299,6 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 								 self->menu_bar_prefs->labels,
 								 &error);
 	utils_check_gerror (&error);
-	return;
 }
 /******************************************************************************/
 static void
@@ -299,7 +326,6 @@ applet_preferences_dialog_response (GtkWidget* window, gint response, AppletPref
 			gtk_widget_hide (window);
 			break;
 	}
-	return;
 }
 /******************************************************************************/
 static void
@@ -355,7 +381,6 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 
 	/* update the revert button*/
 	/*gtk_widget_set_sensitive (revert_button, TRUE);*/
-	return;
 }
 /******************************************************************************/
 static void
@@ -443,8 +468,6 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 		}
 	}
 	gtk_widget_destroy (file_chooser_dialog);
-
-	return;
 }
 /******************************************************************************/
 static void
@@ -506,7 +529,6 @@ applet_preferences_on_add_dir_clicked (GtkWidget* widget, AppletPreferences* sel
 		/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	}
 	gtk_widget_destroy (file_chooser_dialog);
-	return;
 }
 /******************************************************************************/
 static void
@@ -558,8 +580,6 @@ applet_preferences_on_rem_dir_clicked (GtkWidget* widget, AppletPreferences* sel
 		/* update the revert button*/
 		/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 	}
-
-	return;
 }
 /******************************************************************************/
 static void
@@ -612,7 +632,6 @@ applet_preferences_on_down_dir_clicked (GtkWidget* widget, AppletPreferences* se
 			/*gtk_widget_set_sensitive (revert_button, TRUE);*/
 		}
 	}
-	return;
 }
 /******************************************************************************/
 static void
@@ -671,7 +690,6 @@ applet_preferences_on_up_dir_clicked (GtkWidget* widget, AppletPreferences* self
 		}
 		gtk_tree_path_free (path);
 	}
-	return;
 }
 /******************************************************************************/
 static void
@@ -743,8 +761,6 @@ applet_preferences_create_list_view (AppletPreferences* self) {
 	/*put the selection in SINGLE mode */
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW(self->priv->tree_view));
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
-
-	return;
 }
 /******************************************************************************/
 void
@@ -759,6 +775,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
     GtkWidget* show_hidden;
     GtkWidget* terminal;
     GtkWidget* editor;
+    GtkWidget* horizontal_text;
 	MenuBarPrefs* mb_prefs = self->menu_bar_prefs;
 
 	if (self->priv->window == NULL) {
@@ -803,6 +820,15 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 		g_signal_connect (G_OBJECT (show_hidden),
 						  "toggled",
 						  G_CALLBACK (applet_preferences_on_show_hidden_pressed),
+						  self);
+
+		/***** horizontal text *****/
+		horizontal_text = glade_xml_get_widget (xml, "horizontal_text_check");
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (horizontal_text),
+									  mb_prefs->horizontal_text);
+		g_signal_connect (G_OBJECT (horizontal_text),
+						  "toggled",
+						  G_CALLBACK (applet_preferences_on_horizontal_text_pressed),
 						  self);
 
 		/***** icon *****/
@@ -859,8 +885,6 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 
 	gtk_widget_show_all (self->priv->window);
 	gtk_window_present (GTK_WINDOW (self->priv->window));
-
-	return;
 }
 /******************************************************************************/
 static MenuBarPrefs*
@@ -881,91 +905,63 @@ applet_preferences_load_from_gconf (PanelApplet* applet) {
 	if (utils_check_gerror (&error)) return NULL;
 
 	/* show hidden files? */
-	mb_prefs->browser_prefs->show_hidden = panel_applet_gconf_get_bool (applet,
-																	 KEY_HIDDEN_SHOW,
-																	 &error);
+	mb_prefs->browser_prefs->show_hidden = panel_applet_gconf_get_bool (applet, KEY_HIDDEN_SHOW, &error);
 	if (utils_check_gerror (&error)) {
 		mb_prefs->browser_prefs->show_hidden = DEFAULT_SHOW_HIDDEN;
-		panel_applet_gconf_set_bool (applet,
-									 KEY_HIDDEN_SHOW,
-									 mb_prefs->browser_prefs->show_hidden,
-									 &error);
+		panel_applet_gconf_set_bool (applet, KEY_HIDDEN_SHOW, mb_prefs->browser_prefs->show_hidden, &error);
 	}
+
 	/* terminal */
-	mb_prefs->browser_prefs->terminal = panel_applet_gconf_get_string (applet,
-																	KEY_TERMINAL,
-																	&error);
+	mb_prefs->browser_prefs->terminal = panel_applet_gconf_get_string (applet, KEY_TERMINAL, &error);
 	if (utils_check_gerror (&error) || mb_prefs->browser_prefs->terminal == NULL) {
 		mb_prefs->browser_prefs->terminal = g_strdup (DEFAULT_TERMINAL);
-		panel_applet_gconf_set_string (applet,
-									   KEY_TERMINAL,
-									   mb_prefs->browser_prefs->terminal,
-									   &error);
+		panel_applet_gconf_set_string (applet, KEY_TERMINAL, mb_prefs->browser_prefs->terminal, &error);
 	}
+
 	/* editor */
-	mb_prefs->browser_prefs->editor = panel_applet_gconf_get_string (applet,
-																	 KEY_EDITOR,
-																	 &error);
+	mb_prefs->browser_prefs->editor = panel_applet_gconf_get_string (applet, KEY_EDITOR, &error);
 	if (utils_check_gerror (&error) || mb_prefs->browser_prefs->editor == NULL) {
 		mb_prefs->browser_prefs->editor = g_strdup (DEFAULT_EDITOR);
-		panel_applet_gconf_set_string (applet,
-									   KEY_TERMINAL,
-									   mb_prefs->browser_prefs->editor,
-									   &error);
+		panel_applet_gconf_set_string (applet, KEY_TERMINAL, mb_prefs->browser_prefs->editor, &error);
 	}
 
 	/* the icon */
-	mb_prefs->icon = panel_applet_gconf_get_string (applet,
-												 KEY_ICON_NAME,
-												 &error);
+	mb_prefs->icon = panel_applet_gconf_get_string (applet, KEY_ICON_NAME, &error);
 	if (utils_check_gerror (&error) || mb_prefs->icon == NULL) {
 		mb_prefs->icon = g_strdup (DEFAULT_ICON);
-		panel_applet_gconf_set_string (applet,
-									   KEY_ICON_NAME,
-									   mb_prefs->icon,
-									   &error);
+		panel_applet_gconf_set_string (applet, KEY_ICON_NAME, mb_prefs->icon, &error);
 	}
 
 	/* show the icon? */
-	mb_prefs->show_icon = panel_applet_gconf_get_bool (applet,
-													KEY_ICON_SHOW,
-													&error);
+	mb_prefs->show_icon = panel_applet_gconf_get_bool (applet, KEY_ICON_SHOW, &error);
 	if (utils_check_gerror (&error)) {
 		mb_prefs->show_icon = DEFAULT_SHOW_ICON;
-		panel_applet_gconf_set_bool (applet,
-									 KEY_ICON_SHOW,
-									 mb_prefs->show_icon,
-									 &error);
+		panel_applet_gconf_set_bool (applet, KEY_ICON_SHOW, mb_prefs->show_icon, &error);
 	}
+
+	/* horizontal text ? */
+	mb_prefs->horizontal_text = panel_applet_gconf_get_bool (applet, KEY_HORIZONTAL_TEXT, &error);
+	if (utils_check_gerror (&error)) {
+		mb_prefs->horizontal_text = DEFAULT_HORIZONTAL_TEXT;
+		panel_applet_gconf_set_bool (applet, KEY_HORIZONTAL_TEXT, mb_prefs->horizontal_text, &error);
+	}
+
 	/* directory list */
-	GSList* dirs = panel_applet_gconf_get_list (applet,
-											   KEY_DIR,
-											   GCONF_VALUE_STRING,
-											   &error);
+	GSList* dirs = panel_applet_gconf_get_list (applet, KEY_DIR, GCONF_VALUE_STRING, &error);
 	if (utils_check_gerror (&error) || dirs == NULL) {
 		dirs = g_slist_alloc ();
 		dirs->data = g_strdup (DEFAULT_PATH);
 		dirs->next = NULL;
-		panel_applet_gconf_set_list (applet,
-									 KEY_DIR,
-									 GCONF_VALUE_STRING,
-									 dirs,
-									 &error);
+		panel_applet_gconf_set_list (applet, KEY_DIR, GCONF_VALUE_STRING, dirs, &error);
 	}
+
 	/* labels list */
-	GSList* labels = panel_applet_gconf_get_list (applet,
-											     KEY_LABELS,
-											     GCONF_VALUE_STRING,
-											     &error);
+	GSList* labels = panel_applet_gconf_get_list (applet, KEY_LABELS, GCONF_VALUE_STRING, &error);
 	if (utils_check_gerror (&error) || labels == NULL) {
 		labels = g_slist_alloc ();
 		labels->data = g_strdup (DEFAULT_LABEL);
 		labels->next = NULL;
-		panel_applet_gconf_set_list (applet,
-									 KEY_LABELS,
-									 GCONF_VALUE_STRING,
-									 labels,
-									 &error);
+		panel_applet_gconf_set_list (applet, KEY_LABELS, GCONF_VALUE_STRING, labels, &error);
 	}
 	mb_prefs->dirs   = dirs;
 	mb_prefs->labels = labels;

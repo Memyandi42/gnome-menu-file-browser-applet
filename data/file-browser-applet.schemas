@@ -13,6 +13,17 @@
       </schema>
 
       <schema>
+        <key>/schemas/apps/file-browser-applet/prefs/horizontal_text</key>
+        <owner>file-browser-applet</owner>
+        <type>bool</type>
+        <default>TRUE</default>
+        <locale name="C">
+          <short>Specify text orientation when the panel is vertical</short>
+          <long>If false, the panel-menu-bar text will be oriented vertically when the panel is vertical. Otherwise it will be oriented horizontally</long>
+        </locale>
+      </schema>
+
+      <schema>
         <key>/schemas/apps/file-browser-applet/prefs/icon</key>
         <owner>file-browser-applet</owner>
         <type>string</type>

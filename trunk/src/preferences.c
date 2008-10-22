@@ -346,19 +346,12 @@ applet_preferences_label_cell_edited (GtkCellRenderer	*cell,
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW (tree_view));
 
 	/* get an iterator to the model for the currently selected cell */
-	gtk_tree_model_get_iter_from_string (model,
-										 &iter,
-										 path_string);
+	gtk_tree_model_get_iter_from_string (model, &iter, path_string);
 	/* update the model */
-	gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-						LABEL_COLUMN, new_string,
-						-1);
+	gtk_list_store_set (GTK_LIST_STORE (model), &iter, LABEL_COLUMN, new_string, -1);
 
 	/* the path associated with the selection */
-	gtk_tree_model_get (model,
-						&iter,
-						PATH_COLUMN, &path,
-						-1);
+	gtk_tree_model_get (model, &iter, PATH_COLUMN, &path, -1);
 
 	/* create the data structure with the event info to pass to panel_menu_bar */
 	PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
@@ -400,14 +393,9 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW (tree_view));
 
 	/* get an iterator to the model for the currently selected cell */
-	gtk_tree_model_get_iter (model,
-							 &iter,
-							 path);
+	gtk_tree_model_get_iter (model, &iter, path);
 	/* the "Path" value for the active cell */
-	gtk_tree_model_get (model,
-						&iter,
-						PATH_COLUMN, &old_path,
-						-1);
+	gtk_tree_model_get (model, &iter, PATH_COLUMN, &old_path, -1);
 
 	/* make a file chooser object to select the new path */
 	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select New Folder To Browse",
@@ -419,8 +407,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 													   GTK_RESPONSE_ACCEPT,
 													   NULL);
 	/* Set the starting path as the old path */
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog),
-								   old_path);
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog), old_path);
 	g_free (old_path);
 	/* run the dialog */
 	if (gtk_dialog_run (GTK_DIALOG (file_chooser_dialog)) == GTK_RESPONSE_ACCEPT) {
@@ -428,17 +415,11 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 		gchar* new_path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_dialog));
 		/* only update data if it's not the same as the old one */
 		if (g_ascii_strcasecmp (old_path, new_path)) {
-			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-								PATH_COLUMN, new_path,
-								-1);
-
+			gtk_list_store_set (GTK_LIST_STORE (model), &iter, PATH_COLUMN, new_path, -1);
 
 			/* the label associated with the selection */
 			gchar* label = NULL;
-			gtk_tree_model_get (model,
-								&iter,
-								LABEL_COLUMN, &label,
-								-1);
+			gtk_tree_model_get (model, &iter, LABEL_COLUMN, &label, -1);
 
 			/* get the instance from the iterator */
 			gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
@@ -491,8 +472,7 @@ applet_preferences_on_add_dir_clicked (GtkWidget* widget, AppletPreferences* sel
 													   NULL);
 	/* Set the starting path */
 	gchar* start_path = g_strdup_printf ("%s/*", g_get_home_dir ());
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog),
-								   start_path);
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_dialog), start_path);
 	g_free (start_path);
 
 	/* check the reply */
@@ -503,9 +483,12 @@ applet_preferences_on_add_dir_clicked (GtkWidget* widget, AppletPreferences* sel
 		/* get the view's model, add a row and set the values */
 		model = gtk_tree_view_get_model (GTK_TREE_VIEW(tree_view));
 		gtk_list_store_append (GTK_LIST_STORE(model), &iter);
-		gtk_list_store_set (GTK_LIST_STORE(model), &iter,
-							LABEL_COLUMN, label,
-							PATH_COLUMN, dir,
+		gtk_list_store_set (GTK_LIST_STORE(model),
+							&iter,
+							LABEL_COLUMN,
+							label,
+							PATH_COLUMN,
+							dir,
 							-1);
 
 		/* create the data structure with the event info to pass to panel_menu_bar */
@@ -606,9 +589,7 @@ applet_preferences_on_down_dir_clicked (GtkWidget* widget, AppletPreferences* se
 			/* get the instance from the iterator */
 			gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
-			gtk_list_store_swap (GTK_LIST_STORE (model),
-								 &iter,
-								 &iter_next);
+			gtk_list_store_swap (GTK_LIST_STORE (model), &iter, &iter_next);
 
 			/* create the data structure with the event info to pass to panel_menu_bar */
 			PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
@@ -624,9 +605,9 @@ applet_preferences_on_down_dir_clicked (GtkWidget* widget, AppletPreferences* se
 
 			/* emit the signal so the panel menu bar updates itself */
 			g_signal_emit (G_OBJECT (self),
-					applet_preferences_signals [PREFS_CHANGED],
-					0,
-					signal_data);
+						   applet_preferences_signals [PREFS_CHANGED],
+						   0,
+						   signal_data);
 
 			/* update the revert button*/
 			/*gtk_widget_set_sensitive (revert_button, TRUE);*/
@@ -663,9 +644,7 @@ applet_preferences_on_up_dir_clicked (GtkWidget* widget, AppletPreferences* self
 			/* get the instance from the iterator */
 			gchar* instance = gtk_tree_model_get_string_from_iter (model, &iter);
 
-			gtk_list_store_swap (GTK_LIST_STORE (model),
-								 &iter,
-								 &iter_prev);
+			gtk_list_store_swap (GTK_LIST_STORE (model), &iter, &iter_prev);
 
 			/* create the data structure with the event info to pass to panel_menu_bar */
 			PrefsChangedSignalData* signal_data = g_new0 (PrefsChangedSignalData, 1);
@@ -706,18 +685,19 @@ applet_preferences_create_list_view (AppletPreferences* self) {
 
 	/* Create a model.  We are using the store model for now, though we
 	* could use any other GtkTreeModel */
-	store = gtk_list_store_new (N_COLUMNS,
-							    G_TYPE_STRING,
-							    G_TYPE_STRING);
+	store = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 
 	/* fill the model with data */
 	GSList* tmp_dir   = self->menu_bar_prefs->dirs;
 	GSList* tmp_label = self->menu_bar_prefs->labels;
 	while (tmp_label && tmp_dir) {
 		gtk_list_store_append (store, &iter);
-		gtk_list_store_set (store, &iter,
-							LABEL_COLUMN, (gchar *)tmp_label->data,
-							PATH_COLUMN, (gchar *)tmp_dir->data,
+		gtk_list_store_set (store,
+							&iter,
+							LABEL_COLUMN,
+							(gchar *)tmp_label->data,
+							PATH_COLUMN,
+							(gchar *)tmp_dir->data,
 							-1);
 		tmp_dir   = tmp_dir->next;
 		tmp_label = tmp_label->next;
@@ -741,8 +721,10 @@ applet_preferences_create_list_view (AppletPreferences* self) {
 
 	/* Create a column, associating the "text" attribute of the
 	* cell_renderer to the first column of the model */
-	column = gtk_tree_view_column_new_with_attributes ("Label", renderer,
-													   "text", LABEL_COLUMN,
+	column = gtk_tree_view_column_new_with_attributes ("Label",
+													   renderer,
+													   "text",
+													   LABEL_COLUMN,
 													   NULL);
 	/* Add the column to the view. */
 	gtk_tree_view_append_column (GTK_TREE_VIEW (self->priv->tree_view), column);
@@ -753,8 +735,10 @@ applet_preferences_create_list_view (AppletPreferences* self) {
 					  "row-activated",
 					  G_CALLBACK (applet_preferences_path_cell_activated),
 					  self);
-	column = gtk_tree_view_column_new_with_attributes ("Path", renderer,
-													   "text", PATH_COLUMN,
+	column = gtk_tree_view_column_new_with_attributes ("Path",
+													   renderer,
+													   "text",
+													   PATH_COLUMN,
 													   NULL);
 	gtk_tree_view_append_column (GTK_TREE_VIEW (self->priv->tree_view), column);
 
@@ -980,7 +964,6 @@ applet_preferences_new (PanelApplet* applet) {
 	self->menu_bar_prefs = applet_preferences_load_from_gconf (applet);
 	self->priv->window = NULL;
 	self->priv->applet = applet;
-
 
 	return self;
 }

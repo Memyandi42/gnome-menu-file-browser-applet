@@ -41,12 +41,7 @@ garbage_empty (Garbage *garabage, gboolean reuse) {
 
 	g_ptr_array_foreach (*_garbage, (GFunc)g_free, NULL);
 	g_ptr_array_free (*_garbage, TRUE);
-	if (reuse) {
-		*_garbage = g_ptr_array_new();
-	}
-	else {
-		*_garbage = NULL;
-	}
+	*_garbage = reuse ? g_ptr_array_new() : NULL;
 }
 /******************************************************************************/
 void
@@ -61,9 +56,7 @@ utils_check_gerror (GError **error) {
 
 	if (*error) {
 		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
-		utils_show_dialog ("Application Error",
-						   (*error)->message,
-						   GTK_MESSAGE_ERROR);
+		utils_show_dialog ("Application Error", (*error)->message, GTK_MESSAGE_ERROR);
 		g_error_free (*error);
 		*error = NULL;
 		return TRUE;
@@ -82,14 +75,9 @@ utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type
 												message);
 	gtk_window_set_title (GTK_WINDOW (dialog), title);
 
-	g_signal_connect (G_OBJECT (dialog), "destroy",
-					  G_CALLBACK (gtk_widget_destroy), dialog);
-    g_signal_connect (G_OBJECT (dialog), "delete_event",
-                      G_CALLBACK (gtk_widget_destroy), dialog);
-	g_signal_connect_swapped (G_OBJECT (dialog),
-							  "response",
-							  G_CALLBACK (gtk_widget_destroy),
-							  dialog);
+	g_signal_connect (G_OBJECT (dialog), "destroy", G_CALLBACK (gtk_widget_destroy), dialog);
+    g_signal_connect (G_OBJECT (dialog), "delete_event", G_CALLBACK (gtk_widget_destroy), dialog);
+	g_signal_connect_swapped (G_OBJECT (dialog), "response", G_CALLBACK (gtk_widget_destroy), dialog);
 	gtk_widget_show_all (dialog);
 
 	return;

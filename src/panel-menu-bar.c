@@ -195,9 +195,7 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 
 	switch (type) {
 		case PANEL_COLOR_BACKGROUND:
-			gtk_widget_modify_bg (GTK_WIDGET (self),
-								  GTK_STATE_NORMAL,
-								  color);
+			gtk_widget_modify_bg (GTK_WIDGET (self), GTK_STATE_NORMAL, color);
 			break;
 
 		case PANEL_PIXMAP_BACKGROUND:
@@ -257,8 +255,7 @@ panel_menu_bar_on_hotkey_press (GtkHotkeyInfo *hot_key_info,
 
 	GTK_MENU_SHELL (self)->active = TRUE;
 	gtk_menu_shell_set_take_focus (GTK_MENU_SHELL (self), TRUE);
-	gtk_menu_shell_select_item (GTK_MENU_SHELL (self),
-								GTK_WIDGET (menu_browser));
+	gtk_menu_shell_select_item (GTK_MENU_SHELL (self), GTK_WIDGET (menu_browser));
 }
 /******************************************************************************/
 static void
@@ -280,6 +277,7 @@ panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 					  self);
 
 	gtk_hotkey_info_bind (hot_key_info, &error);
+	utils_check_gerror (&error);
 }
 #endif
 /******************************************************************************/
@@ -292,9 +290,7 @@ panel_menu_bar_update_entry (PanelMenuBar *self,
 
 	GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
 
-	menu_browser_update (MENU_BROWSER (menu_browser),
-						 signal_data->path,
-						 signal_data->label);
+	menu_browser_update (MENU_BROWSER (menu_browser), signal_data->path, signal_data->label);
 }
 /******************************************************************************/
 static void
@@ -330,9 +326,7 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 	if (menu_browser != NULL && menu_browser_affected != NULL) {
 		g_object_ref (G_OBJECT (menu_browser));
 		gtk_container_remove (GTK_CONTAINER (self), menu_browser);
-		gtk_menu_shell_insert (GTK_MENU_SHELL (self),
-							   menu_browser,
-							   new_pos);
+		gtk_menu_shell_insert (GTK_MENU_SHELL (self), menu_browser, new_pos);
 		g_object_unref (G_OBJECT (menu_browser));
 		self->priv->file_browsers->pdata[new_pos] = menu_browser;
 		self->priv->file_browsers->pdata[signal_data->instance] = menu_browser_affected;
@@ -375,8 +369,7 @@ panel_menu_bar_add_entry (PanelMenuBar *self,
 	/* add it to the list and to the menu bar*/
 	g_ptr_array_add (self->priv->file_browsers, menu_browser);
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (self),
-						   menu_browser);
+	gtk_menu_shell_append (GTK_MENU_SHELL (self), menu_browser);
 
 	gtk_widget_show_all (menu_browser);
 }

@@ -59,9 +59,7 @@ menu_browser_clear_menu (GtkWidget *menu_item) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *menu = menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item));
-	gtk_container_foreach (GTK_CONTAINER (menu),
-						   (GtkCallback) gtk_widget_destroy,
-						   NULL);
+	gtk_container_foreach (GTK_CONTAINER (menu), (GtkCallback) gtk_widget_destroy, NULL);
 }
 /******************************************************************************/
 static void
@@ -73,7 +71,8 @@ menu_browser_clean_up (MenuBrowser *self) {
 	/*g_ptr_array_foreach (self->priv->garbage, (GFunc)g_free, NULL);*/
 	/*g_ptr_array_free (self->priv->garbage, TRUE);*/
 	/*self->priv->garbage = g_ptr_array_new();*/
-garbage_empty (&(self->priv->_garbage), TRUE);
+
+	garbage_empty (&(self->priv->_garbage), TRUE);
 
 	menu_browser_clear_menu (GTK_WIDGET (self));
 }
@@ -136,20 +135,16 @@ menu_browser_on_item_button_press (GtkWidget *menu_item,
 
 	g_return_val_if_fail (IS_MENU_BROWSER (self), FALSE);
 
-	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item),
-											 G_OBJECT_DATA_NAME);
+	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (vfs_file_exists (path)) {
 		if (event->button == 1) {
 			menu_browser_on_file_left_click (path, self);
 		}
 		else if (event->button == 2) {
-			if (vfs_file_is_directory (path)) {
-				menu_browser_on_dir_middle_click (path, self);
-			}
-			else {
+			vfs_file_is_directory (path) ?
+				menu_browser_on_dir_middle_click (path, self) :
 				menu_browser_on_file_middle_click (path, self);
-			}
 		}
 		else if (event->button == 3) {
 			g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
@@ -196,12 +191,10 @@ menu_browser_on_menu_key_press (GtkWidget *menu, GdkEventKey *event, MenuBrowser
 		}
 		else if (event->keyval == GDK_F4 ||
 				 event->keyval == GDK_KP_F4) {
-			if (vfs_file_is_directory (path)) {
-				menu_browser_on_dir_middle_click (path, self);
-			}
-			else {
+
+			vfs_file_is_directory (path) ?
+				menu_browser_on_dir_middle_click (path, self) :
 				menu_browser_on_file_middle_click (path, self);
-			}
 			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
 		}
 		else if ((event->keyval == GDK_Menu) ||
@@ -249,12 +242,9 @@ menu_browser_on_menu_button_press (GtkWidget *menu, GdkEventButton *event, MenuB
 			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
 		}
 		else if (event->button == 2) {
-			if (vfs_file_is_directory (path)) {
-				menu_browser_on_dir_middle_click (path, self);
-			}
-			else {
+			vfs_file_is_directory (path) ?
+				menu_browser_on_dir_middle_click (path, self) :
 				menu_browser_on_file_middle_click (path, self);
-			}
 			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
 		}
 		else if (event->button == 3) {
@@ -344,8 +334,8 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser	*self) {
 		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), gtk_menu_new ());
 
 		/*g_ptr_array_add (self->priv->garbage, vfs_file_info->file_name);*/
-garbage_add_item (self->priv->_garbage, vfs_file_info->file_name);
-garbage_add_item (self->priv->_garbage, vfs_file_info->display_name);
+		garbage_add_item (self->priv->_garbage, vfs_file_info->file_name);
+		garbage_add_item (self->priv->_garbage, vfs_file_info->display_name);
 
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
@@ -402,8 +392,8 @@ menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
 
 		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
 		/*g_ptr_array_add (self->priv->garbage, vfs_file_info->file_name);*/
-garbage_add_item (self->priv->_garbage, vfs_file_info->file_name);
-garbage_add_item (self->priv->_garbage, vfs_file_info->display_name);
+		garbage_add_item (self->priv->_garbage, vfs_file_info->file_name);
+		garbage_add_item (self->priv->_garbage, vfs_file_info->display_name);
 
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
@@ -433,8 +423,7 @@ menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
 	/* empty the menu of its existing contents first */
 	menu_browser_clear_menu (parent_menu_item);
 
-	current_path = (gchar*)g_object_get_data (G_OBJECT (parent_menu_item),
-											  G_OBJECT_DATA_NAME);
+	current_path = (gchar*)g_object_get_data (G_OBJECT (parent_menu_item), G_OBJECT_DATA_NAME);
 
 	/* huh!? */
 	if (!self->priv->parent_menu_shell->active) return;

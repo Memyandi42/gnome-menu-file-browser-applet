@@ -82,6 +82,9 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 	gint				i;
 	PangoEllipsizeMode	ellipsize_mode = PANGO_ELLIPSIZE_NONE;
 	GtkPackDirection	pack_direction = GTK_PACK_DIRECTION_LTR;
+	double				text_angle = 0.0;
+	float				text_xalign = 0.0;
+	float				text_yalign = 0.5;
 
 	/* update the panel's orientation */
 	self->priv->orientation = orientation;
@@ -93,9 +96,27 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 			/* handled by defaults */
 			break;
 		case PANEL_APPLET_ORIENT_RIGHT:
+			if (self->priv->prefs->menu_bar_prefs->horizontal_text) {
+				pack_direction = GTK_PACK_DIRECTION_TTB;
+				ellipsize_mode = PANGO_ELLIPSIZE_END;
+			}
+			else {
+				pack_direction = GTK_PACK_DIRECTION_BTT;
+				text_angle = 90.0;
+				text_xalign = 0.5;
+				text_yalign = 0.0;
+			}
+			break;
 		case PANEL_APPLET_ORIENT_LEFT:
 			pack_direction = GTK_PACK_DIRECTION_TTB;
-			ellipsize_mode = PANGO_ELLIPSIZE_END;
+			if (self->priv->prefs->menu_bar_prefs->horizontal_text) {
+				ellipsize_mode = PANGO_ELLIPSIZE_END;
+			}
+			else {
+				text_angle = 270.0;
+				text_xalign = 0.5;
+				text_yalign = 0.0;
+			}
 			break;
 		default:
 			g_assert_not_reached ();
@@ -110,9 +131,19 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 		GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_browser));
 		if (GTK_IS_LABEL (label)) {
-			gtk_label_set_ellipsize (GTK_LABEL (label), ellipsize_mode);
+			gtk_label_set_ellipsize	(GTK_LABEL (label), ellipsize_mode);
+			gtk_label_set_angle		(GTK_LABEL (label), text_angle);
+			gtk_misc_set_alignment	(GTK_MISC  (label), text_xalign, text_yalign);
 		}
 	}
+}
+/******************************************************************************/
+static void
+panel_menu_bar_update_orient (PanelMenuBar *self) {
+	g_return_if_fail (IS_PANEL_MENU_BAR (self));
+
+	PanelAppletOrient orientation = panel_applet_get_orient (PANEL_APPLET (self->priv->applet));
+	panel_menu_bar_change_orient (self->priv->applet, orientation, self);
 }
 /******************************************************************************/
 static void	/* Taken from the Main Menu Bar Applet */
@@ -140,9 +171,7 @@ panel_menu_bar_size_allocate (GtkWidget *widget,
 	GTK_WIDGET_CLASS (panel_menu_bar_parent_class)->size_allocate (widget, allocation);
 
 	PanelAppletOrient orientation = panel_applet_get_orient (PANEL_APPLET (self->priv->applet));
-	panel_menu_bar_change_orient (self->priv->applet,
-								  orientation,
-								  self);
+	panel_menu_bar_change_orient (self->priv->applet, orientation, self);
 }
 /******************************************************************************/
 static void	/* Taken from the Trash Applet */
@@ -380,6 +409,9 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 			break;
 		case PREFS_SIGNAL_DIR_DEL :
 			panel_menu_bar_remove_entry (self, signal_data->instance);
+			break;
+		case PREFS_SIGNAL_HORIZONTAL_TEXT :
+			panel_menu_bar_update_orient (self);
 			break;
 	}
 	if (DEBUG) g_printf ("caught the signal: %d, ", signal_data->signal_id);

@@ -61,24 +61,19 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 #ifdef ENABLE_HELP_DOC
 	GError *error = NULL;
 
-	gnome_help_display_desktop_on_screen (
-		  NULL,
-		  "file-browser-applet",
-		  "file-browser-applet",
-		  NULL,
-		  gtk_widget_get_screen (widget),
-		  &error);
+	gnome_help_display_desktop_on_screen (NULL,
+										  "file-browser-applet",
+										  "file-browser-applet",
+										  NULL,
+										  gtk_widget_get_screen (widget),
+										  &error);
 
 	if (error) {
-		utils_show_dialog ("Error",
-						   "Could not display help.",
-						   GTK_MESSAGE_ERROR);
+		utils_show_dialog ("Error", "Could not display help.", GTK_MESSAGE_ERROR);
 		g_error_free (error);
 	}
 #else
-	utils_show_dialog ("Help",
-					   "Sorry, no help or documentation yet...",
-					   GTK_MESSAGE_ERROR);
+	utils_show_dialog ("Help", "Sorry, no help or documentation yet...", GTK_MESSAGE_ERROR);
 #endif
 	return FALSE;
 }
@@ -162,11 +157,11 @@ file_browser_applet_factory (PanelApplet *applet,
 							 const  gchar *iid,
 							 gpointer data) {
 
-        if (strcmp (iid, APPLET_IID) == 0) {
-            return file_browser_applet_create (applet);
-        }
+	if (strcmp (iid, APPLET_IID) == 0) {
+		return file_browser_applet_create (applet);
+	}
 
-        return FALSE;
+	return FALSE;
 }
 /******************************************************************************/
 PANEL_APPLET_BONOBO_FACTORY (APPLET_FACTORY_IID,

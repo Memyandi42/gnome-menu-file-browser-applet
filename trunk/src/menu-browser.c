@@ -42,8 +42,7 @@
 struct _MenuBrowserPrivate {
 	GtkWidget		*menu_item_label;
 	GtkMenuShell	*parent_menu_shell;
-	GPtrArray		*garbage;
-	Garbage			_garbage;
+	Garbage			garbage;
 };
 #define MENU_BROWSER_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_MENU_BROWSER, MenuBrowserPrivate))
 enum  {
@@ -68,13 +67,9 @@ menu_browser_clean_up (MenuBrowser *self) {
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	/*g_ptr_array_foreach (self->priv->garbage, (GFunc)g_free, NULL);*/
-	/*g_ptr_array_free (self->priv->garbage, TRUE);*/
-	/*self->priv->garbage = g_ptr_array_new();*/
-
-	garbage_empty (&(self->priv->_garbage), TRUE);
-
 	menu_browser_clear_menu (GTK_WIDGET (self));
+
+	garbage_empty (&(self->priv->garbage), TRUE);
 }
 /******************************************************************************/
 static void
@@ -88,6 +83,10 @@ menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 	launch_info->file = g_strdup (path);
 
 	vfs_launch_application (launch_info);
+
+	g_free (launch_info->command);
+	g_free (launch_info->file);
+	g_free (launch_info);
 }
 /******************************************************************************/
 static void
@@ -110,6 +109,10 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 	launch_info->file = g_strdup (file_name_and_path);
 
 	vfs_launch_application (launch_info);
+
+	g_free (launch_info->command);
+	g_free (launch_info->file);
+	g_free (launch_info);
 }
 /******************************************************************************/
 static gboolean
@@ -333,9 +336,8 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser	*self) {
 		/*make the sub menu to show all the files in this dir*/
 		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), gtk_menu_new ());
 
-		/*g_ptr_array_add (self->priv->garbage, vfs_file_info->file_name);*/
-		garbage_add_item (self->priv->_garbage, vfs_file_info->file_name);
-		garbage_add_item (self->priv->_garbage, vfs_file_info->display_name);
+		garbage_add_item (self->priv->garbage, vfs_file_info->file_name);
+		garbage_add_item (self->priv->garbage, vfs_file_info->display_name);
 
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
@@ -391,9 +393,9 @@ menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
 									   vfs_file_info->icon);
 
 		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
-		/*g_ptr_array_add (self->priv->garbage, vfs_file_info->file_name);*/
-		garbage_add_item (self->priv->_garbage, vfs_file_info->file_name);
-		garbage_add_item (self->priv->_garbage, vfs_file_info->display_name);
+
+		garbage_add_item (self->priv->garbage, vfs_file_info->file_name);
+		garbage_add_item (self->priv->garbage, vfs_file_info->display_name);
 
 		g_object_set_data (G_OBJECT (menu_item),
 						   G_OBJECT_DATA_NAME,
@@ -523,7 +525,7 @@ menu_browser_dispose (GObject *obj) {
 /*	MenuBrowserClass *klass = MENU_BROWSER_CLASS (g_type_class_peek (TYPE_MENU_BROWSER));*/
 
 	(self->priv->menu_item_label == NULL ? NULL : (self->priv->menu_item_label = (gtk_widget_destroy (self->priv->menu_item_label), NULL)));
-	(self->priv->garbage == NULL ? NULL : (self->priv->garbage = (g_ptr_array_free (self->priv->garbage, TRUE), NULL)));
+	(self->priv->garbage == NULL ? NULL : garbage_empty (&(self->priv->garbage), FALSE));
 
 	G_OBJECT_CLASS (menu_browser_parent_class)->dispose (obj);
 }
@@ -628,8 +630,7 @@ menu_browser_new (const gchar* path,
 	}
 	self->prefs = prefs;
 
-	/*self->priv->garbage = g_ptr_array_new();*/
-garbage_init(&(self->priv->_garbage));
+	garbage_init(&(self->priv->garbage));
 
 	GtkWidget *item_label = gtk_label_new (label);
 	gtk_misc_set_alignment (GTK_MISC (item_label), 0.0, 0.5);
@@ -637,10 +638,9 @@ garbage_init(&(self->priv->_garbage));
 	self->priv->menu_item_label = item_label;
 
 	/*make the main menu*/
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (self),
-							   gtk_menu_new());
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (self), gtk_menu_new());
 
-	g_object_set_data (G_OBJECT (self), G_OBJECT_DATA_NAME, (char *)path);
+	g_object_set_data (G_OBJECT (self), G_OBJECT_DATA_NAME, g_strdup (path));
 
 	g_signal_connect (G_OBJECT (self),
 					  "activate",

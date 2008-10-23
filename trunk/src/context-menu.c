@@ -29,6 +29,8 @@
 #include "context-menu.h"
 #include "vfs.h"
 
+Garbage garbage = NULL;
+
 /******************************************************************************/
 static char *archive_mime_types[] = {
 	"application/x-ar",
@@ -97,6 +99,10 @@ context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
 							  "activate",
 							  G_CALLBACK (vfs_launch_application),
 							  (gpointer) launch_info);
+
+	garbage_add_item (garbage, launch_info);
+	garbage_add_item (garbage, launch_info->command);
+	garbage_add_item (garbage, launch_info->file);
 }
 /******************************************************************************/
 static void
@@ -118,6 +124,10 @@ context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
 							  "activate",
 							  G_CALLBACK (vfs_launch_application),
 							  (gpointer) launch_info);
+
+	garbage_add_item (garbage, launch_info);
+	garbage_add_item (garbage, launch_info->command);
+	garbage_add_item (garbage, launch_info->file);
 }
 /******************************************************************************/
 static gboolean
@@ -175,6 +185,10 @@ context_menu_add_archive_action (const gchar *file_name, GtkWidget *menu) {
 							  "activate",
 							  G_CALLBACK (vfs_launch_application),
 							  (gpointer) launch_info);
+
+	garbage_add_item (garbage, launch_info);
+	garbage_add_item (garbage, launch_info->command);
+	garbage_add_item (garbage, launch_info->file);
 }
 /******************************************************************************/
 static void
@@ -212,10 +226,14 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 
 		gtk_menu_shell_append (GTK_MENU_SHELL (sub_menu), menu_item);
 
+		garbage_add_item (garbage, launch_info);
+		garbage_add_item (garbage, launch_info->command);
+		garbage_add_item (garbage, launch_info->file);
+
 		g_object_unref (apps->data);
 		apps = apps->next;
 	}
-	g_list_free (apps);
+	g_list_free (root);
 }
 /******************************************************************************/
 static void
@@ -270,6 +288,7 @@ context_menu_clean_up (GtkMenuShell *menu, GtkWidget *browser) {
 /*	gdk_pointer_ungrab (GDK_CURRENT_TIME);*/
 	
 	gtk_widget_destroy (GTK_WIDGET (menu));
+	garbage_empty (&garbage, FALSE);
 }
 /******************************************************************************/
 gboolean
@@ -290,6 +309,8 @@ context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 	}
 
 	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item), "menu_browser");
+
+	garbage_init (&garbage);
 
 /*
 GtkWidget *panel_menu_bar = gtk_widget_get_parent (GTK_WIDGET (browser));

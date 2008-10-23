@@ -30,8 +30,6 @@
 #include <gio/gdesktopappinfo.h>
 #include <glib/gprintf.h>
 
-GtkIconTheme *icon_theme = NULL;
-
 /******************************************************************************/
 gboolean
 vfs_file_is_executable (const gchar *file_name) {
@@ -75,7 +73,7 @@ vfs_file_is_desktop (const gchar *file_name) {
 
 	GDesktopAppInfo *app_info = g_desktop_app_info_new_from_filename (file_name);
 	gboolean ret = !(app_info == NULL);
-	g_object_unref (app_info);
+	app_info ? g_object_unref (app_info) : NULL;
 	return ret;
 }
 /******************************************************************************/
@@ -158,6 +156,7 @@ vfs_get_dir_listings (GPtrArray *files,
 	while ((file_info = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL) {
 		/* skip the file if it's hidden and we aren't showing hidden files */
 		if (g_file_info_get_is_hidden (file_info) && !show_hidden) {
+			g_object_unref (file_info);
 			continue;
 		}
 		VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
@@ -184,8 +183,10 @@ vfs_get_dir_listings (GPtrArray *files,
 		else {
 			g_ptr_array_add (files, (gpointer)vfs_file_info);
 		}
+		g_object_unref (file_info);
 	}
 	g_object_unref (enumerator);
+	g_object_unref (file);
 
 	/* always check for errors */
 	if (error) {
@@ -262,9 +263,10 @@ vfs_launch_application (LaunchInfo *launch_info) {
 	g_free (arg);
 	g_strfreev (args);
 	g_free (working_dir);
-	g_free (launch_info->command);
-	g_free (launch_info->file);
-	g_free (launch_info);
+
+	/*g_free (launch_info->command);*/
+	/*g_free (launch_info->file);*/
+	/*g_free (launch_info);*/
 
 	return ret;
 }
@@ -305,13 +307,12 @@ vfs_get_pixbuf_for_icon (const GIcon *icon) {
 
 	if (G_IS_THEMED_ICON (icon)) {
 		const gchar * const *names = g_themed_icon_get_names (G_THEMED_ICON (icon));
-		GtkIconInfo *icon_info = gtk_icon_theme_choose_icon (icon_theme,
+		GtkIconInfo *icon_info = gtk_icon_theme_choose_icon (gtk_icon_theme_get_default(),
 															 (const gchar **)names,
 															 ICON_MENU_SIZE,
 															 0);
 		pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
-		/* the line below causes a crash */
-		/*g_object_unref (icon_info);*/
+		gtk_icon_info_free (icon_info);
 
 		if (pixbuf == NULL) {
 			if (names != NULL && names[0] != NULL) {
@@ -323,7 +324,7 @@ vfs_get_pixbuf_for_icon (const GIcon *icon) {
 					 strcmp (p, ".svg") == 0)) {
 					*p = 0;
 				}
-				pixbuf = gtk_icon_theme_load_icon (icon_theme,
+				pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_default(),
 												   icon_no_extension,
 												   ICON_MENU_SIZE,
 												   0,
@@ -351,9 +352,6 @@ vfs_get_pixbuf_for_icon (const GIcon *icon) {
  * files. The caller  must free the return value. */
 GtkWidget *
 vfs_get_icon_for_file (const gchar *file_name) {
-	if (icon_theme == NULL) {
-		icon_theme = gtk_icon_theme_get_default();
-	}
 
 	GIcon *icon = NULL;
 	GdkPixbuf *icon_pixbuf = NULL; 
@@ -381,8 +379,7 @@ vfs_get_icon_for_file (const gchar *file_name) {
 
 	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
 	g_object_unref (icon_pixbuf);
-	g_object_unref (icon);
-	g_object_unref (file_info);
+	file_info ? g_object_unref (file_info) : NULL;
 	g_object_unref (file);
 	return icon_widget; 
 }
@@ -452,5 +449,9 @@ vfs_file_do_default_action (const gchar *file_name) {
 		launch_info->file =  g_strdup (file_name);
 	}
 	return vfs_launch_application (launch_info);
+
+	g_free (launch_info->command);
+	g_free (launch_info->file);
+	g_free (launch_info);
 }
 /******************************************************************************/

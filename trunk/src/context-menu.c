@@ -23,6 +23,8 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#include <glade/glade-xml.h>
+#include <panel-applet.h>
 #include <glib/gprintf.h>
 #include <glib.h>
 
@@ -82,6 +84,49 @@ context_menu_add_burn_callback (const gchar *file_name) {
 	utils_check_gerror (&error);
 }
 */
+/******************************************************************************/
+static void
+context_menu_add_new_dir_callback (const gchar *file_name) {
+	GError *error = NULL;
+
+	GladeXML* xml = glade_xml_new (GLADEUI_PATH, "new_dir_dialog", NULL);
+	g_return_if_fail (xml != NULL);
+
+	GtkWidget *new_dir_dialog = glade_xml_get_widget (xml, "new_dir_dialog");
+	GtkWidget *new_dir_entry  = glade_xml_get_widget (xml, "new_dir_entry");
+
+	if (gtk_dialog_run (GTK_DIALOG (new_dir_dialog)) == GTK_RESPONSE_ACCEPT) {
+		const gchar *entry_text = gtk_entry_get_text (GTK_ENTRY (new_dir_entry));
+		gchar *new_dir = g_strdup_printf ("%s/%s", file_name, entry_text);
+
+		GFile *file = g_file_new_for_path (new_dir);
+		g_file_make_directory (file, NULL, &error);
+		g_object_unref (file);
+
+		/* open the dir if we succeeded in creating it */
+		if (!utils_check_gerror (&error)) {
+			vfs_file_do_default_action (new_dir);
+		}
+	}
+	gtk_widget_destroy (new_dir_dialog);
+}
+/******************************************************************************/
+static void
+context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
+
+	if (!vfs_file_is_directory (file_name)) return;
+
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_New Folder Here");
+	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+								   gtk_image_new_from_stock (GTK_STOCK_NEW,
+								   							 GTK_ICON_SIZE_MENU));
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+	g_signal_connect_swapped (G_OBJECT (menu_item),
+							  "activate",
+							  G_CALLBACK (context_menu_add_new_dir_callback),
+							  (gpointer) file_name);	
+}
 /******************************************************************************/
 static void
 context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
@@ -242,7 +287,7 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 }
 /******************************************************************************/
 static void
-context_menu_add_delete_item (const gchar *file_name, GtkWidget *menu) {
+context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 						  
 	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Move to Trash");
@@ -275,7 +320,9 @@ context_menu_populate (const gchar *file_name, GtkWidget *menu) {
 
 	context_menu_add_open_with_item	(file_name, menu);
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), gtk_separator_menu_item_new());
-	context_menu_add_delete_item	(file_name, menu);
+	context_menu_add_new_dir		(file_name, menu);
+	context_menu_add_trash_item		(file_name, menu);
+	gtk_menu_shell_append (GTK_MENU_SHELL (menu), gtk_separator_menu_item_new());
 	context_menu_add_archive_action	(file_name, menu);
 	context_menu_add_compile_tex	(file_name, menu);
 	context_menu_add_burn			(file_name, menu);
@@ -312,21 +359,12 @@ context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 		event_button = 3;
 		event_time = gtk_get_current_event_time();
 	}
-
-	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item), "menu_browser");
-
 	garbage_init (&garbage);
 
-/*
-GtkWidget *panel_menu_bar = gtk_widget_get_parent (GTK_WIDGET (browser));
-GtkWidget *parent_menu = gtk_widget_get_parent (GTK_WIDGET (menu_item));
-GtkMenuShell *panel_menu_bar_shell = GTK_MENU_SHELL (panel_menu_bar);
-GtkWidget *applet = gtk_widget_get_parent (GTK_WIDGET (panel_menu_bar));
-GtkWidget *panel = gtk_widget_get_parent (GTK_WIDGET (applet));
-*/
 
 	GtkWidget *menu = gtk_menu_new ();
 
+	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item), "menu_browser");
 	g_signal_connect (GTK_MENU_SHELL (menu),
   					  "selection_done",
 					  G_CALLBACK (context_menu_clean_up),
@@ -343,6 +381,23 @@ GtkWidget *panel = gtk_widget_get_parent (GTK_WIDGET (applet));
 					NULL,
 					event_button,
 					event_time);
+
+/*
+	GtkWidget *current = gtk_widget_get_parent (GTK_WIDGET (menu_item));
+	while (current && !PANEL_IS_APPLET (current)) {
+		gtk_widget_set_sensitive (current, FALSE);
+		current = gtk_widget_get_parent (GTK_WIDGET (current));
+	}
+*/
+
+/*
+	GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item), "menu_browser");
+GtkWidget *panel_menu_bar = gtk_widget_get_parent (GTK_WIDGET (browser));
+GtkWidget *parent_menu = gtk_widget_get_parent (GTK_WIDGET (menu_item));
+GtkMenuShell *panel_menu_bar_shell = GTK_MENU_SHELL (panel_menu_bar);
+GtkWidget *applet = gtk_widget_get_parent (GTK_WIDGET (panel_menu_bar));
+GtkWidget *panel = gtk_widget_get_parent (GTK_WIDGET (applet));
+*/
 
 /*gtk_grab_add (GTK_WIDGET (menu));*/
 /*gdk_pointer_grab (GTK_WIDGET (menu)->window,

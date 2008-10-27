@@ -277,7 +277,7 @@ panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 					  self);
 
 	gtk_hotkey_info_bind (hot_key_info, &error);
-	utils_check_gerror (&error);
+	utils_gerror_ok (&error);
 }
 #endif
 /******************************************************************************/
@@ -503,6 +503,7 @@ panel_menu_bar_on_deactivate (GtkWidget *widget,
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
+	gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
 }
 /******************************************************************************/
 gboolean

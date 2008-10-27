@@ -122,26 +122,18 @@ vfs_get_desktop_app_name (const gchar *file_name) {
 }
 /******************************************************************************/
 void
-vfs_trash_file (const gchar *file_name) {
+vfs_trash_file (gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GError *error = NULL;
 	GFile *file = g_file_new_for_path (file_name);
 
 	/* Try moving it to the trash */
-	g_file_trash (file,
-				  NULL,
-				  &error);
+	g_file_trash (file, NULL, &error);
 
 	/* Let the user know if we failed. */
-	if (utils_check_gerror (&error)) {
-		gchar *message = g_strdup_printf ("Error: Failed to move \"%s\" to Trash.",
-										  file_name);
-		utils_show_dialog ("Error: Failed to move tile to Trash",
-						   message,
-						   GTK_MESSAGE_ERROR);
-		g_free (message);
-	}
+	utils_gerror_ok (&error);
+	g_free (file_name);
 }
 /******************************************************************************/
 /* Blatantly stolen (and modified) from nautilus-mime-application-chooser.c.
@@ -337,22 +329,11 @@ vfs_launch_application (LaunchInfo *launch_info) {
 							  NULL,
 							  &error);
 
-	if (utils_check_gerror (&error)) {
-		gchar *tmp = g_strdup_printf ("Error: Failed to launch \"%s\".", args[0]);
-		utils_show_dialog ("Error: Failed to launch application",
-						   tmp,
-						   GTK_MESSAGE_ERROR);
-		g_free (tmp);
-		ret = FALSE;
-	}
+	ret = utils_gerror_ok (&error) ? ret : FALSE;
 	
 	g_free (arg);
 	g_strfreev (args);
 	g_free (working_dir);
-
-	/*g_free (launch_info->command);*/
-	/*g_free (launch_info->file);*/
-	/*g_free (launch_info);*/
 
 	return ret;
 }
@@ -417,8 +398,7 @@ vfs_get_dir_listings (GPtrArray *files,
 	/* did we read the dir correctly? */
 	if (error) {
 		gchar *error_msg = g_strdup (error->message);
-		g_error_free (error);
-		error = NULL;
+		utils_gerror_ok (&error);
 		return error_msg;
 	}
 
@@ -461,8 +441,7 @@ vfs_get_dir_listings (GPtrArray *files,
 	/* always check for errors */
 	if (error) {
 		gchar *error_msg = g_strdup (error->message);
-		g_error_free (error);
-		error = NULL;
+		utils_gerror_ok (&error);
 		return error_msg;
 	}
 

@@ -121,8 +121,8 @@ menu_browser_on_file_right_click (const gchar *file_name_and_path, GtkWidget *me
 #ifdef ENABLE_CONTEXT_MENU
 	return context_menu_display (file_name_and_path, menu_item);
 #else
-	utils_show_dialog ("Error: Action not implemented.",
-					   "Right click on file action not yet implemented\n",
+	utils_show_dialog ("Error",
+					   "Right-click on file action not yet implemented.",
 					   GTK_MESSAGE_INFO);
 	return TRUE;
 #endif
@@ -140,26 +140,27 @@ menu_browser_on_item_button_press (GtkWidget *menu_item,
 
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-	if (vfs_file_exists (path)) {
-		if (event->button == 1) {
-			menu_browser_on_file_left_click (path, self);
-		}
-		else if (event->button == 2) {
-			vfs_file_is_directory (path) ?
-				menu_browser_on_dir_middle_click (path, self) :
-				menu_browser_on_file_middle_click (path, self);
-		}
-		else if (event->button == 3) {
-			g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
-			g_object_set_data (G_OBJECT (menu_item), "button_event", event);
-			return menu_browser_on_file_right_click (path, menu_item);
-		}
-	}
-	else {
-		gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
-		utils_show_dialog ("Error: File not found.", tmp, GTK_MESSAGE_ERROR);
+	if (!vfs_file_exists (path)) {
+		gchar *tmp = g_strdup_printf ("Error: The file \"%s\" does not exists.", path);
+		utils_show_dialog ("Error", tmp, GTK_MESSAGE_ERROR);
 		g_free (tmp);
+		return FALSE;
 	}
+
+	if (event->button == 1) {
+		menu_browser_on_file_left_click (path, self);
+	}
+	else if (event->button == 2) {
+		vfs_file_is_directory (path) ?
+			menu_browser_on_dir_middle_click (path, self) :
+			menu_browser_on_file_middle_click (path, self);
+	}
+	else if (event->button == 3) {
+		g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
+		g_object_set_data (G_OBJECT (menu_item), "button_event", event);
+		return menu_browser_on_file_right_click (path, menu_item);
+	}
+
 	gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
 	return FALSE;
 }
@@ -181,38 +182,39 @@ menu_browser_on_menu_key_press (GtkWidget *menu, GdkEventKey *event, MenuBrowser
 
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-	if (vfs_file_exists (path)) {
-		if (event->keyval == GDK_KP_Space ||
-			event->keyval == GDK_space ||
-			event->keyval == GDK_Return ||
-			event->keyval == GDK_KP_Enter ||
-			event->keyval == GDK_ISO_Enter ||
-			event->keyval == GDK_3270_Enter) {
-
-			menu_browser_on_file_left_click (path, self);
-			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
-		}
-		else if (event->keyval == GDK_F4 ||
-				 event->keyval == GDK_KP_F4) {
-
-			vfs_file_is_directory (path) ?
-				menu_browser_on_dir_middle_click (path, self) :
-				menu_browser_on_file_middle_click (path, self);
-			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
-		}
-		else if ((event->keyval == GDK_Menu) ||
-				 (event->keyval == GDK_F10 &&
-				 (event->state & gtk_accelerator_get_default_mod_mask ()) == GDK_SHIFT_MASK)){
-			g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
-			g_object_set_data (G_OBJECT (menu_item), "button_event", event);
-			return menu_browser_on_file_right_click (path, menu_item);
-		}
-	}
-	else {
-		gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
-		utils_show_dialog ("Error: File not found.", tmp, GTK_MESSAGE_ERROR);
+	if (!vfs_file_exists (path)) {
+		gchar *tmp = g_strdup_printf ("Error: The file \"%s\" does not exists.", path);
+		utils_show_dialog ("Error", tmp, GTK_MESSAGE_ERROR);
 		g_free (tmp);
+		return FALSE;
 	}
+
+	if (event->keyval == GDK_KP_Space ||
+		event->keyval == GDK_space ||
+		event->keyval == GDK_Return ||
+		event->keyval == GDK_KP_Enter ||
+		event->keyval == GDK_ISO_Enter ||
+		event->keyval == GDK_3270_Enter) {
+
+		menu_browser_on_file_left_click (path, self);
+		gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
+	}
+	else if (event->keyval == GDK_F4 ||
+			 event->keyval == GDK_KP_F4) {
+
+		vfs_file_is_directory (path) ?
+			menu_browser_on_dir_middle_click (path, self) :
+			menu_browser_on_file_middle_click (path, self);
+		gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
+	}
+	else if ((event->keyval == GDK_Menu) ||
+			 (event->keyval == GDK_F10 &&
+			 (event->state & gtk_accelerator_get_default_mod_mask ()) == GDK_SHIFT_MASK)){
+		g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
+		g_object_set_data (G_OBJECT (menu_item), "button_event", event);
+		return menu_browser_on_file_right_click (path, menu_item);
+	}
+
 	return FALSE;
 }
 /******************************************************************************/
@@ -239,28 +241,29 @@ menu_browser_on_menu_button_press (GtkWidget *menu, GdkEventButton *event, MenuB
 
 	path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
-	if (vfs_file_exists (path)) {
-		if (event->button == 1) {
-			menu_browser_on_file_left_click (path, self);
-			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
-		}
-		else if (event->button == 2) {
-			vfs_file_is_directory (path) ?
-				menu_browser_on_dir_middle_click (path, self) :
-				menu_browser_on_file_middle_click (path, self);
-			gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
-		}
-		else if (event->button == 3) {
-			g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
-			g_object_set_data (G_OBJECT (menu_item), "button_event", event);
-			return menu_browser_on_file_right_click (path, menu_item);
-		}
-	}
-	else {
-		gchar *tmp = g_strdup_printf ("Error: \"%s\" does not exists.", path);
-		utils_show_dialog ("Error: File not found.", tmp, GTK_MESSAGE_ERROR);
+	if (!vfs_file_exists (path)) {
+		gchar *tmp = g_strdup_printf ("Error: The file \"%s\" does not exists.", path);
+		utils_show_dialog ("Error", tmp, GTK_MESSAGE_ERROR);
 		g_free (tmp);
+		return FALSE;
 	}
+
+	if (event->button == 1) {
+		menu_browser_on_file_left_click (path, self);
+		gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
+	}
+	else if (event->button == 2) {
+		vfs_file_is_directory (path) ?
+			menu_browser_on_dir_middle_click (path, self) :
+			menu_browser_on_file_middle_click (path, self);
+		gtk_menu_shell_deactivate (self->priv->parent_menu_shell);
+	}
+	else if (event->button == 3) {
+		g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
+		g_object_set_data (G_OBJECT (menu_item), "button_event", event);
+		return menu_browser_on_file_right_click (path, menu_item);
+	}
+
 	/*gtk_menu_shell_deactivate (self->priv->parent_menu_shell);*/
 	return FALSE;
 }
@@ -599,10 +602,12 @@ menu_browser_activate_main_menu (MenuBrowser *self) {
 
 	g_return_val_if_fail (IS_MENU_BROWSER (self), FALSE);
 
+
 	self->priv->parent_menu_shell =
 			GTK_MENU_SHELL (gtk_widget_get_parent (GTK_WIDGET (self)));
 
 	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (self));
+	gtk_widget_set_sensitive (GTK_WIDGET (menu), TRUE);
 	menu_browser_populate_menu (GTK_WIDGET (self), self);
 
 #ifdef NEW_MENU_SIGNAL

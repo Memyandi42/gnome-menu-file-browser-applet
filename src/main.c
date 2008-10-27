@@ -67,13 +67,9 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 										  NULL,
 										  gtk_widget_get_screen (widget),
 										  &error);
-
-	if (error) {
-		utils_show_dialog ("Error", "Could not display help.", GTK_MESSAGE_ERROR);
-		g_error_free (error);
-	}
+	utils_gerror_ok (&error);
 #else
-	utils_show_dialog ("Help", "Sorry, no help or documentation yet...", GTK_MESSAGE_ERROR);
+	utils_show_dialog ("Error", "Sorry, no help or documentation yet...", GTK_MESSAGE_ERROR);
 #endif
 	return FALSE;
 }

@@ -60,7 +60,7 @@ GtkWidget*	vfs_get_icon_for_file	 (const gchar *file_name);
 GtkWidget*	vfs_get_icon_for_app_info 	  (GAppInfo *app_info);
 
 gboolean	vfs_launch_application (LaunchInfo *launch_info);
-void	 	vfs_trash_file			 (const gchar *file_name);
+void	 	vfs_trash_file			 (gchar *file_name);
 gboolean	vfs_file_do_default_action (const gchar *file_name);
 /******************************************************************************/
 

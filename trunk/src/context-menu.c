@@ -81,12 +81,12 @@ context_menu_add_burn_callback (const gchar *file_name) {
 				 NULL,
 				 &error);
 
-	utils_check_gerror (&error);
+	utils_gerror_ok (&error);
 }
 */
 /******************************************************************************/
 static void
-context_menu_add_new_dir_callback (const gchar *file_name) {
+context_menu_add_new_dir_callback (gchar *file_name) {
 	GError *error = NULL;
 
 	GladeXML* xml = glade_xml_new (GLADEUI_PATH, "new_dir_dialog", NULL);
@@ -104,11 +104,12 @@ context_menu_add_new_dir_callback (const gchar *file_name) {
 		g_object_unref (file);
 
 		/* open the dir if we succeeded in creating it */
-		if (!utils_check_gerror (&error)) {
+		if (utils_gerror_ok (&error)) {
 			vfs_file_do_default_action (new_dir);
 		}
 	}
 	gtk_widget_destroy (new_dir_dialog);
+	g_free (file_name);
 }
 /******************************************************************************/
 static void
@@ -125,7 +126,7 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
 	g_signal_connect_swapped (G_OBJECT (menu_item),
 							  "activate",
 							  G_CALLBACK (context_menu_add_new_dir_callback),
-							  (gpointer) file_name);	
+							  (gpointer) g_strdup (file_name));	
 }
 /******************************************************************************/
 static void
@@ -299,7 +300,7 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 	g_signal_connect_swapped (G_OBJECT (menu_item),
 							  "activate",
 							  G_CALLBACK (vfs_trash_file),
-							  (gpointer) file_name);
+							  (gpointer) g_strdup (file_name));
 }
 /******************************************************************************/
 static void

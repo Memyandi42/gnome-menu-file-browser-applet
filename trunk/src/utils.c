@@ -51,13 +51,15 @@ garbage_add_item (Garbage garabage, gpointer item) {
 }
 /******************************************************************************/
 gboolean
-utils_gerror_ok (GError **error) {
+utils_gerror_ok (GError **error, gboolean show_error) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	if (*error) {
 		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
 
-		utils_show_dialog ("Error", (*error)->message, GTK_MESSAGE_ERROR);
+		if (show_error)
+			utils_show_dialog ("Error", (*error)->message, GTK_MESSAGE_ERROR);
+
 		g_error_free (*error);
 		*error = NULL;
 		return FALSE;

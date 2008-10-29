@@ -277,7 +277,7 @@ panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 					  self);
 
 	gtk_hotkey_info_bind (hot_key_info, &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 }
 #endif
 /******************************************************************************/
@@ -311,13 +311,11 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 		new_pos = signal_data->instance + 1;
 	}
 	else {
-		if (DEBUG) g_printf("shitzer\n");
-		return;
+		if (DEBUG) g_printf("shitzer\n"); return;
 	}
 
 	if (new_pos < 0) {
-		if (DEBUG) g_printf("shitzer\n");
-		return;
+		if (DEBUG) g_printf("shitzer\n"); return;
 	}
 
 	menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, signal_data->instance));
@@ -503,6 +501,9 @@ panel_menu_bar_on_deactivate (GtkWidget *widget,
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
+
+	/* this is here because of the solution to the focus problem caused by the
+	 * popped context menu */
 	gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
 }
 /******************************************************************************/

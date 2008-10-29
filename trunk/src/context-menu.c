@@ -65,6 +65,43 @@ static char *archive_mime_types[] = {
 	NULL
 };
 /******************************************************************************/
+static void
+tree_set_sensitive (GtkWidget *menu_item, gboolean sensitive) {
+	/* walk up the menu browser tree from the menu item that causes the popup
+	 * menu and disable all the menu shells, stopping at the menu bar. Need to
+	 * do this to get around the focus bug. Would be nicer if we coudl do this
+	 * w/o changing the appearance of the widgets  */
+	GtkWidget *current = menu_item->parent;
+	while (current) {
+		gtk_widget_set_sensitive (current, sensitive);
+
+		if (GTK_IS_MENU_BAR (current)) return;
+
+		current = GTK_MENU_SHELL (current)->parent_menu_shell;
+	}
+}
+/******************************************************************************/
+static void
+context_menu_clean_up (GtkMenuShell *menu) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+	g_return_if_fail (GTK_IS_MENU_SHELL (menu));
+
+	/* re-enable the menu browser */
+	tree_set_sensitive (g_object_get_data (G_OBJECT (menu), "menu_item"), TRUE);
+
+	/* close the menu browser tree */
+	GtkWidget *browser = g_object_get_data (G_OBJECT (menu), "menu_browser");
+	GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (browser));
+	gtk_menu_shell_deactivate (GTK_MENU_SHELL (parent));
+
+	/* delete the popup menu and empty the garbage */
+	gtk_widget_destroy (GTK_WIDGET (menu));
+	garbage_empty (&garbage, FALSE);
+}
+/******************************************************************************/
+/* originally wanted to use nautilus burn for this, but it doesn't seem
+ * possible to programmatically add files to burn:/// */
 /*
 static void
 context_menu_add_burn_callback (const gchar *file_name) {
@@ -81,7 +118,7 @@ context_menu_add_burn_callback (const gchar *file_name) {
 				 NULL,
 				 &error);
 
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 }
 */
 /******************************************************************************/
@@ -104,7 +141,7 @@ context_menu_add_new_dir_callback (gchar *file_name) {
 		g_object_unref (file);
 
 		/* open the dir if we succeeded in creating it */
-		if (utils_gerror_ok (&error)) {
+		if (utils_gerror_ok (&error, TRUE)) {
 			vfs_file_do_default_action (new_dir);
 		}
 	}
@@ -253,6 +290,13 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 
 	GtkWidget *sub_menu = gtk_menu_new ();
+	/* sigh! The browser menu does not close properly if the popup menu is
+	 * cancelled from a submenu in the popup menu*/
+	g_signal_connect_swapped (GTK_MENU_SHELL (sub_menu),
+  					  "selection_done",
+					  G_CALLBACK (context_menu_clean_up),
+					  menu);
+
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
 							   sub_menu);
 
@@ -326,49 +370,9 @@ context_menu_populate (const gchar *file_name, GtkWidget *menu) {
 	context_menu_add_archive_action	(file_name, menu);
 	context_menu_add_compile_tex	(file_name, menu);
 	context_menu_add_burn			(file_name, menu);
-	context_menu_add_close_item		(menu);
+	/*context_menu_add_close_item		(menu);*/
 
 	gtk_widget_show_all (menu);
-}
-/******************************************************************************/
-static void
-tree_set_sensitive (GtkWidget *menu_item, gboolean sensitive) {
-	/* walk up the menu browser tree from the menu item that causes the popup
-	 * menu and disable all the menu shells, stopping at the menu bar. Need to
-	 * do this to get around the focus bug. */
-	GtkWidget *current = menu_item;
-	while (current && !PANEL_IS_APPLET (current)) {
-		if (GTK_IS_MENU (current)) {
-			gtk_widget_set_sensitive (current, sensitive);
-			current = gtk_menu_get_attach_widget (GTK_MENU (current));
-		}
-		else if (GTK_IS_MENU_BAR (current)) {
-			gtk_widget_set_sensitive (current, sensitive);
-			break;
-		}
-		current = gtk_widget_get_parent (GTK_WIDGET (current));
-	}
-}
-/******************************************************************************/
-static void
-context_menu_clean_up (GtkMenuShell *menu) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
-	/* re-enable the menu browser */
-	tree_set_sensitive (g_object_get_data (G_OBJECT (menu), "menu_item"), TRUE);
-
-	/* close the manu browser tree */
-	GtkWidget *browser = g_object_get_data (G_OBJECT (menu), "menu_browser");
-	GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (browser));
-	gtk_menu_shell_deactivate (GTK_MENU_SHELL (parent));
-	
-	gtk_widget_destroy (GTK_WIDGET (menu));
-	garbage_empty (&garbage, FALSE);
-
-/*
-	gtk_grab_remove (GTK_WIDGET (menu));
-	gdk_pointer_ungrab (GDK_CURRENT_TIME);
-*/
 }
 /******************************************************************************/
 gboolean
@@ -414,24 +418,6 @@ context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 					NULL,
 					event_button,
 					event_time);
-
-/*
-GtkWidget *browser = g_object_get_data (G_OBJECT (menu_item), "menu_browser");
-GtkWidget *panel_menu_bar = gtk_widget_get_parent (GTK_WIDGET (browser));
-GtkWidget *parent_menu = gtk_widget_get_parent (GTK_WIDGET (menu_item));
-GtkMenuShell *panel_menu_bar_shell = GTK_MENU_SHELL (panel_menu_bar);
-GtkWidget *applet = gtk_widget_get_parent (GTK_WIDGET (panel_menu_bar));
-GtkWidget *panel = gtk_widget_get_parent (GTK_WIDGET (applet));
-*/
-
-/*gtk_grab_add (GTK_WIDGET (menu));*/
-/*gdk_pointer_grab (GTK_WIDGET (menu)->window,
-				  TRUE,
-				  0,
-				  NULL,
-				  NULL,
-				  GDK_CURRENT_TIME);*/
-
 	return TRUE;
 }
 /******************************************************************************/

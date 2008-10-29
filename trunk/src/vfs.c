@@ -132,7 +132,7 @@ vfs_trash_file (gchar *file_name) {
 	g_file_trash (file, NULL, &error);
 
 	/* Let the user know if we failed. */
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 	g_free (file_name);
 }
 /******************************************************************************/
@@ -329,7 +329,7 @@ vfs_launch_application (LaunchInfo *launch_info) {
 							  NULL,
 							  &error);
 
-	ret = utils_gerror_ok (&error) ? ret : FALSE;
+	ret = utils_gerror_ok (&error, TRUE) ? ret : FALSE;
 	
 	g_free (arg);
 	g_strfreev (args);
@@ -398,7 +398,7 @@ vfs_get_dir_listings (GPtrArray *files,
 	/* did we read the dir correctly? */
 	if (error) {
 		gchar *error_msg = g_strdup (error->message);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, FALSE);
 		return error_msg;
 	}
 
@@ -441,7 +441,7 @@ vfs_get_dir_listings (GPtrArray *files,
 	/* always check for errors */
 	if (error) {
 		gchar *error_msg = g_strdup (error->message);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, FALSE);
 		return error_msg;
 	}
 

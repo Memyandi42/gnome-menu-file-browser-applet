@@ -57,6 +57,7 @@
                             <child>
                               <widget class="GtkButton" id="move_down_button">
                                 <property name="visible">True</property>
+								<property name="tooltip" translatable="yes">Move the selected Folder down/right.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-go-down</property>
                                 <property name="use_stock">True</property>
@@ -71,6 +72,7 @@
                             <child>
                               <widget class="GtkButton" id="move_up_button">
                                 <property name="visible">True</property>
+								<property name="tooltip" translatable="yes">Move the selected Folder up/left.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-go-up</property>
                                 <property name="use_stock">True</property>
@@ -83,8 +85,9 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkButton" id="directory_remove_button">
+                              <widget class="GtkButton" id="Folder">
                                 <property name="visible">True</property>
+								<property name="tooltip" translatable="yes">Remove the selected Folder.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-remove</property>
                                 <property name="use_stock">True</property>
@@ -99,6 +102,7 @@
                             <child>
                               <widget class="GtkButton" id="directory_add_button">
                                 <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">Add a new Folder to browse.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-add</property>
                                 <property name="use_stock">True</property>
@@ -153,6 +157,7 @@
                               <widget class="GtkCheckButton" id="show_hidden_check">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="tooltip" translatable="yes">Show files beginning with a "." in the menu browser.</property>
                                 <property name="label" translatable="yes">Show hidden and backup files</property>
                                 <property name="use_underline">True</property>
                                 <property name="response_id">0</property>
@@ -164,10 +169,11 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkCheckButton" id="show_icon_check">
+                              <widget class="GtkCheckButton" id="horizontal_text_check">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="label" translatable="yes">Show applet icon</property>
+                                <property name="tooltip" translatable="yes">Specify text orientation when the panel is vertical.</property>
+                                <property name="label" translatable="yes">Horizontal text</property>
                                 <property name="use_underline">True</property>
                                 <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
@@ -179,11 +185,11 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkCheckButton" id="horizontal_text_check">
+                              <widget class="GtkCheckButton" id="show_icon_check">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip" translatable="yes">Specify text orientation when the panel is vertical.</property>
-                                <property name="label" translatable="yes">Horizontal text</property>
+                                <property name="tooltip" translatable="yes">Show the selected icon in the applet.</property>
+                                <property name="label" translatable="yes">Show applet icon</property>
                                 <property name="use_underline">True</property>
                                 <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
@@ -211,6 +217,7 @@
                                 <child>
                                   <widget class="GtkButton" id="icon_button">
                                     <property name="visible">True</property>
+                                	<property name="tooltip" translatable="yes">Select the icon to show in the applet.</property>
                                     <property name="can_focus">True</property>
                                     <property name="response_id">0</property>
                                     <child>
@@ -274,6 +281,7 @@
                             <child>
                               <widget class="GtkLabel" id="label16">
                                 <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">This command will be executed on right-click or F4 on a Folder entry in the menu browser.</property>
                                 <property name="label" translatable="yes">Terminal executable:</property>
                               </widget>
                               <packing>
@@ -303,6 +311,7 @@
                             <child>
                               <widget class="GtkLabel" id="label2">
                                 <property name="visible">True</property>
+                                <property name="tooltip" translatable="yes">This command will be executed on right-click or F4 on a File entry in the menu browser.</property>
                                 <property name="label" translatable="yes">Editor executable:</property>
                               </widget>
                               <packing>

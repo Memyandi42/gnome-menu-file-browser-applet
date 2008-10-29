@@ -1,5 +1,9 @@
 Version 0.5.8
 *************
+	* Fixed a few bugs in the build system.
+
+Version 0.5.8
+*************
 	* Migrated to gio. This removed dependency on gnome-vfs and libgnomedesktop (yay!).
 	* Fixed bugs 10, 12, 28, 32
 	* Build system fixes (thanks to Deji Akingunola)

@@ -253,42 +253,42 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 								 KEY_HIDDEN_SHOW,
 								 self->menu_bar_prefs->browser_prefs->show_hidden,
 								 &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* terminal */
 	panel_applet_gconf_set_string (applet,
 								   KEY_TERMINAL,
 								   self->menu_bar_prefs->browser_prefs->terminal,
 								   &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* editor */
 	panel_applet_gconf_set_string (applet,
 								   KEY_EDITOR,
 								   self->menu_bar_prefs->browser_prefs->editor,
 								   &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* the icon */
 	panel_applet_gconf_set_string (applet,
 								   KEY_ICON_NAME,
 								   self->menu_bar_prefs->icon,
 								   &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* show the icon? */
 	panel_applet_gconf_set_bool (applet,
 								 KEY_ICON_SHOW,
 								 self->menu_bar_prefs->show_icon,
 								 &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* horizontal text? */
 	panel_applet_gconf_set_bool (applet,
 								 KEY_HORIZONTAL_TEXT,
 								 self->menu_bar_prefs->horizontal_text,
 								 &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* directory list */
 	panel_applet_gconf_set_list (applet,
@@ -296,7 +296,7 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 								 GCONF_VALUE_STRING,
 								 self->menu_bar_prefs->dirs,
 								 &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 
 	/* labels list */
 	panel_applet_gconf_set_list (applet,
@@ -304,7 +304,7 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
 								 GCONF_VALUE_STRING,
 								 self->menu_bar_prefs->labels,
 								 &error);
-	utils_gerror_ok (&error);
+	utils_gerror_ok (&error, TRUE);
 }
 /******************************************************************************/
 static void
@@ -892,74 +892,74 @@ applet_preferences_load_from_gconf (PanelApplet* applet) {
 	 * instance. It also check to make sure the values were retrieved properly
 	 * AND that they are valid */
 	panel_applet_add_preferences (applet, "/schemas/apps/file-browser-applet/prefs", &error);
-	g_return_val_if_fail (utils_gerror_ok (&error), NULL);
+	g_return_val_if_fail (utils_gerror_ok (&error, TRUE), NULL);
 
 	/* show hidden files? */
 	mb_prefs->browser_prefs->show_hidden = panel_applet_gconf_get_bool (applet, KEY_HIDDEN_SHOW, &error);
-	if (!utils_gerror_ok (&error)) {
+	if (!utils_gerror_ok (&error, TRUE)) {
 		mb_prefs->browser_prefs->show_hidden = DEFAULT_SHOW_HIDDEN;
 		panel_applet_gconf_set_bool (applet, KEY_HIDDEN_SHOW, mb_prefs->browser_prefs->show_hidden, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* terminal */
 	mb_prefs->browser_prefs->terminal = panel_applet_gconf_get_string (applet, KEY_TERMINAL, &error);
-	if (!utils_gerror_ok (&error) || mb_prefs->browser_prefs->terminal == NULL) {
+	if (!utils_gerror_ok (&error, TRUE) || mb_prefs->browser_prefs->terminal == NULL) {
 		mb_prefs->browser_prefs->terminal = g_strdup (DEFAULT_TERMINAL);
 		panel_applet_gconf_set_string (applet, KEY_TERMINAL, mb_prefs->browser_prefs->terminal, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* editor */
 	mb_prefs->browser_prefs->editor = panel_applet_gconf_get_string (applet, KEY_EDITOR, &error);
-	if (!utils_gerror_ok (&error) || mb_prefs->browser_prefs->editor == NULL) {
+	if (!utils_gerror_ok (&error, TRUE) || mb_prefs->browser_prefs->editor == NULL) {
 		mb_prefs->browser_prefs->editor = g_strdup (DEFAULT_EDITOR);
 		panel_applet_gconf_set_string (applet, KEY_TERMINAL, mb_prefs->browser_prefs->editor, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* the icon */
 	mb_prefs->icon = panel_applet_gconf_get_string (applet, KEY_ICON_NAME, &error);
-	if (!utils_gerror_ok (&error) || mb_prefs->icon == NULL) {
+	if (!utils_gerror_ok (&error, TRUE) || mb_prefs->icon == NULL) {
 		mb_prefs->icon = g_strdup (DEFAULT_ICON);
 		panel_applet_gconf_set_string (applet, KEY_ICON_NAME, mb_prefs->icon, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* show the icon? */
 	mb_prefs->show_icon = panel_applet_gconf_get_bool (applet, KEY_ICON_SHOW, &error);
-	if (!utils_gerror_ok (&error)) {
+	if (!utils_gerror_ok (&error, TRUE)) {
 		mb_prefs->show_icon = DEFAULT_SHOW_ICON;
 		panel_applet_gconf_set_bool (applet, KEY_ICON_SHOW, mb_prefs->show_icon, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* horizontal text ? */
 	mb_prefs->horizontal_text = panel_applet_gconf_get_bool (applet, KEY_HORIZONTAL_TEXT, &error);
-	if (!utils_gerror_ok (&error)) {
+	if (!utils_gerror_ok (&error, TRUE)) {
 		mb_prefs->horizontal_text = DEFAULT_HORIZONTAL_TEXT;
 		panel_applet_gconf_set_bool (applet, KEY_HORIZONTAL_TEXT, mb_prefs->horizontal_text, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* directory list */
 	GSList* dirs = panel_applet_gconf_get_list (applet, KEY_DIR, GCONF_VALUE_STRING, &error);
-	if (!utils_gerror_ok (&error) || dirs == NULL) {
+	if (!utils_gerror_ok (&error, TRUE) || dirs == NULL) {
 		dirs = g_slist_alloc ();
 		dirs->data = g_strdup (DEFAULT_PATH);
 		dirs->next = NULL;
 		panel_applet_gconf_set_list (applet, KEY_DIR, GCONF_VALUE_STRING, dirs, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 
 	/* labels list */
 	GSList* labels = panel_applet_gconf_get_list (applet, KEY_LABELS, GCONF_VALUE_STRING, &error);
-	if (!utils_gerror_ok (&error) || labels == NULL) {
+	if (!utils_gerror_ok (&error, TRUE) || labels == NULL) {
 		labels = g_slist_alloc ();
 		labels->data = g_strdup (DEFAULT_LABEL);
 		labels->next = NULL;
 		panel_applet_gconf_set_list (applet, KEY_LABELS, GCONF_VALUE_STRING, labels, &error);
-		utils_gerror_ok (&error);
+		utils_gerror_ok (&error, TRUE);
 	}
 	mb_prefs->dirs   = dirs;
 	mb_prefs->labels = labels;

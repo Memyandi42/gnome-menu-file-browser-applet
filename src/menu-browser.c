@@ -602,19 +602,21 @@ menu_browser_activate_main_menu (MenuBrowser *self) {
 
 	g_return_val_if_fail (IS_MENU_BROWSER (self), FALSE);
 
-
 	self->priv->parent_menu_shell =
 			GTK_MENU_SHELL (gtk_widget_get_parent (GTK_WIDGET (self)));
 
 	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (self));
+
+	/* this is here because of the solution to the focus problem caused by the
+	 * popped context menu */
 	gtk_widget_set_sensitive (GTK_WIDGET (menu), TRUE);
+
 	menu_browser_populate_menu (GTK_WIDGET (self), self);
 
 #ifdef NEW_MENU_SIGNAL
 	gchar *path = g_object_get_data (G_OBJECT (self), G_OBJECT_DATA_NAME);
 	menu_browser_add_main_menu_header (menu, path, self);
 #endif
-
 	gtk_menu_reposition (GTK_MENU (menu));
 	return TRUE;
 }

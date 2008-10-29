@@ -1,19 +1,32 @@
-Version 0.5.8
+Version 0.6.0
+*************
+	* Added context menu with a few actions (open-with, new folder here, delete
+	  file/folder, create/extract archive, create CD/DVD from file/folder,
+	  compile a tex file).
+	* Added configuration option to make text vertical/horizontal when the
+	  panel is vertical.
+	* Fixed bugs #21, 30, 34, 37.
+	* Plugged some memory leaks.
+	* Lots of code cleanups.
+
+Version 0.5.9
 *************
 	* Fixed a few bugs in the build system.
 
 Version 0.5.8
 *************
-	* Migrated to gio. This removed dependency on gnome-vfs and libgnomedesktop (yay!).
-	* Fixed bugs 10, 12, 28, 32
-	* Build system fixes (thanks to Deji Akingunola)
-	* Added optional keyboard activation (a.k.a. hotkey). libgtkhotkey required for this functionality.
+	* Migrated to gio. This removed dependency on gnome-vfs and libgnomedesktop
+	  (yay!).
+	* Fixed bugs #10, 12, 28, 32.
+	* Build system fixes (thanks to Deji Akingunola).
+	* Added optional keyboard activation (a.k.a. hotkey). libgtkhotkey required
+	  for this functionality.
 	* Fixed size of icons in menu items to 20px.
 	* Improved keyboard navigation (a lot).
 	* Better long file name ellipsize
 	* Added optional keyboard activation (a.k.a. hotkey). libgtkhotkey is
 	  required for this functionality. Activation is currently bound to
-	  <Super>h
+	  <Super>h.
 
 Version 0.5.6
 *************
@@ -23,18 +36,18 @@ Version 0.5.6
 
 Version 0.5.5
 *************
-	* Renamed applet to "File Browser Applet"
-	* Improved configuration dialog (thanks to Ivan N. Zlatev)
-	* Added support for .desktop files
+	* Renamed applet to "File Browser Applet".
+	* Improved configuration dialog (much thanks to Ivan N. Zlatev).
+	* Added support for .desktop files.
 	* New actions associated with left and middle click: Left-click is default
 	  action (run if file is executable, open with default application
 	  otherwise). Middle-click opens file for editing with configured editor.
-	* Fixes to build system
+	* Fixes to build system.
 
 Version 0.5.4
 *************
 	* Added configuration dialog.
-	* Fixed bugs 5, 13, 16,18.
+	* Fixed bugs #5, 13, 16,18.
 	* "Addressed" bugs 17, 20.
 	* Plugged a memory leak.
 	* Added options to Build system.
@@ -48,7 +61,8 @@ Version 0.5.3
 
 Version 0.5.2
 *************
-	* Added handling of changes in panel (size allocation, background and orientation).
+	* Added handling of changes in panel (size allocation, background and
+	  orientation).
 
 Version 0.5.1
 *************

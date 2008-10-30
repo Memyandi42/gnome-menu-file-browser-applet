@@ -347,6 +347,7 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 							  (gpointer) g_strdup (file_name));
 }
 /******************************************************************************/
+/*
 static void
 context_menu_add_close_item (GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
@@ -357,6 +358,7 @@ context_menu_add_close_item (GtkWidget *menu) {
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu),
 						   gtk_image_menu_item_new_from_stock (GTK_STOCK_CLOSE, NULL));
 }
+*/
 /******************************************************************************/
 static void
 context_menu_populate (const gchar *file_name, GtkWidget *menu) {

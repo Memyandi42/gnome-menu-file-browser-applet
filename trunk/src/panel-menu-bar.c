@@ -500,7 +500,7 @@ panel_menu_bar_on_deactivate (GtkWidget *widget,
 
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
-	g_object_set (G_OBJECT (widget), "has-tooltip", TRUE, NULL);
+	g_object_set (G_OBJECT (self), "has-tooltip", TRUE, NULL);
 
 	/* this is here because of the solution to the focus problem caused by the
 	 * popped context menu */

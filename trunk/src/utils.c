@@ -75,6 +75,7 @@ utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type
 												0,
 												type,
 												GTK_BUTTONS_CLOSE,
+												"%s",
 												message);
 	gtk_window_set_title (GTK_WINDOW (dialog), title);
 

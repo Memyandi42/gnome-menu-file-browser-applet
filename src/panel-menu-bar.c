@@ -91,36 +91,36 @@ panel_menu_bar_change_orient (PanelApplet		*applet,
 
 	/* set the text and pack direction and */
 	switch (orientation) {
-		case PANEL_APPLET_ORIENT_UP:
-		case PANEL_APPLET_ORIENT_DOWN:
-			/* handled by defaults */
-			break;
-		case PANEL_APPLET_ORIENT_RIGHT:
-			if (self->priv->prefs->menu_bar_prefs->horizontal_text) {
-				pack_direction = GTK_PACK_DIRECTION_TTB;
-				ellipsize_mode = PANGO_ELLIPSIZE_END;
-			}
-			else {
-				pack_direction = GTK_PACK_DIRECTION_BTT;
-				text_angle = 90.0;
-				text_xalign = 0.5;
-				text_yalign = 0.0;
-			}
-			break;
-		case PANEL_APPLET_ORIENT_LEFT:
+	case PANEL_APPLET_ORIENT_UP:
+	case PANEL_APPLET_ORIENT_DOWN:
+		/* handled by defaults */
+		break;
+	case PANEL_APPLET_ORIENT_RIGHT:
+		if (self->priv->prefs->menu_bar_prefs->horizontal_text) {
 			pack_direction = GTK_PACK_DIRECTION_TTB;
-			if (self->priv->prefs->menu_bar_prefs->horizontal_text) {
-				ellipsize_mode = PANGO_ELLIPSIZE_END;
-			}
-			else {
-				text_angle = 270.0;
-				text_xalign = 0.5;
-				text_yalign = 0.0;
-			}
-			break;
-		default:
-			g_assert_not_reached ();
-			break;
+			ellipsize_mode = PANGO_ELLIPSIZE_END;
+		}
+		else {
+			pack_direction = GTK_PACK_DIRECTION_BTT;
+			text_angle = 90.0;
+			text_xalign = 0.5;
+			text_yalign = 0.0;
+		}
+		break;
+	case PANEL_APPLET_ORIENT_LEFT:
+		pack_direction = GTK_PACK_DIRECTION_TTB;
+		if (self->priv->prefs->menu_bar_prefs->horizontal_text) {
+			ellipsize_mode = PANGO_ELLIPSIZE_END;
+		}
+		else {
+			text_angle = 270.0;
+			text_xalign = 0.5;
+			text_yalign = 0.0;
+		}
+		break;
+	default:
+		g_assert_not_reached ();
+		break;
 	}
 	/* update the menu_bar pack direction */
 	gtk_menu_bar_set_pack_direction (GTK_MENU_BAR (self), pack_direction);
@@ -194,23 +194,21 @@ panel_menu_bar_change_background (PanelApplet				*applet,
 	gtk_rc_style_unref (rc_style);
 
 	switch (type) {
-		case PANEL_COLOR_BACKGROUND:
-			gtk_widget_modify_bg (GTK_WIDGET (self), GTK_STATE_NORMAL, color);
-			break;
+	case PANEL_COLOR_BACKGROUND:
+		gtk_widget_modify_bg (GTK_WIDGET (self), GTK_STATE_NORMAL, color);
+		break;
+	case PANEL_PIXMAP_BACKGROUND:
+		style = gtk_style_copy (GTK_WIDGET (self)->style);
+		if (style->bg_pixmap[GTK_STATE_NORMAL] != NULL)
+			g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
 
-		case PANEL_PIXMAP_BACKGROUND:
-			style = gtk_style_copy (GTK_WIDGET (self)->style);
-			if (style->bg_pixmap[GTK_STATE_NORMAL] != NULL)
-				g_object_unref (style->bg_pixmap[GTK_STATE_NORMAL]);
-
-			style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref (pixmap);
-			gtk_widget_set_style (GTK_WIDGET (self), style);
-			g_object_unref (style);
-			break;
-
-		case PANEL_NO_BACKGROUND:
-		default:
-			break;
+		style->bg_pixmap[GTK_STATE_NORMAL] = g_object_ref (pixmap);
+		gtk_widget_set_style (GTK_WIDGET (self), style);
+		g_object_unref (style);
+		break;
+	case PANEL_NO_BACKGROUND:
+	default:
+		break;
 	}
 }
 /******************************************************************************/
@@ -381,29 +379,31 @@ panel_menu_bar_on_preferences_changed (AppletPreferences *a_prefs,
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
 
 	switch (signal_data->signal_id) {
-		case PREFS_SIGNAL_TERMINAL :
-		case PREFS_SIGNAL_SHOW_HIDDEN :
-			break;
-		case PREFS_SIGNAL_SHOW_ICON :
-		case PREFS_SIGNAL_ICON_CHANGED :
-			panel_menu_bar_update_image (self);
-			break;
-		case PREFS_SIGNAL_DIR_MOVE_UP :
-		case PREFS_SIGNAL_DIR_MOVE_DOWN :
-			panel_menu_bar_move_entry (self, signal_data);
-			break;
-		case PREFS_SIGNAL_DIR_CHANGED :
-			panel_menu_bar_update_entry (self, signal_data);
-			break;
-		case PREFS_SIGNAL_DIR_ADD :
-			panel_menu_bar_add_entry (self, signal_data->label, g_strdup (signal_data->path));
-			break;
-		case PREFS_SIGNAL_DIR_DEL :
-			panel_menu_bar_remove_entry (self, signal_data->instance);
-			break;
-		case PREFS_SIGNAL_HORIZONTAL_TEXT :
-			panel_menu_bar_update_orient (self);
-			break;
+	case PREFS_SIGNAL_TERMINAL :
+	case PREFS_SIGNAL_SHOW_HIDDEN :
+		break;
+	case PREFS_SIGNAL_SHOW_ICON :
+	case PREFS_SIGNAL_ICON_CHANGED :
+		panel_menu_bar_update_image (self);
+		break;
+	case PREFS_SIGNAL_DIR_MOVE_UP :
+	case PREFS_SIGNAL_DIR_MOVE_DOWN :
+		panel_menu_bar_move_entry (self, signal_data);
+		break;
+	case PREFS_SIGNAL_DIR_CHANGED :
+		panel_menu_bar_update_entry (self, signal_data);
+		break;
+	case PREFS_SIGNAL_DIR_ADD :
+		panel_menu_bar_add_entry (self, signal_data->label, g_strdup (signal_data->path));
+		break;
+	case PREFS_SIGNAL_DIR_DEL :
+		panel_menu_bar_remove_entry (self, signal_data->instance);
+		break;
+	case PREFS_SIGNAL_HORIZONTAL_TEXT :
+		panel_menu_bar_update_orient (self);
+		break;
+	default:
+		g_assert_not_reached ();
 	}
 	if (DEBUG) g_printf ("caught the signal: %d, ", signal_data->signal_id);
 	if (DEBUG) g_printf ("instance %d, label: %s, path %s\n",

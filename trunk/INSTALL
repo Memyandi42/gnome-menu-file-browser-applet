@@ -6,7 +6,7 @@ Requirements
 You will need to have the binary and development files (and all their
 dependencies) for the following packages installed to compile this program:
 
-gtk-2.0 >= 2.12
+gtk-2.0 >= 2.14
 gio-2.0
 libpanel-applet-2.0
 libglade-2.0

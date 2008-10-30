@@ -85,7 +85,9 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		"Contributions by:",
 		"Ivan N. Zlatev <contact@i-nz.net>",
 		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
-		"Deji Akingunola",
+		"Deji Akingunola <dakingun@gmail.com>",
+		"Serkan Kaba",
+		"Silvio Ricardo Cordeiro <silvioricardoc@gmail.com>",
 		NULL
 	};
 	const gchar *documenters [] = {
@@ -93,7 +95,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 /*		"Axel von Bertoldi", */
 		NULL
 	};
-	const gchar *translator_credits = _("translator_credits");
+	const gchar *translator_credits = "You!!! That's right! You can help!";
 
 	file = gnome_program_locate_file (NULL, GNOME_FILE_DOMAIN_PIXMAP, "file-browser-applet.png", TRUE, NULL);
 	if (file != NULL) {

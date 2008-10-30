@@ -5,7 +5,8 @@ Version 0.6.0
 	  compile a tex file).
 	* Added configuration option to make text vertical/horizontal when the
 	  panel is vertical.
-	* Fixed bugs #21, 30, 34, 37.
+	* Added tooltips to configuration dialog.
+	* Fixed bugs #21, 30, 34, 37, 39.
 	* Plugged some memory leaks.
 	* Lots of code cleanups.
 

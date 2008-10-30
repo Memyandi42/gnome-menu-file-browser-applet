@@ -365,11 +365,13 @@ vfs_file_do_default_action (const gchar *file_name) {
 		launch_info->command = vfs_get_default_mime_application (file_name);
 		launch_info->file =  g_strdup (file_name);
 	}
-	return vfs_launch_application (launch_info);
+	gboolean ret = vfs_launch_application (launch_info);
 
 	g_free (launch_info->command);
 	g_free (launch_info->file);
 	g_free (launch_info);
+
+	return ret;
 }
 /******************************************************************************/
 /* Gets the contents of a directory. Puts the files and directories in separate

@@ -7,12 +7,13 @@ Version 0.6.0
 	  panel is vertical.
 	* Added tooltips to configuration dialog.
 	* Fixed bugs #21, 30, 34, 37, 39.
-	* Plugged some memory leaks.
+	* Plugged some memory leaks (thanks Silvio Ricardo Cordeiro).
 	* Lots of code cleanups.
 
 Version 0.5.9
 *************
-	* Fixed a few bugs in the build system.
+	* Fixed a few bugs in the build system (thanks Serkan Kaba).
+
 
 Version 0.5.8
 *************
@@ -53,7 +54,7 @@ Version 0.5.4
 	* Plugged a memory leak.
 	* Added options to Build system.
 	* Re-implemented MenuBrowser object as a proper GObject.
-	* Added tooltips to truncated filenames.
+	* Added tooltips to truncated filenames (thanks to Stefano Maggiolo).
 
 Version 0.5.3
 *************

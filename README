@@ -40,7 +40,7 @@ To Do
 Bugs
 ****
 	* See http://code.google.com/p/gnome-menu-file-browser-applet/issues/list
-	* Plus lots of memory leaks that will be plugged eventually...
+	* Plus lots of memory leaks.
 
 Hacking
 *******

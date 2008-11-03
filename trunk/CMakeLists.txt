@@ -77,7 +77,7 @@ SET (CPACK_SOURCE_IGNORE_FILES
 	 "po"
 	 "progress.make"
 	 ".svn"
-)
+	 "doc")
 INCLUDE (CPack)
 
 ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"
@@ -92,7 +92,7 @@ ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"
 
 ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   cmake_install.cmake
-									   ${CPACK_SOURCE_PACKAGE_FILE_NAME}
+									   ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz
 									   *.deb
 									   CPackConfig.cmake
 									   cmake_uninstall.cmake

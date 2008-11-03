@@ -48,20 +48,18 @@ struct _LaunchInfo {
 	gchar *file;	/* the file to open if any. Should be NULL if not used. */
 };
 /******************************************************************************/
-gboolean	vfs_file_is_executable	 (const gchar *file_name);
-gboolean	vfs_file_is_desktop		 (const gchar *file_name);
-gboolean	vfs_file_is_directory	 (const gchar *file_name);
-gboolean	vfs_file_exists			 (const gchar *file_name);
+gboolean	vfs_file_is_executable		(const gchar *file_name);
+gboolean	vfs_file_is_desktop			(const gchar *file_name);
+gboolean	vfs_file_is_directory		(const gchar *file_name);
+gboolean	vfs_file_exists				(const gchar *file_name);
 
-gchar*		vfs_get_dir_listings	 (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, const gchar *path);
+gchar*		vfs_get_dir_listings		(GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, const gchar *path);
 GList*		vfs_get_all_mime_applications (const gchar *file_name);
-const gchar*vfs_get_app_name_for_file_info (GFileInfo *file_info);
-GtkWidget*	vfs_get_icon_for_file	 (const gchar *file_name);
-GtkWidget*	vfs_get_icon_for_app_info 	  (GAppInfo *app_info);
+GtkWidget*	vfs_get_icon_for_file		(const gchar *file_name);
 
-gboolean	vfs_launch_application (LaunchInfo *launch_info);
-void	 	vfs_trash_file			 (gchar *file_name);
-gboolean	vfs_file_do_default_action (const gchar *file_name);
+gboolean	vfs_launch_application		(LaunchInfo *launch_info);
+gboolean	vfs_file_do_default_action	(const gchar *file_name);
+void	 	vfs_file_trash				(gchar *file_name);
 /******************************************************************************/
 
 #endif

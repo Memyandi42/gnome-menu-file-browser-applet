@@ -28,6 +28,6 @@
 
 #include <gtk/gtk.h>
 
-gboolean	context_menu_display	(const gchar *file_name, GtkWidget *menu_item);
+gboolean context_menu_display (const gchar *file_name, GtkWidget *menu_item);
 
 #endif

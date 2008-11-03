@@ -43,24 +43,24 @@ G_BEGIN_DECLS
 #define IS_APPLET_PREFERENCES_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_APPLET_PREFERENCES))
 #define APPLET_PREFERENCES_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_APPLET_PREFERENCES, AppletPreferencesClass))
 /******************************************************************************/
-#define KEY_DIR			"dirs"
-#define KEY_LABELS		"labels"
-#define KEY_ICON_NAME	"icon"
-#define KEY_ICON_SHOW	"show_icon"
-#define KEY_HIDDEN_SHOW	"show_hidden"
-#define KEY_TERMINAL	"terminal"
-#define KEY_EDITOR		"editor"
+#define KEY_DIR				"dirs"
+#define KEY_LABELS			"labels"
+#define KEY_ICON_NAME		"icon"
+#define KEY_ICON_SHOW		"show_icon"
+#define KEY_HIDDEN_SHOW		"show_hidden"
+#define KEY_TERMINAL		"terminal"
+#define KEY_EDITOR			"editor"
 #define KEY_HORIZONTAL_TEXT	"horizontal_text"
 
 /* default options */
-#define DEFAULT_ICON		"user-home"
-#define DEFAULT_SHOW_ICON	TRUE
-#define DEFAULT_LABEL		"Home"
-#define DEFAULT_PATH		g_get_home_dir ()
-#define DEFAULT_TERMINAL	"gnome-terminal"
-#define DEFAULT_EDITOR		"gedit"
-#define DEFAULT_SHOW_HIDDEN	FALSE
-#define DEFAULT_HORIZONTAL_TEXT TRUE
+#define DEFAULT_ICON			"user-home"
+#define DEFAULT_SHOW_ICON		TRUE
+#define DEFAULT_LABEL			"Home"
+#define DEFAULT_PATH			g_get_home_dir ()
+#define DEFAULT_TERMINAL		"gnome-terminal"
+#define DEFAULT_EDITOR			"gedit"
+#define DEFAULT_SHOW_HIDDEN		FALSE
+#define DEFAULT_HORIZONTAL_TEXT	TRUE
 /******************************************************************************/
 typedef struct _BrowserPrefs BrowserPrefs;
 typedef struct _MenuBarPrefs MenuBarPrefs;

@@ -86,7 +86,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		"Ivan N. Zlatev <contact@i-nz.net>",
 		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
 		"Deji Akingunola <dakingun@gmail.com>",
-		"Serkan Kaba",
+		"Serkan Kaba <serkan@gentoo.org>",
 		"Silvio Ricardo Cordeiro <silvioricardoc@gmail.com>",
 		NULL
 	};

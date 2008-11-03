@@ -303,12 +303,8 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 	while (apps != NULL) {
 		menu_item = gtk_image_menu_item_new_with_label (g_app_info_get_name (apps->data));
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-									   vfs_get_icon_for_app_info (apps->data));
-/* or
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 									   gtk_image_new_from_gicon (g_app_info_get_icon (apps->data),
 									   							 GTK_ICON_SIZE_MENU));
-*/
 
 		LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
 		launch_info->command = g_strdup (g_app_info_get_executable (apps->data));

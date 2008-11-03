@@ -51,13 +51,6 @@ CMAKE_INSTALL_BONOBO_DIR specifies the installation bonobo Server file.
 The default is CMAKE_INSTALL_LIB_PREFIX/bonobo/servers
 
 To configure using the defaults, run the following command at the project root folder:
-'cmake .'
-
-To specify an option, run (with the trailing period):
-'cmake -D CMAKE_OPTION=/new/option/value .'
-
-
-To configure using the defaults, run the following command at the project root folder:
 {{{
 cmake .
 }}}

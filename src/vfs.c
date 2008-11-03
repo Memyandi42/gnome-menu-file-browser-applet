@@ -122,7 +122,7 @@ vfs_get_desktop_app_name (const gchar *file_name) {
 }
 /******************************************************************************/
 void
-vfs_trash_file (gchar *file_name) {
+vfs_file_trash (gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GError *error = NULL;

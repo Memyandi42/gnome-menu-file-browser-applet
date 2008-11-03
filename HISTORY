@@ -8,7 +8,7 @@ Version 0.6.0
 	* Added tooltips to configuration dialog.
 	* Fixed bugs #21, 30, 34, 37, 39.
 	* Plugged some memory leaks (thanks Silvio Ricardo Cordeiro).
-	* Lots of code cleanups.
+	* Lots of code cleanup.
 
 Version 0.5.9
 *************

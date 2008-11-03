@@ -333,8 +333,7 @@ panel_menu_bar_move_entry (PanelMenuBar *self,
 }
 /******************************************************************************/
 static void
-panel_menu_bar_remove_entry (PanelMenuBar *self,
-							 gint instance) {
+panel_menu_bar_remove_entry (PanelMenuBar *self, gint instance) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
@@ -351,9 +350,7 @@ panel_menu_bar_remove_entry (PanelMenuBar *self,
 }
 /******************************************************************************/
 static void
-panel_menu_bar_add_entry (PanelMenuBar *self,
-						  const gchar *label,
-						  const gchar *path) {
+panel_menu_bar_add_entry (PanelMenuBar *self, const gchar *label, const gchar *path) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_PANEL_MENU_BAR (self));
@@ -505,6 +502,11 @@ panel_menu_bar_on_deactivate (GtkWidget *widget,
 	/* this is here because of the solution to the focus problem caused by the
 	 * popped context menu */
 	gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
+	gint i;
+	for (i=0; i < self->priv->file_browsers->len; i++) {
+		GtkWidget *menu_browser = (GtkWidget *)(g_ptr_array_index (self->priv->file_browsers, i));
+		gtk_widget_set_sensitive (menu_browser, TRUE);
+	}
 }
 /******************************************************************************/
 gboolean

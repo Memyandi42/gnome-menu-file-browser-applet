@@ -69,7 +69,7 @@ static void
 tree_set_sensitive (GtkWidget *menu_item, gboolean sensitive) {
 	/* walk up the menu browser tree from the menu item that causes the popup
 	 * menu and disable all the menu shells, stopping at the menu bar. Need to
-	 * do this to get around the focus bug. Would be nicer if we coudl do this
+	 * do this to get around the focus bug. Would be nicer if we couls do this
 	 * w/o changing the appearance of the widgets  */
 	GtkWidget *current = menu_item->parent;
 	while (current) {
@@ -88,7 +88,9 @@ context_menu_clean_up (GtkMenuShell *menu) {
 	g_return_if_fail (GTK_IS_MENU_SHELL (menu));
 
 	/* re-enable the menu browser */
-	tree_set_sensitive (g_object_get_data (G_OBJECT (menu), "menu_item"), TRUE);
+	GtkWidget *tree_menu_item = g_object_get_data (G_OBJECT (menu), "menu_item");
+	if (tree_menu_item)
+		tree_set_sensitive (tree_menu_item, TRUE);
 
 	/* close the menu browser tree */
 	GtkWidget *browser = g_object_get_data (G_OBJECT (menu), "menu_browser");
@@ -339,7 +341,7 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 	
 	g_signal_connect_swapped (G_OBJECT (menu_item),
 							  "activate",
-							  G_CALLBACK (vfs_trash_file),
+							  G_CALLBACK (vfs_file_trash),
 							  (gpointer) g_strdup (file_name));
 }
 /******************************************************************************/

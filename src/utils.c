@@ -91,10 +91,10 @@ GtkWidget*
 utils_get_scaled_image_from_file (const gchar *file_name, int size) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-		GdkPixbuf *pixbuf   = gdk_pixbuf_new_from_file_at_size (file_name,
-															   size,
-															   size,
-															   NULL);
+	GdkPixbuf *pixbuf   = gdk_pixbuf_new_from_file_at_size (file_name,
+															size,
+															size,
+															NULL);
 		if (pixbuf == NULL) return NULL;
 
 		GtkWidget *icon = gtk_image_new_from_pixbuf (pixbuf);

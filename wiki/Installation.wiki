@@ -2,12 +2,15 @@
 Instructions for installing menu-file-browser-applet
 
 =Dependencies=
-You will need to have the binary and development files (and all their
-dependencies) for the following packages installed to compile this program:
-  * gtk-2.0 >= 2.12
+You will need to have the binary and development files (and all their dependencies) for the following packages installed to compile this program:
+
+  * gtk-2.0 >= 2.14
   * libpanel-applet-2.0
   * libglade-2.0
   * libgio-2.0
+
+  * Some of the context menu actions require File-roller, Brasero and Rubber. You can compile and run the applet without them though.
+
   * Optionally requires libgtkhotkey-1.0 for keyboard activation.
 
 You will also need the following packages installed to compile this program:
@@ -16,37 +19,53 @@ You will also need the following packages installed to compile this program:
 
 =Configuration=
 
-There are 4 configuration options available:
-    * CMAKE_INSTALL_PATH
-    * CMAKE_INSTALL_LIB_DIR
-    * CMAKE_INSTALL_GCONF_SCHEMA_DIR
-    * CMAKE_INSTALL_GLADEUI_DIR
+There are 5 configuration options available:
+	* CMAKE_INSTALL_PREFIX
+	* CMAKE_INSTALL_LIB_PREFIX
+	* CMAKE_INSTALL_LIB_EXEC_DIR
+	* CMAKE_INSTALL_BONOBO_DIR
+	* CMAKE_INSTALL_GCONF_SCHEMA_DIR
+	* CMAKE_INSTALL_GLADEUI_DIR
 
-CMAKE_INSTALL_PATH specifies the installation prefix and currently only affects
-installation of the icons which are installed in
- * CMAKE_INSTALL_PATH/share/pixmaps
- * CMAKE_INSTALL_PATH/share/icons/hicolor/128x128/apps.
- * CMAKE_INSTALL_PATH/lib/bonobo/servers
-The default is /usr.
+CMAKE_INSTALL_PREFIX specifies the base installation prefix. The following
+other specific installation paths depend on this prefix:
+ - CMAKE_INSTALL_LIB_PREFIX
+ - CMAKE_INSTALL_GCONF_SCHEMA_DIR
+ - CMAKE_INSTALL_GLADEUI_DIR
+NOTE!!! The default is /usr/local but should be /usr for the applet-loader to find the applet.
 
-CMAKE_INSTALL_LIB_DIR specifies the installation prefix of the binary
-application file which is installed in
- * CMAKE_INSTALL_LIB_DIR/file-browser-applet/
-The default is CMAKE_INSTALL_PATH/lib.
+CMAKE_INSTALL_LIB_PREFIX specifies the installation prefix of the binary
+application file. Two other specific installation paths depend on this prefix:
+ - CMAKE_INSTALL_LIB_EXEC_DIR
+ - CMAKE_INSTALL_BONOBO_DIR
+The default is CMAKE_INSTALL_PREFIX/lib.
+
+CMAKE_INSTALL_LIB_EXEC_DIR specifies the installation path of the binary
+application file. The default is
+CMAKE_INSTALL_LIB_EXEC_DIR=CMAKE_INSTALL_LIB_PREFIX/file-browser-applet
 
 CMAKE_INSTALL_GCONF_SCHEMA_DIR specifies the installation prefix of the gconf schema
-file. The default is CMAKE_INSTALL_PATH/share/gconf/schemas
+file. The default is CMAKE_INSTALL_PREFIX/share/gconf/schemas
 
 CMAKE_INSTALL_GLADEUI_DIR specifies the installation prefix of the glade ui
-file. The default is CMAKE_INSTALL_PATH/share/file-browser-applet/glade
+file. The default is CMAKE_INSTALL_PREFIX/share/file-browser-applet/glade
+
+CMAKE_INSTALL_BONOBO_DIR specifies the installation bonobo Server file. The
+default is CMAKE_INSTALL_LIB_PREFIX/bonobo/servers
+
+To configure using the defaults, run the following command at the project root folder:
+'cmake .'
+
+To specify an option, run (with the trailing period):
+'cmake -D CMAKE_OPTION=/new/option/value .'
 
 
-To configure using the defaults, execute:
+To configure using the defaults, run the following command at the project root folder:
 {{{
 cmake .
 }}}
 
-To specify an option, execute:
+To specify an option, run (with the trailing period):
 {{{
 cmake -D CMAKE_OPTION=/new/option/value .
 }}}

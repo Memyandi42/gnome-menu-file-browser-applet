@@ -69,7 +69,7 @@ SET (CPACK_SOURCE_IGNORE_FILES
 	 "${CPACK_SOURCE_PACKAGE_FILE_NAME}"
 	 "*.tar.gz"
 	 "CPack*"
-	 "cmake_uninstall.cmake"
+	 #"cmake_uninstall.cmake"
 	 "CMakeFiles"
 	 "install_manifest.txt"
 	 "Makefile"

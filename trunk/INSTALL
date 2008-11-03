@@ -11,8 +11,8 @@ gio-2.0
 libpanel-applet-2.0
 libglade-2.0
 
-The context menu actions require File-roller, Brasero and Rubber. You can
-compile and run the applet without them though.
+Some of the context menu actions require File-roller, Brasero and Rubber. You
+can compile and run the applet without them though.
 
 Optionally requires libgtkhotkey-1.0 for keyboard activation.
 

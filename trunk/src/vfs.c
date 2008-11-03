@@ -136,64 +136,6 @@ vfs_trash_file (gchar *file_name) {
 	g_free (file_name);
 }
 /******************************************************************************/
-/* Blatantly stolen (and modified) from nautilus-mime-application-chooser.c.
- * Returns a pixmap of the image associated with the passed file. .desktop
- * files will generally be handled by the G_IS_FILE_ICON section. Theme images
- * are handles by the G_IS_THEMED_ICON section where we first do some shit I
- * don't understand and if that fails, we ask gtk_icon_theme_choose_icon to
- * figure out what icon to use.
- * The caller must free the returned value. 
- *
- * get rid of this function when using 2.14 */
-static GdkPixbuf *
-vfs_get_pixbuf_for_icon (const GIcon *icon) {
-	GdkPixbuf  *pixbuf = NULL;
-
-	if (G_IS_THEMED_ICON (icon)) {
-		const gchar * const *names = g_themed_icon_get_names (G_THEMED_ICON (icon));
-		GtkIconInfo *icon_info = gtk_icon_theme_choose_icon (gtk_icon_theme_get_default(),
-															 (const gchar **)names,
-															 ICON_MENU_SIZE,
-															 0);
-		pixbuf = gtk_icon_info_load_icon (icon_info, NULL);
-		gtk_icon_info_free (icon_info);
-
-		if (pixbuf == NULL) {
-			if (names != NULL && names[0] != NULL) {
-				gchar *icon_no_extension = g_strdup (names[0]);
-				gchar *p = strrchr (icon_no_extension, '.');
-				if (p &&
-					(strcmp (p, ".png") == 0 ||
-					 strcmp (p, ".xpm") == 0 ||
-					 strcmp (p, ".svg") == 0)) {
-					*p = 0;
-				}
-				pixbuf = gtk_icon_theme_load_icon (gtk_icon_theme_get_default(),
-												   icon_no_extension,
-												   ICON_MENU_SIZE,
-												   0,
-												   NULL);
-				g_free (icon_no_extension);
-			}
-		}
-	}
-	else if (G_IS_FILE_ICON (icon)) {
-		GFile *file = g_file_icon_get_file (G_FILE_ICON (icon));
-		gchar *file_name = g_file_get_path (file);
-		if (file_name) {
-			pixbuf = gdk_pixbuf_new_from_file_at_size (file_name,
-													   ICON_MENU_SIZE,
-													   ICON_MENU_SIZE,
-													   NULL);
-		}
-		g_free (file_name);
-		g_object_unref (file);
-	}
-	return pixbuf;
-}
-/******************************************************************************/
-/*must wait for GTK 2.14*/
-/*
 GtkWidget *
 vfs_get_icon_for_file (const gchar *file_name) {
 
@@ -219,45 +161,6 @@ vfs_get_icon_for_file (const gchar *file_name) {
 		g_object_unref (file_info);
 	}
 	return icon_widget;
-}
-*/
-/******************************************************************************/
-/* Returns the image associated with a file. Works on both normal and desktop
- * files. The caller  must free the return value.
- *
- * replace this function with the above when using 2.14 */
-GtkWidget *
-vfs_get_icon_for_file (const gchar *file_name) {
-
-	GIcon *icon = NULL;
-	GdkPixbuf *icon_pixbuf = NULL; 
-	GFile* file = NULL;
-	GFileInfo* file_info = NULL;
-
-	/* try for desktop file */
-	if (vfs_file_is_desktop (file_name)) {
-		GDesktopAppInfo *info = g_desktop_app_info_new_from_filename (file_name);
-		icon = g_app_info_get_icon (G_APP_INFO (info));
-	}	/* not a desktop file */
-	else {
-		file = g_file_new_for_path (file_name),
-		file_info = g_file_query_info (file,
-									   G_FILE_ATTRIBUTE_STANDARD_ICON,
-									   0,
-									   NULL,
-									   NULL);	
-		icon = g_file_info_get_icon (file_info);
-	}
-
-	if (icon != NULL) {
-		icon_pixbuf = vfs_get_pixbuf_for_icon (icon);
-	}
-
-	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
-	g_object_unref (icon_pixbuf);
-	file_info ? g_object_unref (file_info) : NULL;
-	g_object_unref (file);
-	return icon_widget; 
 }
 /******************************************************************************/
 GList*
@@ -365,7 +268,17 @@ vfs_file_do_default_action (const gchar *file_name) {
 		launch_info->command = vfs_get_default_mime_application (file_name);
 		launch_info->file =  g_strdup (file_name);
 	}
-	gboolean ret = vfs_launch_application (launch_info);
+
+	gboolean ret = FALSE;
+	if (launch_info->command) {
+		ret = vfs_launch_application (launch_info);
+	}
+	else {
+		gchar *msg = g_strdup_printf ("Could not display \"%s\".\n"
+									  "There is no application installed for this file type.", file_name);
+		utils_show_dialog ("Error", msg, GTK_MESSAGE_ERROR);
+		g_free (msg);
+	}
 
 	g_free (launch_info->command);
 	g_free (launch_info->file);
@@ -451,23 +364,5 @@ vfs_get_dir_listings (GPtrArray *files,
 	g_ptr_array_sort (files, (GCompareFunc)&vfs_sort_array);
 
 	return NULL;
-}
-/******************************************************************************/
-/* get rid of this function when using 2.14 */
-GtkWidget*
-vfs_get_icon_for_app_info  (GAppInfo *app_info) {
-
-	GIcon *icon = g_app_info_get_icon (app_info);
-	GdkPixbuf *icon_pixbuf = (icon != NULL) ? vfs_get_pixbuf_for_icon (icon) : NULL;
-
-	GtkWidget *icon_widget = gtk_image_new_from_pixbuf (icon_pixbuf);
-	g_object_unref (icon_pixbuf);
-
-	return icon_widget;
-
-/*
-	return gtk_image_new_from_gicon (g_app_info_get_icon (app_info),
-									 GTK_ICON_SIZE_MENU);
-*/
 }
 /******************************************************************************/

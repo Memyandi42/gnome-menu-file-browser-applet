@@ -64,16 +64,19 @@ SET (CPACK_SOURCE_PACKAGE_FILE_NAME
 	"${EXEC}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET (CPACK_SOURCE_GENERATOR TGZ)
 SET (CPACK_SOURCE_IGNORE_FILES
-	 "CMakeFiles"
-	 "Makefile"
-	 "progress.make"
-	 "CPack*"
 	 "CMakeCache.txt"
-	 "cmake_install.cmake"
-	 #"cmake_uninstall.cmake"
-	 "/*.tar.gz"
-	 ".svn"
+	 #"cmake_install.cmake"
+	 "${CPACK_SOURCE_PACKAGE_FILE_NAME}"
+	 "*.tar.gz"
+	 "CPack*"
+	 "cmake_uninstall.cmake"
+	 "CMakeFiles"
 	 "install_manifest.txt"
+	 "Makefile"
+	 "_CPack_Packages"
+	 "po"
+	 "progress.make"
+	 ".svn"
 )
 INCLUDE (CPack)
 
@@ -89,18 +92,25 @@ ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"
 
 ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   cmake_install.cmake
+									   ${CPACK_SOURCE_PACKAGE_FILE_NAME}
+									   *.deb
 									   CPackConfig.cmake
 									   cmake_uninstall.cmake
 									   CMakeFiles
 									   CPackSourceConfig.cmake
-									   *.deb
 									   install_manifest.txt
 									   Makefile
+									   _CPack_Packages
 									   pixmaps/CMakeFiles
 									   pixmaps/cmake_install.cmake
 									   pixmaps/Makefile
 									   src/${EXEC}
 									   src/cmake_install.cmake
+									   src/config.h
 									   src/CMakeFiles
-									   src/Makefile)
- 
+									   src/Makefile
+									   data/CMakeFiles
+									   data/cmake_install.cmake
+									   data/GNOME_FileBrowserApplet_Factory.server
+									   data/Makefile) 
+

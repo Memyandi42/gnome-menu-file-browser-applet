@@ -549,8 +549,8 @@ panel_menu_bar_on_button_press (GtkWidget *widget,
 /******************************************************************************/
 gboolean
 panel_menu_bar_on_key_press (GtkWidget *widget,
-								GdkEventKey *event,
-								PanelMenuBar *self) {
+							 GdkEventKey *event,
+							 PanelMenuBar *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_val_if_fail (IS_PANEL_MENU_BAR (self), TRUE);

@@ -32,6 +32,6 @@
 #define DEBUG 0
 #cmakedefine ENABLE_HELP_DOC
 #cmakedefine ENABLE_CONTEXT_MENU
-#cmakedefine ENABLE_GTK_HOTKEY
+#cmakedefine LIBGTKHOTKEY_FOUND
 
 #endif

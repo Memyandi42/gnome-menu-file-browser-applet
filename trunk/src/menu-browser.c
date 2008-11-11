@@ -607,6 +607,16 @@ menu_browser_activate_main_menu (MenuBrowser *self) {
 
 	GtkWidget *menu = gtk_menu_item_get_submenu (GTK_MENU_ITEM (self));
 
+	/*GdkEvent *event = gdk_event_get ();*/
+	/*if (event->type == GDK_2BUTTON_PRESS) {*/
+		/*gchar *path = g_object_get_data (G_OBJECT (self), G_OBJECT_DATA_NAME);*/
+		/*vfs_file_do_default_action (path);*/
+		/*gdk_event_free (event);*/
+		/*gtk_menu_popdown (GTK_MENU (menu));*/
+		/*gtk_menu_shell_deactivate (GTK_MENU_SHELL (self->priv->parent_menu_shell));*/
+		/*return TRUE;*/
+	/*}*/
+
 	/* this is here because of the solution to the focus problem caused by the
 	 * popped context menu */
 	gtk_widget_set_sensitive (GTK_WIDGET (menu), TRUE);
@@ -649,7 +659,7 @@ menu_browser_new (const gchar* path,
 
 	g_object_set_data (G_OBJECT (self), G_OBJECT_DATA_NAME, g_strdup (path));
 
-	g_signal_connect (G_OBJECT (self),
+	g_signal_connect_after (G_OBJECT (self),
 					  "activate",
 					  G_CALLBACK (menu_browser_activate_main_menu),
 					  self);

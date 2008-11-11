@@ -31,7 +31,7 @@
 #include "menu-browser.h"
 #include "utils.h"
 
-#ifdef ENABLE_GTK_HOTKEY 
+#ifdef LIBGTKHOTKEY_FOUND 
 #include <gtkhotkey.h>
 #endif
 
@@ -240,7 +240,7 @@ panel_menu_bar_update_image (PanelMenuBar *self) {
 	}
 }
 /******************************************************************************/
-#ifdef ENABLE_GTK_HOTKEY
+#ifdef LIBGTKHOTKEY_FOUND
 static void
 panel_menu_bar_on_hotkey_press (GtkHotkeyInfo *hot_key_info,
 								guint event_time,
@@ -641,7 +641,7 @@ panel_menu_bar_new (PanelApplet* applet) {
 	/* get a handle to the applet context menu */
 	self->priv->bonobo_control = panel_applet_get_control (applet);
 
-#ifdef ENABLE_GTK_HOTKEY
+#ifdef LIBGTKHOTKEY_FOUND
 	/* setup global keybinding */
 	panel_menu_bar_add_keybinding (self);
 #endif

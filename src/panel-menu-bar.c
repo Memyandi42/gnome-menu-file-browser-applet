@@ -23,13 +23,16 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <glib.h>
 #include <glib/gprintf.h>
 #include <gdk/gdkkeysyms.h>
+#include <panel-applet.h>
+#include <glib-object.h>
+
 #include "panel-menu-bar.h"
 #include "preferences.h"
 #include "menu-browser.h"
 #include "utils.h"
+#include "config.h"
 
 #ifdef LIBGTKHOTKEY_FOUND 
 #include <gtkhotkey.h>

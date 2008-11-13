@@ -26,11 +26,7 @@
 #ifndef __PANEL_MENU_BAR_H__
 #define __PANEL_MENU_BAR_H__
 
-#include <glib-object.h>
 #include <gtk/gtk.h>
-#include <panel-applet.h>
-
-#include "config.h"
 
 G_BEGIN_DECLS
 

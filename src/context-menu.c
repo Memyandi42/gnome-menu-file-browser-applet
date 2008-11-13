@@ -24,12 +24,12 @@
  */
 
 #include <glade/glade-xml.h>
-#include <panel-applet.h>
 #include <glib/gprintf.h>
-#include <glib.h>
 
 #include "context-menu.h"
 #include "vfs.h"
+#include "utils.h"
+#include "config.h"
 
 Garbage garbage = NULL;
 
@@ -103,7 +103,7 @@ context_menu_clean_up (GtkMenuShell *menu) {
 }
 /******************************************************************************/
 /* originally wanted to use nautilus burn for this, but it doesn't seem
- * possible to programmatically add files to burn:/// */
+ * possible to programatically add files to burn:/// */
 /*
 static void
 context_menu_add_burn_callback (const gchar *file_name) {
@@ -156,7 +156,7 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
 
 	if (!vfs_file_is_directory (file_name)) return;
 
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_New Folder Here");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_New Folder Here"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_stock (GTK_STOCK_NEW,
 								   							 GTK_ICON_SIZE_MENU));
@@ -170,7 +170,7 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
 /******************************************************************************/
 static void
 context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Create CD/DVD");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Create CD/DVD"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_icon_name ("nautilus-cd-burner",
 								   								 GTK_ICON_SIZE_MENU));
@@ -195,7 +195,7 @@ context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
 
 	if (!g_str_has_suffix (file_name, "tex")) return;
 
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Build Latex Document");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Build Latex Document"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_icon_name ("build",
 								   								 GTK_ICON_SIZE_MENU));
@@ -248,11 +248,11 @@ context_menu_add_archive_action (const gchar *file_name, GtkWidget *menu) {
 	gchar *archive_action = NULL;
 
 	if (is_archive (file_name)) {
-		archive_label = "_Extract Here";
+		archive_label = _("_Extract Here");
 		archive_action = "file-roller -h";
 	}
 	else {
-		archive_label = "Create _Archive";
+		archive_label = _("Create _Archive");
 		archive_action = "file-roller -d";
 	}
 
@@ -285,7 +285,7 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 	
 	if (root == NULL) return;
 
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Open With");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Open With"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_stock (GTK_STOCK_OPEN,
 								   							 GTK_ICON_SIZE_MENU));
@@ -333,7 +333,7 @@ static void
 context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 						  
-	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic ("_Move to Trash");
+	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Move to Trash"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 														gtk_image_new_from_stock (GTK_STOCK_DELETE,
 																				  GTK_ICON_SIZE_MENU));

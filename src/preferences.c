@@ -23,14 +23,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "preferences.h"
-#include "utils.h"
 #include <gtk/gtk.h>
 #include <glade/glade-xml.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
 
+#include "preferences.h"
+#include "utils.h"
 #include "vfs.h"
+#include "config.h"
 
 /******************************************************************************/
 struct _AppletPreferencesPrivate {
@@ -181,7 +182,7 @@ applet_preferences_on_icon_select (GtkWidget* button, AppletPreferences* self) {
 	/* set up a file chooser dialog so we can choose the new icon. An icon
 	 * chooser would be better, but that widget is deprecated in the Gnome UI
 	 * lib and GTK equivalent doesn't exist yet */
-	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select Icon",
+	file_chooser_dialog = gtk_file_chooser_dialog_new (_("Select Icon"),
 													   NULL,
 													   GTK_FILE_CHOOSER_ACTION_OPEN,
 													   GTK_STOCK_CANCEL,
@@ -404,7 +405,7 @@ applet_preferences_path_cell_activated (GtkTreeView		  *tree_view,
 	gtk_tree_model_get (model, &iter, PATH_COLUMN, &old_path, -1);
 
 	/* make a file chooser object to select the new path */
-	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select New Folder To Browse",
+	file_chooser_dialog = gtk_file_chooser_dialog_new (_("Select Folder To Browse"),
 													   NULL,
 													   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 													   GTK_STOCK_CANCEL,
@@ -468,7 +469,7 @@ applet_preferences_on_add_dir_clicked (GtkWidget* widget, AppletPreferences* sel
 	GtkWidget*	  file_chooser_dialog;
 	GtkWidget*	  tree_view = self->priv->tree_view;
 
-	file_chooser_dialog = gtk_file_chooser_dialog_new ("Select Folder To Add",
+	file_chooser_dialog = gtk_file_chooser_dialog_new (_("Select Folder To Add"),
 													   NULL,
 													   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 													   GTK_STOCK_CANCEL,
@@ -727,7 +728,7 @@ applet_preferences_create_list_view (AppletPreferences* self) {
 
 	/* Create a column, associating the "text" attribute of the
 	* cell_renderer to the first column of the model */
-	column = gtk_tree_view_column_new_with_attributes ("Label",
+	column = gtk_tree_view_column_new_with_attributes (_("Label"),
 													   renderer,
 													   "text",
 													   LABEL_COLUMN,
@@ -741,7 +742,7 @@ applet_preferences_create_list_view (AppletPreferences* self) {
 					  "row-activated",
 					  G_CALLBACK (applet_preferences_path_cell_activated),
 					  self);
-	column = gtk_tree_view_column_new_with_attributes ("Path",
+	column = gtk_tree_view_column_new_with_attributes (_("Path"),
 													   renderer,
 													   "text",
 													   PATH_COLUMN,

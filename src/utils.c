@@ -24,9 +24,9 @@
  */
 
 #include <glib/gprintf.h>
-#include <string.h>
 
 #include "utils.h"
+#include "config.h"
 
 /******************************************************************************/
 void
@@ -58,7 +58,7 @@ utils_gerror_ok (GError **error, gboolean show_error) {
 		if (DEBUG) g_printf ("error: %s\n", (*error)->message);
 
 		if (show_error)
-			utils_show_dialog ("Error", (*error)->message, GTK_MESSAGE_ERROR);
+			utils_show_dialog (_("Error"), (*error)->message, GTK_MESSAGE_ERROR);
 
 		g_error_free (*error);
 		*error = NULL;

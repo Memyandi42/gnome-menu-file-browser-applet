@@ -26,12 +26,7 @@
 #ifndef __VFS_H__
 #define __VFS_H__
 
-#include <glib.h>
 #include <gtk/gtk.h>
-#include <gio/gio.h>
-
-#include "config.h"
-#include "menu-browser.h"
 
 /******************************************************************************/
 typedef struct _VfsFileInfo VfsFileInfo;

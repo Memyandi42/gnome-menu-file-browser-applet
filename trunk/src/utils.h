@@ -26,11 +26,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <glib.h>
 #include <gtk/gtk.h>
 
-#include "config.h"
-
+/******************************************************************************/
 typedef GPtrArray *Garbage;
 /******************************************************************************/
 void		garbage_empty (Garbage *garabage, gboolean reuse);

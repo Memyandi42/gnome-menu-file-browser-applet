@@ -26,11 +26,9 @@
 #ifndef __MENU_BROWSER_H__
 #define __MENU_BROWSER_H__
 
-#include <glib-object.h>
 #include <gtk/gtk.h>
 
 #include "preferences.h"
-#include "config.h"
 
 G_BEGIN_DECLS
 

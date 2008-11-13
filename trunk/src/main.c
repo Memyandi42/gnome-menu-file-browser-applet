@@ -23,11 +23,7 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <glib.h>
-#include <glib/gprintf.h>
-#include <gtk/gtk.h>
 #include <panel-applet.h>
-#include <string.h>
 
 #include "panel-menu-bar.h"
 #include "utils.h"
@@ -35,7 +31,7 @@
 
 #define APPLET_IID			"OAFIID:GNOME_FileBrowserApplet"
 #define APPLET_FACTORY_IID	"OAFIID:GNOME_FileBrowserApplet_Factory"
-#define VERSION				"0.6.0"
+#define VERSION				"0.6.1"
 
 /******************************************************************************/
 static const gchar file_browser_applet_menu_xml [] =
@@ -106,7 +102,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 	gtk_show_about_dialog (NULL,
 			       "name", _("File Browser Applet"),
 			       "version", VERSION,
-			       "copyright", "Copyright \xc2\xa9 2006-2008 Axel von Bertoldi.",
+			       "copyright", _("Copyright \xc2\xa9 2006-2008 Axel von Bertoldi."),
 			       "comments", _("Browse and open files in your home directory from the panel"),
 			       "authors", authors,
 			       "documenters", documenters,
@@ -130,6 +126,10 @@ BonoboUIVerb file_browser_applet_menu_verbs [] = {
 /******************************************************************************/
 static gboolean
 file_browser_applet_create (PanelApplet *applet) {
+
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
 
 	PanelMenuBar* panel_menu_bar = panel_menu_bar_new (applet);
 

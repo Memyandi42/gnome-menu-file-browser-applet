@@ -26,12 +26,8 @@
 #ifndef __PREFERENCES_H__
 #define __PREFERENCES_H__
 
-#include <glib.h>
 #include <glib-object.h>
 #include <panel-applet-gconf.h>
-
-#include "utils.h"
-#include "config.h"
 
 G_BEGIN_DECLS
 

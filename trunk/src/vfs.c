@@ -23,12 +23,13 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include "vfs.h"
-#include "utils.h"
-
-#include <string.h>
 #include <gio/gdesktopappinfo.h>
 #include <glib/gprintf.h>
+#include <gio/gio.h>
+
+#include "vfs.h"
+#include "utils.h"
+#include "config.h"
 
 /******************************************************************************/
 /* sort the structures based on the file's display_name */
@@ -274,9 +275,9 @@ vfs_file_do_default_action (const gchar *file_name) {
 		ret = vfs_launch_application (launch_info);
 	}
 	else {
-		gchar *msg = g_strdup_printf ("Could not display \"%s\".\n"
-									  "There is no application installed for this file type.", file_name);
-		utils_show_dialog ("Error", msg, GTK_MESSAGE_ERROR);
+		gchar *msg = g_strdup_printf (_("Could not display \"%s\".\n"
+									  "There is no application installed for this file type."), file_name);
+		utils_show_dialog (_("Error"), msg, GTK_MESSAGE_ERROR);
 		g_free (msg);
 	}
 

@@ -26,8 +26,12 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
+#include <glib/gi18n.h>
+
 #define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
 #define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/${EXEC}.glade"
+#define LOCALEDIR		"${CMAKE_INSTALL_PREFIX}/share/locale/"
+#define PACKAGE			"file-browser-applet"
 
 #define DEBUG 0
 #cmakedefine ENABLE_HELP_DOC

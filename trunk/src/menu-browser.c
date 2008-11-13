@@ -23,16 +23,14 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <glib.h>
 #include <glib/gprintf.h>
-#include <gio/gio.h>
 #include <gdk/gdkkeysyms.h>
-#include <string.h>
 
 #include "menu-browser.h"
 #include "utils.h"
 #include "vfs.h"
 #include "context-menu.h"
+#include "config.h"
 
 /*#define NEW_MENU_SIGNAL*/
 /******************************************************************************/
@@ -121,8 +119,8 @@ menu_browser_on_file_right_click (const gchar *file_name_and_path, GtkWidget *me
 #ifdef ENABLE_CONTEXT_MENU
 	return context_menu_display (file_name_and_path, menu_item);
 #else
-	utils_show_dialog ("Error",
-					   "Right-click on file action not yet implemented.",
+	utils_show_dialog (_("Error"),
+					   _("Right-click on file action not yet implemented."),
 					   GTK_MESSAGE_INFO);
 	return TRUE;
 #endif
@@ -141,8 +139,8 @@ menu_browser_on_item_button_press (GtkWidget *menu_item,
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (!vfs_file_exists (path)) {
-		gchar *tmp = g_strdup_printf ("Error: The file \"%s\" does not exists.", path);
-		utils_show_dialog ("Error", tmp, GTK_MESSAGE_ERROR);
+		gchar *tmp = g_strdup_printf (_("Error: The file \"%s\" does not exists."), path);
+		utils_show_dialog (_("Error"), tmp, GTK_MESSAGE_ERROR);
 		g_free (tmp);
 		return FALSE;
 	}
@@ -183,8 +181,8 @@ menu_browser_on_menu_key_press (GtkWidget *menu, GdkEventKey *event, MenuBrowser
 	gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (!vfs_file_exists (path)) {
-		gchar *tmp = g_strdup_printf ("Error: The file \"%s\" does not exists.", path);
-		utils_show_dialog ("Error", tmp, GTK_MESSAGE_ERROR);
+		gchar *tmp = g_strdup_printf (_("Error: The file \"%s\" does not exists."), path);
+		utils_show_dialog (_("Error"), tmp, GTK_MESSAGE_ERROR);
 		g_free (tmp);
 		return FALSE;
 	}
@@ -242,8 +240,8 @@ menu_browser_on_menu_button_press (GtkWidget *menu, GdkEventButton *event, MenuB
 	path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
 
 	if (!vfs_file_exists (path)) {
-		gchar *tmp = g_strdup_printf ("Error: The file \"%s\" does not exists.", path);
-		utils_show_dialog ("Error", tmp, GTK_MESSAGE_ERROR);
+		gchar *tmp = g_strdup_printf (_("Error: The file \"%s\" does not exists."), path);
+		utils_show_dialog (_("Error"), tmp, GTK_MESSAGE_ERROR);
 		g_free (tmp);
 		return FALSE;
 	}
@@ -318,7 +316,10 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser	*self) {
 		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (dirs, i);
 
 		/*make a menu item for this dir, limit the length of the text in the menu*/
-		GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);
+		/*GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);*/
+gchar *tmp = g_strdup_printf ("_%s", vfs_file_info->display_name);
+GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (tmp);
+g_free (tmp);
 
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
 		if (GTK_IS_LABEL (label)) {
@@ -371,7 +372,10 @@ menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
 		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (files, i);
 
 		/*make a menu item for this dir*/
-		GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);
+		/*GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);*/
+gchar *tmp = g_strdup_printf ("_%s", vfs_file_info->display_name);
+GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (tmp);
+g_free (tmp);
 	
 		/* set the ellipsizig and tooltip */
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
@@ -477,7 +481,7 @@ menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
 		gtk_widget_set_sensitive (GTK_WIDGET (menu_item), FALSE);
 	} /* the folder was empty */
 	else if ((dirs->len == 0) & (files->len == 0)) {
-		menu_item = gtk_menu_item_new_with_label ("(Empty)");
+		menu_item = gtk_menu_item_new_with_label (_("(Empty)"));
 		gtk_menu_shell_append (GTK_MENU_SHELL (current_menu), menu_item);
 		gtk_widget_set_sensitive (GTK_WIDGET (menu_item), FALSE);
 	}
@@ -627,6 +631,7 @@ menu_browser_activate_main_menu (MenuBrowser *self) {
 	gchar *path = g_object_get_data (G_OBJECT (self), G_OBJECT_DATA_NAME);
 	menu_browser_add_main_menu_header (menu, path, self);
 #endif
+	gtk_menu_shell_select_first (GTK_MENU_SHELL (menu), FALSE);
 	gtk_menu_reposition (GTK_MENU (menu));
 	return TRUE;
 }

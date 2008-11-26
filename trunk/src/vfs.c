@@ -49,14 +49,17 @@ vfs_file_is_executable (const gchar *file_name) {
 
 	GFile*	   file = g_file_new_for_path (file_name);
 	GFileInfo* file_info =  g_file_query_info (file,
-											   G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE,
+											   /*G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE ,*/
+											   "standard::content-type,"
+											   "access::can-execute",
 											   0,
 											   NULL,
 											   NULL);
 
 	gboolean ret = g_file_info_get_attribute_boolean (file_info,
 													  G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE) &&
-											  		  !vfs_file_is_directory (file_name);
+													  g_content_type_can_be_executable (g_file_info_get_content_type (file_info));
+
 	g_object_unref (file_info);
 	g_object_unref (file);
 	return ret;	
@@ -251,9 +254,10 @@ vfs_file_do_default_action (const gchar *file_name) {
 	/*Try launching file as desktop file first*/
 	if (vfs_file_is_desktop (file_name)) {
 		GDesktopAppInfo *app_info = g_desktop_app_info_new_from_filename (file_name);
-		launch_info->command = g_strdup (g_app_info_get_executable (G_APP_INFO (app_info)));
-		launch_info->file = NULL;
+		gboolean ret = g_app_info_launch (app_info, NULL, NULL, NULL);
 		g_object_unref (app_info);
+		g_free (launch_info);
+		return ret;		
 	}
 	/* run it if its an executable */
 	else if (vfs_file_is_executable (file_name)) {

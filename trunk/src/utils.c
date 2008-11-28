@@ -116,3 +116,18 @@ g_slist_swap_data (GSList *list, guint index) {
 	return list;
 }
 /******************************************************************************/
+gchar*
+utils_escape_str (const gchar *str, const gchar *old_token, const gchar *new_token) {
+	gchar **tokens = g_strsplit (str, old_token, 0);
+	gchar *escaped_str = g_strjoinv (new_token, tokens);
+	g_strfreev (tokens);
+	return escaped_str;
+}
+/******************************************************************************/
+gchar**
+g_strv_new (guint size) {
+	gchar **strv = g_new0 (gchar*, size + 1);
+	strv[size] = NULL;
+	return strv;
+}
+/******************************************************************************/

@@ -29,18 +29,18 @@
 #include <gtk/gtk.h>
 
 /******************************************************************************/
+enum {
+	ARG_APP,
+	ARG_FILE,
+};
+/******************************************************************************/
 typedef struct _VfsFileInfo VfsFileInfo;
-typedef struct _LaunchInfo LaunchInfo;
 /******************************************************************************/
 struct _VfsFileInfo {
 	gchar		*display_name; /* need to free this */
 	gchar		*file_name; /* need to free this */
 	GtkWidget	*icon; /* don't need to free this */
 	gboolean	is_executable;
-};
-struct _LaunchInfo {
-	gchar *command;	/* the app to launch. can include args in here too, even file names. */
-	gchar *file;	/* the file to open if any. Should be NULL if not used. */
 };
 /******************************************************************************/
 gboolean	vfs_file_is_executable		(const gchar *file_name);
@@ -52,7 +52,7 @@ gchar*		vfs_get_dir_listings		(GPtrArray *files, GPtrArray *dirs, gboolean show_
 GList*		vfs_get_all_mime_applications (const gchar *file_name);
 GtkWidget*	vfs_get_icon_for_file		(const gchar *file_name);
 
-gboolean	vfs_launch_application		(LaunchInfo *launch_info);
+gboolean	vfs_launch_application		(const gchar *const*args);
 gboolean	vfs_file_do_default_action	(const gchar *file_name);
 void	 	vfs_file_trash				(gchar *file_name);
 /******************************************************************************/

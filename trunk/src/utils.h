@@ -38,6 +38,8 @@ void		garbage_add_item (Garbage garabage, gpointer item);
 gboolean	utils_gerror_ok (GError **error, gboolean show_error);
 void		utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type);
 GtkWidget*	utils_get_scaled_image_from_file (const gchar *file_name, int size);
+gchar*		utils_escape_str (const gchar *str, const gchar *old_token, const gchar *new_token);
 GSList*		g_slist_swap_data (GSList *list, guint index);
+gchar**		g_strv_new (guint size);
 /******************************************************************************/
 #endif

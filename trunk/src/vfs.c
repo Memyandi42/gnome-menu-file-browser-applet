@@ -25,6 +25,7 @@
 
 #include <gio/gdesktopappinfo.h>
 #include <glib/gprintf.h>
+#include <glib/gstdio.h>
 #include <gio/gio.h>
 
 #include "vfs.h"
@@ -160,6 +161,8 @@ vfs_get_icon_for_file (const gchar *file_name) {
 											  NULL);	
 
 		GIcon *icon = g_file_info_get_icon (file_info);
+/*g_printf ("is an emblemed icon? %d\n", G_IS_EMBLEMED_ICON (icon));*/
+/*g_printf ("is an emblem? %d\n", G_IS_EMBLEM (icon));*/
 		icon_widget = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_MENU);
 		g_object_unref (file);
 		g_object_unref (file_info);
@@ -187,108 +190,91 @@ vfs_get_all_mime_applications (const gchar *file_name) {
 	return app_infos;
 }
 /******************************************************************************/
+/* Takes a null-terminated array of strings at least 2 items long. The first
+ * item is always the application to execute, including if it is a script or
+ * .desktop file. The second is the files to open. Either ARG_FILE or ARG_APP
+ * can be NULL, but not both. If ARG_FILE is NULL, just launch ARG_APP. If
+ * ARG_APP is NULL, open ARG_FILE with the default mime handler. */
 gboolean
-vfs_launch_application (LaunchInfo *launch_info) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+vfs_launch_application (const gchar *const *args) {
 
-	gboolean ret = TRUE;
-	GError *error = NULL;
-	gint child_pid;
-	gchar *working_dir = NULL;
+	/* Can't have both arg[ARG_APP] and args[ARG_FILE} NULL */
+	g_return_val_if_fail ((args[ARG_APP] != NULL || args[ARG_FILE] != NULL), FALSE);
 
-	if (launch_info->file) {
-		working_dir = (vfs_file_is_directory (launch_info->file)) ? 
-					  g_strdup (launch_info->file) :
-					  g_path_get_dirname (launch_info->file);
+	guint	 i;
+	gboolean ret	   = FALSE;
+	GError	 *error    = NULL;
+	GFile	 *file     = NULL;
+	GList	 *files	   = NULL;
+	GAppInfo *app_info = NULL;
+	gchar	 *command_line = NULL;
+
+	/* Put the file(s) in a list (only of there is a file) for g_app_info_launch() */
+	for (i = ARG_FILE; args[i]; i++) {
+		file = g_file_new_for_path (args[i]);
+		files = g_list_append (files, (gpointer) file);
+	}
+
+	/* Set the current working dir. Do we use ARG_APP or ARG_FILE to set
+	 * cwd?  If ARG_FILE == NULL, use ARG_APP, otherwise use ARG_FILE */
+	const gchar *cwd_root = args[ARG_FILE] == NULL ? args[ARG_APP] : args[ARG_FILE];
+	gchar *working_dir = vfs_file_is_directory (cwd_root) ? g_strdup (cwd_root) : g_path_get_dirname (cwd_root);
+	g_chdir (working_dir);
+	g_free (working_dir);
+
+	/* No agrs[ARG_APP] was NULL, open file with default mime handler */
+	if (args[ARG_APP] == NULL) {
+		GFile *file = g_file_new_for_path (args[ARG_FILE]);
+		gchar *uri = g_file_get_uri (file);
+		ret = g_app_info_launch_default_for_uri (uri, NULL, &error);
+		utils_gerror_ok (&error, TRUE);
+		g_free (uri);
+		g_object_unref (file);
 	}
 	else {
-		working_dir = g_strdup (g_get_home_dir ());
+		if (vfs_file_is_desktop (args[ARG_APP])) {
+			app_info = G_APP_INFO (g_desktop_app_info_new_from_filename (args[ARG_APP]));
+		}
+		else {
+			command_line = vfs_file_is_executable (args[ARG_APP]) ?
+				utils_escape_str (args[ARG_APP], " ", "\\ ") : g_strdup (args[ARG_APP]);
+			app_info = g_app_info_create_from_commandline (command_line, NULL, 0, &error);
+			utils_gerror_ok (&error, TRUE);
+		}
+
+		if (app_info) {
+			ret = g_app_info_launch (app_info, files, NULL, &error);
+			utils_gerror_ok (&error, TRUE);
+			g_object_unref (app_info);
+		}
+		else {
+			gchar *msg = g_strdup_printf (_("Could not launch \"%s\".\n"), args[ARG_FILE]);
+			utils_show_dialog (_("Error"), msg, GTK_MESSAGE_ERROR);
+			g_free (msg);
+		}
 	}
-
-	g_strdelimit (launch_info->command, " ", '\1');
-
-	/* only add the file name as an argument if one was specified */
-	gchar *arg = (launch_info->file) ? 
-				 g_strconcat (launch_info->command, "\1", launch_info->file, NULL) :
-				 g_strdup (launch_info->command);
-
-	gchar** args = g_strsplit (arg, "\1", 0);
-
-	/* need to do this to convert the '\2's back into spaces. */
-	g_strdelimit (args[0], "\2", ' ');
-
-	/* remove trailing spaces from all args */
-	int i = 0;
-	while (args[i]) {
-		g_strchomp (args[i]);
-		i++;
-	}
-
-	g_spawn_async_with_pipes (working_dir,
-							  args,
-							  NULL,
-							  G_SPAWN_SEARCH_PATH,
-							  NULL,
-							  NULL,
-							  &child_pid,
-							  NULL,
-							  NULL,
-							  NULL,
-							  &error);
-
-	ret = utils_gerror_ok (&error, TRUE) ? ret : FALSE;
-	
-	g_free (arg);
-	g_strfreev (args);
-	g_free (working_dir);
+	g_list_foreach (files, (GFunc)g_object_unref, NULL);
+	g_list_free (files);
+	g_free (command_line);
 
 	return ret;
 }
 /******************************************************************************/
 gboolean
 vfs_file_do_default_action (const gchar *file_name) {
-	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+	gchar **args = g_strv_new (2);
+	gchar *_file_name = g_strdup (file_name);
 
-	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-
-	/*Try launching file as desktop file first*/
-	if (vfs_file_is_desktop (file_name)) {
-		GDesktopAppInfo *app_info = g_desktop_app_info_new_from_filename (file_name);
-		gboolean ret = g_app_info_launch (app_info, NULL, NULL, NULL);
-		g_object_unref (app_info);
-		g_free (launch_info);
-		return ret;		
-	}
-	/* run it if its an executable */
-	else if (vfs_file_is_executable (file_name)) {
-		launch_info->command = g_strdup (file_name);
-		/* need to do this in case the path or filename has spaces in it since
-		 * the spaces are converted to '\1' in vfs_launch_application.
-		 * vfs_launch_application will convert the '\2' back to a space. */
-		g_strdelimit (launch_info->command, " ", '\2');
-		launch_info->file = NULL;
+	if (vfs_file_is_desktop (_file_name) ||
+		vfs_file_is_executable (_file_name)) {
+		args[ARG_APP] = _file_name;
 	}
 	/* open it with the default mime app */
 	else {
-		launch_info->command = vfs_get_default_mime_application (file_name);
-		launch_info->file =  g_strdup (file_name);
+		args[ARG_FILE] = _file_name;
 	}
-
-	gboolean ret = FALSE;
-	if (launch_info->command) {
-		ret = vfs_launch_application (launch_info);
-	}
-	else {
-		gchar *msg = g_strdup_printf (_("Could not display \"%s\".\n"
-									  "There is no application installed for this file type."), file_name);
-		utils_show_dialog (_("Error"), msg, GTK_MESSAGE_ERROR);
-		g_free (msg);
-	}
-
-	g_free (launch_info->command);
-	g_free (launch_info->file);
-	g_free (launch_info);
-
+	gboolean ret = vfs_launch_application ((const gchar*const*)args);
+	g_strfreev (args);
 	return ret;
 }
 /******************************************************************************/

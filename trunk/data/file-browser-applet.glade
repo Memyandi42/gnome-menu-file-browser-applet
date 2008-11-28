@@ -85,7 +85,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkButton" id="Folder">
+                              <widget class="GtkButton" id="directory_remove_button">
                                 <property name="visible">True</property>
 								<property name="tooltip" translatable="yes">Remove the selected Folder.</property>
                                 <property name="can_focus">True</property>

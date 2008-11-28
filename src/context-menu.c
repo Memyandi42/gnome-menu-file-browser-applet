@@ -102,6 +102,22 @@ context_menu_clean_up (GtkMenuShell *menu) {
 	garbage_empty (&garbage, FALSE);
 }
 /******************************************************************************/
+static void
+context_menu_setup_callback (const gchar *app, const gchar* file, GtkMenuItem *menu_item) {
+	gchar **args = g_strv_new (2);
+	args[ARG_APP]  = g_strdup (app);
+	args[ARG_FILE] = g_strdup (file);
+
+	g_signal_connect_swapped (G_OBJECT (menu_item),
+							  "activate",
+							  G_CALLBACK (vfs_launch_application),
+							  (gpointer) args);
+
+	garbage_add_item (garbage, args[ARG_APP]);
+	garbage_add_item (garbage, args[ARG_FILE]);
+	garbage_add_item (garbage, args);
+}
+/******************************************************************************/
 /* originally wanted to use nautilus burn for this, but it doesn't seem
  * possible to programatically add files to burn:/// */
 /*
@@ -176,18 +192,7 @@ context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
 								   								 GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 
-	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-	launch_info->command = g_strdup ("brasero");
-	launch_info->file = g_strdup (file_name);
-
-	g_signal_connect_swapped (G_OBJECT (menu_item),
-							  "activate",
-							  G_CALLBACK (vfs_launch_application),
-							  (gpointer) launch_info);
-
-	garbage_add_item (garbage, launch_info);
-	garbage_add_item (garbage, launch_info->command);
-	garbage_add_item (garbage, launch_info->file);
+	context_menu_setup_callback ("brasero", file_name, GTK_MENU_ITEM (menu_item));
 }
 /******************************************************************************/
 static void
@@ -200,19 +205,8 @@ context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
 								   gtk_image_new_from_icon_name ("build",
 								   								 GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-	
-	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-	launch_info->command = g_strdup ("rubber -f --inplace -d");
-	launch_info->file = g_strdup (file_name);
 
-	g_signal_connect_swapped (G_OBJECT (menu_item),
-							  "activate",
-							  G_CALLBACK (vfs_launch_application),
-							  (gpointer) launch_info);
-
-	garbage_add_item (garbage, launch_info);
-	garbage_add_item (garbage, launch_info->command);
-	garbage_add_item (garbage, launch_info->file);
+	context_menu_setup_callback ("rubber -f --inplace -d", file_name, GTK_MENU_ITEM (menu_item));
 }
 /******************************************************************************/
 static gboolean
@@ -261,19 +255,8 @@ context_menu_add_archive_action (const gchar *file_name, GtkWidget *menu) {
 								   gtk_image_new_from_icon_name ("package",
 								   								 GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-	
-	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-	launch_info->command = g_strdup (archive_action);
-	launch_info->file = g_strdup (file_name);
 
-	g_signal_connect_swapped (G_OBJECT (menu_item),
-							  "activate",
-							  G_CALLBACK (vfs_launch_application),
-							  (gpointer) launch_info);
-
-	garbage_add_item (garbage, launch_info);
-	garbage_add_item (garbage, launch_info->command);
-	garbage_add_item (garbage, launch_info->file);
+	context_menu_setup_callback (archive_action, file_name, GTK_MENU_ITEM (menu_item));
 }
 /******************************************************************************/
 static void
@@ -283,7 +266,7 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 	GList *root = vfs_get_all_mime_applications (file_name);
 	GList *apps = root;
 	
-	if (root == NULL) return;
+	g_return_if_fail (root != NULL);
 
 	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Open With"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
@@ -295,9 +278,9 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 	/* sigh! The browser menu does not close properly if the popup menu is
 	 * cancelled from a submenu in the popup menu*/
 	g_signal_connect_swapped (GTK_MENU_SHELL (sub_menu),
-  					  "selection_done",
-					  G_CALLBACK (context_menu_clean_up),
-					  menu);
+  					  		  "selection_done",
+							  G_CALLBACK (context_menu_clean_up),
+							  menu);
 
 	gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item),
 							   sub_menu);
@@ -307,21 +290,10 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 									   gtk_image_new_from_gicon (g_app_info_get_icon (apps->data),
 									   							 GTK_ICON_SIZE_MENU));
-
-		LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-		launch_info->command = g_strdup (g_app_info_get_executable (apps->data));
-		launch_info->file = g_strdup (file_name);
-
-		g_signal_connect_swapped (GTK_MENU_ITEM (menu_item),
-								  "activate",
-								  G_CALLBACK (vfs_launch_application),
-								  (gpointer) launch_info);
-
 		gtk_menu_shell_append (GTK_MENU_SHELL (sub_menu), menu_item);
 
-		garbage_add_item (garbage, launch_info);
-		garbage_add_item (garbage, launch_info->command);
-		garbage_add_item (garbage, launch_info->file);
+		context_menu_setup_callback (g_app_info_get_executable (apps->data),
+									 file_name, GTK_MENU_ITEM (menu_item));
 
 		g_object_unref (apps->data);
 		apps = apps->next;

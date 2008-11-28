@@ -76,15 +76,11 @@ menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-	launch_info->command = g_strdup (self->prefs->terminal);
-	launch_info->file = g_strdup (path);
-
-	vfs_launch_application (launch_info);
-
-	g_free (launch_info->command);
-	g_free (launch_info->file);
-	g_free (launch_info);
+	gchar **args = g_strv_new (2);
+	args[ARG_APP]  = g_strdup (self->prefs->terminal);
+	args[ARG_FILE] = g_strdup (path);
+	vfs_launch_application ((const gchar*const*)args);
+	g_strfreev (args);
 }
 /******************************************************************************/
 static void
@@ -102,15 +98,11 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	LaunchInfo *launch_info = g_new0 (LaunchInfo, 1);
-	launch_info->command = g_strdup (self->prefs->editor);
-	launch_info->file = g_strdup (file_name_and_path);
-
-	vfs_launch_application (launch_info);
-
-	g_free (launch_info->command);
-	g_free (launch_info->file);
-	g_free (launch_info);
+	gchar **args = g_strv_new (2);
+	args[ARG_APP]  = g_strdup (self->prefs->editor);
+	args[ARG_FILE] = g_strdup (file_name_and_path);
+	vfs_launch_application ((const gchar*const*)args);
+	g_strfreev (args);
 }
 /******************************************************************************/
 static gboolean
@@ -316,10 +308,13 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser	*self) {
 		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (dirs, i);
 
 		/*make a menu item for this dir, limit the length of the text in the menu*/
-		/*GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);*/
-gchar *tmp = g_strdup_printf ("_%s", vfs_file_info->display_name);
-GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (tmp);
-g_free (tmp);
+		/* WTH is going on here! Because we're using a mnemonic, we have to
+		 * replace all _ with __ for the name to appear correctly */
+		gchar *tmp_str = utils_escape_str (vfs_file_info->display_name, "_", "__");
+		gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
+		GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
+		g_free (escaped_str);
+		g_free (tmp_str);
 
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
 		if (GTK_IS_LABEL (label)) {
@@ -372,10 +367,11 @@ menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
 		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (files, i);
 
 		/*make a menu item for this dir*/
-		/*GtkWidget *menu_item = gtk_image_menu_item_new_with_label (vfs_file_info->display_name);*/
-gchar *tmp = g_strdup_printf ("_%s", vfs_file_info->display_name);
-GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (tmp);
-g_free (tmp);
+		gchar *tmp_str = utils_escape_str (vfs_file_info->display_name, "_", "__");
+		gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
+		GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
+		g_free (escaped_str);
+		g_free (tmp_str);
 	
 		/* set the ellipsizig and tooltip */
 		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));

@@ -204,15 +204,12 @@ vfs_launch_application (const gchar *const *args) {
 	guint	 i;
 	gboolean ret	   = FALSE;
 	GError	 *error    = NULL;
-	GFile	 *file     = NULL;
 	GList	 *files	   = NULL;
-	GAppInfo *app_info = NULL;
 	gchar	 *command_line = NULL;
 
 	/* Put the file(s) in a list (only of there is a file) for g_app_info_launch() */
 	for (i = ARG_FILE; args[i]; i++) {
-		file = g_file_new_for_path (args[i]);
-		files = g_list_append (files, (gpointer) file);
+		files = g_list_append (files, (gpointer)g_file_new_for_path (args[i]));
 	}
 
 	/* Set the current working dir. Do we use ARG_APP or ARG_FILE to set
@@ -232,6 +229,7 @@ vfs_launch_application (const gchar *const *args) {
 		g_object_unref (file);
 	}
 	else {
+		GAppInfo *app_info = NULL;
 		if (vfs_file_is_desktop (args[ARG_APP])) {
 			app_info = G_APP_INFO (g_desktop_app_info_new_from_filename (args[ARG_APP]));
 		}
@@ -256,6 +254,8 @@ vfs_launch_application (const gchar *const *args) {
 	g_list_foreach (files, (GFunc)g_object_unref, NULL);
 	g_list_free (files);
 	g_free (command_line);
+
+	g_chdir (g_get_home_dir());
 
 	return ret;
 }

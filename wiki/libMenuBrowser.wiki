@@ -1,0 +1,22 @@
+#labels Phase-Requirements,Phase-Design
+lib-menu-browser???
+
+I want to query "the community" to see if anyone would be interested in having the menu-based file browser functionality of this applet exported as a lib that could (very) easily be used in other apps.
+
+This could be accomplished with very little work on my part, and would be hella-easy to use in another application.
+
+The interface would be something like:
+
+{{{
+GtkWidget *my_menu = gtk_menu_new();
+
+gtk_menu_shell_append (GTK_MENU_SHELL (my_menu),
+                       menu_browser_new (const gchar *path,
+                                         const gchar *label,
+                                         BrowserPrefs *prefs));
+/* prefs can be NULL for default */
+}}}
+
+Currently prefs includes the terminal to launch on middle-click on a folder, the editor to use on middle click on a file and whether or not to show hidden files/folders. Maybe path and label could be rolled into prefs. Additionally, other parameters could be added to further change the widget's behaviour such as what functions to call on left/right/middle clicks and such.
+
+Please post back with level of interest, related ideas and possible uses.

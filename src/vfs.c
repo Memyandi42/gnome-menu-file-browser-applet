@@ -246,7 +246,7 @@ vfs_launch_application (const gchar *const *args) {
 			g_object_unref (app_info);
 		}
 		else {
-			gchar *msg = g_strdup_printf (_("Could not launch \"%s\".\n"), args[ARG_FILE]);
+			gchar *msg = g_strdup_printf (_("Could not open \"%s\".\n"), args[ARG_FILE]);
 			utils_show_dialog (_("Error"), msg, GTK_MESSAGE_ERROR);
 			g_free (msg);
 		}

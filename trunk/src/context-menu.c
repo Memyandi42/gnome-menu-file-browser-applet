@@ -67,6 +67,7 @@ static char *archive_mime_types[] = {
 /******************************************************************************/
 static void
 tree_set_sensitive (GtkWidget *menu_item, gboolean sensitive) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 	/* walk up the menu browser tree from the menu item that causes the popup
 	 * menu and disable all the menu shells, stopping at the menu bar. Need to
 	 * do this to get around the focus bug. Would be nicer if we couls do this
@@ -104,6 +105,8 @@ context_menu_clean_up (GtkMenuShell *menu) {
 /******************************************************************************/
 static void
 context_menu_setup_callback (const gchar *app, const gchar* file, GtkMenuItem *menu_item) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
 	gchar **args = g_strv_new (2);
 	args[ARG_APP]  = g_strdup (app);
 	args[ARG_FILE] = g_strdup (file);
@@ -142,6 +145,8 @@ context_menu_add_burn_callback (const gchar *file_name) {
 /******************************************************************************/
 static void
 context_menu_add_new_dir_callback (gchar *file_name) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
 	GError *error = NULL;
 
 	GladeXML* xml = glade_xml_new (GLADEUI_PATH, "new_dir_dialog", NULL);
@@ -169,6 +174,7 @@ context_menu_add_new_dir_callback (gchar *file_name) {
 /******************************************************************************/
 static void
 context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	if (!vfs_file_is_directory (file_name)) return;
 
@@ -186,6 +192,8 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
 /******************************************************************************/
 static void
 context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
 	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Create CD/DVD"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
 								   gtk_image_new_from_icon_name ("nautilus-cd-burner",
@@ -197,6 +205,7 @@ context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
 /******************************************************************************/
 static void
 context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	if (!g_str_has_suffix (file_name, "tex")) return;
 
@@ -211,6 +220,8 @@ context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
 /******************************************************************************/
 static gboolean
 is_archive (const gchar *file_name) {
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
 	gboolean ret = FALSE;
 	GFile*	   file = g_file_new_for_path (file_name);
 	GFileInfo* file_info =  g_file_query_info (file,

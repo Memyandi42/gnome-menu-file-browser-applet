@@ -287,7 +287,7 @@ menu_browser_add_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
 	g_object_set_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME, path);
 
 	g_signal_connect (G_OBJECT (menu_item),
-					  "button_press_event",
+					  "button_release_event",
 					  G_CALLBACK (menu_browser_on_item_button_press),
 					  self);
 
@@ -405,7 +405,7 @@ menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
 						   vfs_file_info->file_name);
 #ifndef NEW_MENU_SIGNAL
 		g_signal_connect (menu_item,
-						  "button_press_event",
+						  "button_release_event",
 						  G_CALLBACK (menu_browser_on_item_button_press),
 						  self);
 #endif
@@ -443,7 +443,7 @@ menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
 
 #ifdef NEW_MENU_SIGNAL
 	g_signal_connect (current_menu,
-					  "button_press_event",
+					  "button_release_event",
 					  G_CALLBACK (menu_browser_on_menu_button_press),
 					  self),
 #else 

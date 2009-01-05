@@ -65,7 +65,7 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 										  &error);
 	utils_gerror_ok (&error, TRUE);
 #else
-	utils_show_dialog ("Error", "Sorry, no help or documentation yet...", GTK_MESSAGE_ERROR);
+	utils_show_dialog (_("Error"), _("Sorry, no help or documentation yet..."), GTK_MESSAGE_ERROR);
 #endif
 	return FALSE;
 }
@@ -78,7 +78,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 	const gchar *authors[] = {
 		"Axel von Bertoldi <bertoldia@gmail.com>",
 		"",
-		"Contributions by:",
+		_("Contributions by:"),
 		"Ivan N. Zlatev <contact@i-nz.net>",
 		"Stefano Maggiolo <maggiolo@mail.dm.unipi.it>",
 		"Deji Akingunola <dakingun@gmail.com>",

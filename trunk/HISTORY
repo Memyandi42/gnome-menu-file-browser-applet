@@ -1,7 +1,7 @@
 Version 0.6.1
 *************
 	* Added mnemonic keyboard shortcut to menus for faster keyboard navigation.
-
+    * fixed bugs #43, 44, 45, 49.
 
 Version 0.6.0
 *************

@@ -41,7 +41,7 @@ static const gchar file_browser_applet_menu_xml [] =
 	"   <menuitem name=\"Help Item\" verb=\"Help\" _label=\"Help\"\n"
 	"             pixtype=\"stock\" pixname=\"gtk-help\"/>\n"
 	"   <menuitem name=\"About Item\" verb=\"About\" _label=\"About\"\n"
-	"             pixtype=\"stock\" pixname=\"gnome-stock-about\"/>\n"
+	"             pixtype=\"stock\" pixname=\"gtk-about\"/>\n"
 	"</popup>\n";
 /******************************************************************************/
 static gboolean

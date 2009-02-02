@@ -32,6 +32,7 @@
 enum {
 	ARG_APP,
 	ARG_FILE,
+    ARGS_SIZE,
 };
 /******************************************************************************/
 typedef struct _VfsFileInfo VfsFileInfo;

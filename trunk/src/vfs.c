@@ -262,7 +262,7 @@ vfs_launch_application (const gchar *const *args) {
 /******************************************************************************/
 gboolean
 vfs_file_do_default_action (const gchar *file_name) {
-	gchar **args = g_strv_new (2);
+	gchar **args = g_strv_new (ARGS_SIZE);
 	gchar *_file_name = g_strdup (file_name);
 
 	if (vfs_file_is_desktop (_file_name) ||

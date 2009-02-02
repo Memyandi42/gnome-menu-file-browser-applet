@@ -84,6 +84,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		"Deji Akingunola <dakingun@gmail.com>",
 		"Serkan Kaba <serkan@gentoo.org>",
 		"Silvio Ricardo Cordeiro <silvioricardoc@gmail.com>",
+        "pachoramos",
 		NULL
 	};
 	const gchar *documenters [] = {

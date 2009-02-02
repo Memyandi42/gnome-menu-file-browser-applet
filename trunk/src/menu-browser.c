@@ -76,7 +76,7 @@ menu_browser_on_dir_middle_click (const gchar *path, MenuBrowser *self) {
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	gchar **args = g_strv_new (2);
+	gchar **args = g_strv_new (ARGS_SIZE);
 	args[ARG_APP]  = g_strdup (self->prefs->terminal);
 	args[ARG_FILE] = g_strdup (path);
 	vfs_launch_application ((const gchar*const*)args);
@@ -98,7 +98,7 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	gchar **args = g_strv_new (2);
+	gchar **args = g_strv_new (ARGS_SIZE);
 	args[ARG_APP]  = g_strdup (self->prefs->editor);
 	args[ARG_FILE] = g_strdup (file_name_and_path);
 	vfs_launch_application ((const gchar*const*)args);
@@ -146,6 +146,13 @@ menu_browser_on_item_button_press (GtkWidget *menu_item,
 			menu_browser_on_file_middle_click (path, self);
 	}
 	else if (event->button == 3) {
+        /* Sigh! Have to set the event button to 0 because the menu items in
+         * the "open with" sub menu in the context menu aren't activated
+         * otherwise. This bug appeared when "button_press_event" was changes
+         * to "button_release_event" in all the mouse clicks on the menu items
+         * of the main menu. */
+        event->button = 0;
+
 		g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
 		g_object_set_data (G_OBJECT (menu_item), "button_event", event);
 		return menu_browser_on_file_right_click (path, menu_item);

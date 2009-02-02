@@ -107,7 +107,7 @@ static void
 context_menu_setup_callback (const gchar *app, const gchar* file, GtkMenuItem *menu_item) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	gchar **args = g_strv_new (2);
+	gchar **args = g_strv_new (ARGS_SIZE);
 	args[ARG_APP]  = g_strdup (app);
 	args[ARG_FILE] = g_strdup (file);
 

@@ -212,6 +212,12 @@ vfs_launch_application (const gchar *const *args) {
 		files = g_list_append (files, (gpointer)g_file_new_for_path (args[i]));
 	}
 
+    gchar *uri = args[ARG_FILE] ? g_strdup_printf("file://%s", args[ARG_FILE]) : g_strdup_printf("file://%s", args[ARG_APP]);
+    GtkRecentManager *recent = gtk_recent_manager_new ();
+    gtk_recent_manager_add_item (recent, uri);
+    g_object_unref (G_OBJECT(recent));
+    g_free (uri);
+
 	/* Set the current working dir. Do we use ARG_APP or ARG_FILE to set
 	 * cwd?  If ARG_FILE == NULL, use ARG_APP, otherwise use ARG_FILE */
 	const gchar *cwd_root = args[ARG_FILE] == NULL ? args[ARG_APP] : args[ARG_FILE];

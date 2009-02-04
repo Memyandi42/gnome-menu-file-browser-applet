@@ -1,7 +1,6 @@
 INCLUDE (FindPkgConfig)
 
 PKG_CHECK_MODULES (DEPS REQUIRED gtk+-2.0>=2.14 gio-unix-2.0 libpanelapplet-2.0 libglade-2.0)
-MESSAGE ("")
 
 INCLUDE_DIRECTORIES (${DEPS_INCLUDE_DIRS})
 LINK_DIRECTORIES (${DEPS_LIBRARY_DIRS})
@@ -16,16 +15,17 @@ IF (ENABLE_GTK_HOTKEY)
 		INCLUDE_DIRECTORIES (${LIBGTKHOTKEY_INCLUDE_DIRS})
 		LINK_DIRECTORIES (${LIBGTKHOTKEY_LIBRARY_DIRS})
 		SET (LIBS ${LIBS} ${LIBGTKHOTKEY_LIBRARIES})
-		MESSAGE ("\n-- libgtkhotkey found at ${LIBGTKHOTKEY_LIBRARY_DIRS}. Keyboard hotkey enabled.\n")
+		MESSAGE (STATUS "libgtkhotkey found at ${LIBGTKHOTKEY_LIBDIR}. Keyboard hotkey enabled.")
 		SET (ENABLE_GTK_HOTKEY TRUE)
 	ELSE (LIBGTKHOTKEY_FOUND)
-		MESSAGE ("\n-- libgtkhotkey not found. Keyboard hotkey disabled.\n")
+		MESSAGE (STATUS "libgtkhotkey not found. Keyboard hotkey disabled.")
 	ENDIF (LIBGTKHOTKEY_FOUND)
 
 ELSE (ENABLE_GTK_HOTKEY)
-	MESSAGE ("\n-- libgtkhotkey manually disabled.\n")
+	MESSAGE (STATUS "libgtkhotkey manually disabled.")
 	SET (LIBGTKHOTKEY_FOUND FALSE)
 ENDIF (ENABLE_GTK_HOTKEY)
+MESSAGE("")
 
 SET (ENABLE_CONTEXT_MENU TRUE)
 SET (ENABLE_HELP_DOC TRUE)

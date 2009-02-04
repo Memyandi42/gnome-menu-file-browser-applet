@@ -212,7 +212,7 @@ vfs_launch_application (const gchar *const *args) {
 		files = g_list_append (files, (gpointer)g_file_new_for_path (args[i]));
 	}
 
-    gchar *uri = args[ARG_FILE] ? g_strdup_printf("file://%s", args[ARG_FILE]) : g_strdup_printf("file://%s", args[ARG_APP]);
+    gchar *uri = args[ARG_FILE] ? g_filename_to_uri(args[ARG_FILE], NULL, NULL) : g_filename_to_uri(args[ARG_APP], NULL, NULL);
     GtkRecentManager *recent = gtk_recent_manager_new ();
     gtk_recent_manager_add_item (recent, uri);
     g_object_unref (G_OBJECT(recent));

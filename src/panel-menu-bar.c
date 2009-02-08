@@ -267,8 +267,8 @@ panel_menu_bar_add_keybinding (PanelMenuBar *self) {
 
 	GError *error = NULL;
 
-	GtkHotkeyInfo *hot_key_info = gtk_hotkey_info_new ("file-browser-applet",
-													   "file-browser-applet",
+	GtkHotkeyInfo *hot_key_info = gtk_hotkey_info_new (APP_NAME,
+                                                       APP_NAME,
                                                        "<Super>h",
 													   NULL);
 

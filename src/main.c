@@ -58,8 +58,8 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 	GError *error = NULL;
 
 	gnome_help_display_desktop_on_screen (NULL,
-										  "file-browser-applet",
-										  "file-browser-applet",
+                                          APP_NAME,
+                                          APP_NAME,
 										  NULL,
 										  gtk_widget_get_screen (widget),
 										  &error);
@@ -73,8 +73,6 @@ file_browser_applet_display_help_dialog (GtkWidget *widget) {
 static gboolean
 file_browser_applet_display_about_dialog (GtkWidget *widget) {
 
-	GdkPixbuf  *pixbuf = NULL;
-	gchar       *file;
 	const gchar *authors[] = {
 		"Axel von Bertoldi <bertoldia@gmail.com>",
 		"",
@@ -88,32 +86,36 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
 		NULL
 	};
 	const gchar *documenters [] = {
-		"You!!! That's right! You can help!",
+		_("You!!! That's right! You can help!"),
 /*		"Axel von Bertoldi", */
 		NULL
 	};
-	const gchar *translator_credits = "You!!! That's right! You can help!";
+	const gchar *translator_credits = _("You!!! That's right! You can help!");
 
-	file = gnome_program_locate_file (NULL, GNOME_FILE_DOMAIN_PIXMAP, "file-browser-applet.png", TRUE, NULL);
-	if (file != NULL) {
-		pixbuf = gdk_pixbuf_new_from_file (file, NULL);
-		g_free (file);
-	}
+    static GtkWidget *about_dialog = NULL;
+    if (about_dialog) {
+        gtk_window_set_screen (GTK_WINDOW (about_dialog),
+                gtk_widget_get_screen (widget));
+        gtk_window_present (GTK_WINDOW (about_dialog));
+        return 0;
+    }
+    about_dialog = gtk_about_dialog_new ();
+    g_object_set (about_dialog,	
+                  "name", _("File Browser Applet"),
+                  "version", VERSION,
+                  "copyright", _("Copyright \xc2\xa9 2006-2009 Axel von Bertoldi."),
+                  "comments", _("Browse and open files in your home directory from the panel"),
+                  "authors", authors,
+                  "documenters", documenters,
+                  "translator-credits", strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
+                  "logo-icon-name", APP_NAME,
+                  "icon-name", APP_NAME,
+                  NULL);
+    gtk_window_set_screen (GTK_WINDOW (about_dialog), gtk_widget_get_screen (widget));
+	g_signal_connect (about_dialog, "destroy", G_CALLBACK (gtk_widget_destroyed), &about_dialog);
+	g_signal_connect (about_dialog, "response", G_CALLBACK (gtk_widget_destroy), NULL);
+    gtk_widget_show (about_dialog);
 
-	gtk_show_about_dialog (NULL,
-			       "name", _("File Browser Applet"),
-			       "version", VERSION,
-			       "copyright", _("Copyright \xc2\xa9 2006-2008 Axel von Bertoldi."),
-			       "comments", _("Browse and open files in your home directory from the panel"),
-			       "authors", authors,
-			       "documenters", documenters,
-			       "translator-credits", strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
-			       "logo", pixbuf,
-			       NULL);
-
-	if (pixbuf) {
-		g_object_unref (pixbuf);
-	}
 	return 0;
 }
 /******************************************************************************/
@@ -129,8 +131,8 @@ static gboolean
 file_browser_applet_create (PanelApplet *applet) {
 
 	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
-	textdomain (PACKAGE);
+	bindtextdomain (APP_NAME, LOCALEDIR);
+	textdomain (APP_NAME);
 
 	PanelMenuBar* panel_menu_bar = panel_menu_bar_new (applet);
 
@@ -165,7 +167,7 @@ file_browser_applet_factory (PanelApplet *applet,
 /******************************************************************************/
 PANEL_APPLET_BONOBO_FACTORY (APPLET_FACTORY_IID,
 			     			PANEL_TYPE_APPLET,
-							"file-browser-applet",
+                            APP_NAME,
 							"0",
 							file_browser_applet_factory,
 							NULL)

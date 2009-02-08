@@ -28,10 +28,11 @@
 
 #include <glib/gi18n.h>
 
+#define APP_NAME         "${EXEC}"
 #define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
-#define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/${EXEC}.glade"
-#define LOCALEDIR		"${CMAKE_INSTALL_PREFIX}/share/locale/"
-#define PACKAGE			"file-browser-applet"
+#define GLADEUI_PATH	 "${CMAKE_INSTALL_GLADEUI_DIR}/${EXEC}.glade"
+#define PIXMAP_PATH	     "${CMAKE_INSTALL_PREFIX}/share/pixmaps/"
+#define LOCALEDIR		 "${CMAKE_INSTALL_PREFIX}/share/locale/"
 
 #define DEBUG 0
 #cmakedefine ENABLE_HELP_DOC

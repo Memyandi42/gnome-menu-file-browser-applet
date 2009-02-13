@@ -276,49 +276,51 @@ menu_browser_add_signals (GtkWidget *menu_item, MenuBrowser *self) {
                       self);
 }
 /******************************************************************************/
-/*GtkWidget **/
-/*menu_browser_entry_new (VfsFileInfo *file_info, MenuBarPrefs *self) {*/
-    /*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
+static GtkWidget*
+menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
+    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-		/*[>make a menu item for this dir<]*/
-		/*gchar *tmp_str = utils_escape_str (vfs_file_info->display_name, "_", "__");*/
-		/*gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);*/
-		/*GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);*/
-		/*g_free (escaped_str);*/
-		/*g_free (tmp_str);*/
-	
-		/*[> set the ellipsizig and tooltip <]*/
-		/*GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));*/
-		/*if (GTK_IS_LABEL (label)) {*/
-			/*gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);	*/
-			/*gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);*/
-		/*}*/
-		/*if (strlen (vfs_file_info->display_name) > MAX_FILE_NAME_LENGTH) {*/
-			/*gtk_widget_set_tooltip_text (menu_item, vfs_file_info->display_name);*/
-		/*}*/
+	g_return_val_if_fail (IS_MENU_BROWSER (self), NULL);
 
-		/*[> bold executable files <]*/
-		/*if (vfs_file_info->is_executable) {*/
-			/*gchar *markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>",*/
-													 /*vfs_file_info->display_name);*/
-			/*gtk_label_set_markup (GTK_LABEL (label), markup);*/
-			/*g_free (markup);*/
-		/*}*/
+    /* Make a menu item for this file/dir, limit the length of the text in the
+     * menu WTH is going on here! Because we're using a mnemonic, we have to
+     * replace all _ with __ for the name to appear correctly. */
+    gchar *tmp_str = utils_escape_str (file_info->display_name, "_", "__");
+    gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
+    GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
+    g_free (escaped_str);
+    g_free (tmp_str);
 
-		/*[>stick the icon in the menu item, the menu item in the menu and show it all<]*/
-		/*gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),*/
-									   /*vfs_file_info->icon);*/
+    /* set the ellipsizig and tooltip */
+    GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
+    if (GTK_IS_LABEL (label)) {
+        gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);	
+        gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
+    }
+    if (strlen (file_info->display_name) > MAX_FILE_NAME_LENGTH) {
+        gtk_widget_set_tooltip_text (menu_item, file_info->display_name);
+    }
 
-		/*garbage_add_item (self->priv->garbage, vfs_file_info->file_name);*/
-		/*garbage_add_item (self->priv->garbage, vfs_file_info->display_name);*/
+    /* bold executable files */
+    if (file_info->is_executable) {
+        gchar *markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>",
+                                                 file_info->display_name);
+        gtk_label_set_markup (GTK_LABEL (label), markup);
+        g_free (markup);
+    }
 
-		/*g_object_set_data (G_OBJECT (menu_item),*/
-						   /*G_OBJECT_DATA_NAME,*/
-						   /*vfs_file_info->file_name);*/
+    /*stick the icon in the menu item, the menu item in the menu and show it all*/
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                   file_info->icon);
 
-        /*return menu_item;*/
+    garbage_add_item (self->priv->garbage, file_info->file_name);
+    garbage_add_item (self->priv->garbage, file_info->display_name);
 
-/*}*/
+    g_object_set_data (G_OBJECT (menu_item),
+                       G_OBJECT_DATA_NAME,
+                       file_info->file_name);
+    return menu_item;
+}
 /******************************************************************************/
 static void
 menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
@@ -330,43 +332,9 @@ menu_browser_add_files (GtkWidget *menu, GPtrArray *files, MenuBrowser *self) {
 	for (i=0; i<files->len; i++) {
 		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (files, i);
 
-		/*make a menu item for this dir*/
-		gchar *tmp_str = utils_escape_str (vfs_file_info->display_name, "_", "__");
-		gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
-		GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
-		g_free (escaped_str);
-		g_free (tmp_str);
-	
-		/* set the ellipsizig and tooltip */
-		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
-		if (GTK_IS_LABEL (label)) {
-			gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);	
-			gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
-		}
-		if (strlen (vfs_file_info->display_name) > MAX_FILE_NAME_LENGTH) {
-			gtk_widget_set_tooltip_text (menu_item, vfs_file_info->display_name);
-		}
-
-		/* bold executable files */
-		if (vfs_file_info->is_executable) {
-			gchar *markup = g_markup_printf_escaped ("<span weight=\"bold\">%s</span>",
-													 vfs_file_info->display_name);
-			gtk_label_set_markup (GTK_LABEL (label), markup);
-			g_free (markup);
-		}
-
-		/*stick the icon in the menu item, the menu item in the menu and show it all*/
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-									   vfs_file_info->icon);
+        GtkWidget *menu_item = menu_browser_entry_new (vfs_file_info, self);
 
 		gtk_menu_shell_append (GTK_MENU_SHELL(menu), menu_item);
-
-		garbage_add_item (self->priv->garbage, vfs_file_info->file_name);
-		garbage_add_item (self->priv->garbage, vfs_file_info->display_name);
-
-		g_object_set_data (G_OBJECT (menu_item),
-						   G_OBJECT_DATA_NAME,
-						   vfs_file_info->file_name);
 
         menu_browser_add_signals (menu_item, self);
 	}
@@ -382,40 +350,11 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser	*self) {
 	for (i=0; i<dirs->len; i++) {
 		VfsFileInfo *vfs_file_info = (VfsFileInfo*)g_ptr_array_index (dirs, i);
 
-		/*make a menu item for this dir, limit the length of the text in the menu*/
-		/* WTH is going on here! Because we're using a mnemonic, we have to
-		 * replace all _ with __ for the name to appear correctly */
-		gchar *tmp_str = utils_escape_str (vfs_file_info->display_name, "_", "__");
-		gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
-		GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
-		g_free (escaped_str);
-		g_free (tmp_str);
-
-		GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
-		if (GTK_IS_LABEL (label)) {
-			gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);	
-			gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
-		}
-		if (strlen (vfs_file_info->display_name) > MAX_FILE_NAME_LENGTH) {
-			gtk_widget_set_tooltip_text (menu_item, vfs_file_info->display_name);
-		}
-
-		/*get the icon widget based on the returned icon name (always the same icon, can speed up here)*/
-		/*stick the icon in the menu item, the menu item in the menu and show it all*/
-		gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-									   vfs_file_info->icon);
+        GtkWidget *menu_item = menu_browser_entry_new (vfs_file_info, self);
 
 		gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-
 		/*make the sub menu to show all the files in this dir*/
 		gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_item), gtk_menu_new ());
-
-		garbage_add_item (self->priv->garbage, vfs_file_info->file_name);
-		garbage_add_item (self->priv->garbage, vfs_file_info->display_name);
-
-		g_object_set_data (G_OBJECT (menu_item),
-						   G_OBJECT_DATA_NAME,
-						   vfs_file_info->file_name);
 
 		g_signal_connect (GTK_MENU_ITEM (menu_item),
 						  "activate",
@@ -436,30 +375,16 @@ menu_browser_add_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
-	gchar *dir = g_path_get_basename (path);
+	VfsFileInfo *vfs_file_info   = g_new0 (VfsFileInfo, 1);
+    vfs_file_info->display_name  = g_strdup (g_path_get_basename(path));
+    vfs_file_info->file_name     = g_strdup (path);
+    vfs_file_info->icon          = vfs_get_icon_for_file (path);
+    vfs_file_info->is_executable = FALSE;
 
-    gchar *tmp_str = utils_escape_str (dir, "_", "__");
-    gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
-    GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
-    g_free (escaped_str);
-    g_free (tmp_str);
-
-	GtkWidget *label = gtk_bin_get_child (GTK_BIN (menu_item));
-	if (GTK_IS_LABEL (label)) {
-		gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);	
-		gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
-	}
-	if (strlen (dir) > MAX_FILE_NAME_LENGTH) {
-		gtk_widget_set_tooltip_text (menu_item, dir);
-	}
-	g_free(dir);
-
-	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-								   vfs_get_icon_for_file (path));
+    GtkWidget *menu_item = menu_browser_entry_new (vfs_file_info, self);
+    g_free (vfs_file_info);
 
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-
-	g_object_set_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME, path);
 
     menu_browser_add_signals (menu_item, self);
 

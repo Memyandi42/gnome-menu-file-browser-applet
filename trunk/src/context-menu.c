@@ -369,6 +369,11 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 							  "activate",
 							  G_CALLBACK (vfs_file_trash),
 							  (gpointer) g_strdup (file_name));
+
+    g_signal_connect_swapped (menu_item,
+                              "activate",
+                              G_CALLBACK (close_menu_browser),
+                              menu);
 }
 /******************************************************************************/
 static void

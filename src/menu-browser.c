@@ -119,7 +119,7 @@ menu_browser_on_file_right_click (const gchar *file_name_and_path, GtkWidget *me
 /******************************************************************************/
 static void
 menu_browser_on_item_activate (GtkMenuItem *menu_item, MenuBrowser *self) {
-	g_printf ("In %s\n", __FUNCTION__);
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	g_return_if_fail (IS_MENU_BROWSER (self));
 
@@ -174,44 +174,6 @@ menu_browser_on_item_button_release (GtkWidget *menu_item,
 
 	return FALSE;
 }
-/******************************************************************************/
-/*static gboolean*/
-/*menu_browser_on_item_key_release (GtkWidget *menu_item,*/
-                                  /*GdkEventKey *event,*/
-                                  /*MenuBrowser *self) {*/
-    /*if (DEBUG) g_printf ("In %s\n", __FUNCTION__);*/
-/*g_printf ("In %s\n", __FUNCTION__);*/
-
-    /*g_return_val_if_fail (IS_MENU_BROWSER (self), FALSE);*/
-
-    /*gchar *path = (gchar*)g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);*/
-
-    /*if (!vfs_file_exists (path)) {*/
-        /*gchar *tmp = g_strdup_printf (_("Error: The file \"%s\" does not exists."), path);*/
-        /*utils_show_dialog (_("Error"), tmp, GTK_MESSAGE_ERROR);*/
-        /*g_free (tmp);*/
-        /*return FALSE;*/
-    /*}*/
-
-    /*[> "Enter" or equivalent a are handled by menu_browser_on_item_activate <]*/
-
-    /*if (event->keyval == GDK_F4 ||*/
-             /*event->keyval == GDK_KP_F4) {*/
-        /*vfs_file_is_directory (path) ?*/
-            /*menu_browser_on_dir_middle_click (path, self) :*/
-            /*menu_browser_on_file_middle_click (path, self);*/
-        /*gtk_menu_shell_deactivate (self->priv->parent_menu_shell);*/
-        /*return TRUE;*/
-    /*}*/
-    /*else if ((event->keyval == GDK_Menu) ||*/
-             /*(event->keyval == GDK_F10 &&*/
-             /*(event->state & gtk_accelerator_get_default_mod_mask ()) == GDK_SHIFT_MASK)){*/
-        /*g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);*/
-        /*g_object_set_data (G_OBJECT (menu_item), "button_event", event);*/
-        /*return menu_browser_on_file_right_click (path, menu_item);*/
-    /*}*/
-    /*return FALSE;*/
-/*}*/
 /******************************************************************************/
 static gboolean
 menu_browser_on_menu_key_release (GtkWidget *menu,

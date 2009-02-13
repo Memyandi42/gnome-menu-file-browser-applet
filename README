@@ -22,6 +22,7 @@ Features
 	  Currently set as <Super>h.
 	* Context menu with some useful actions such as open-with, new folder here,
 	  delete file/folder, create/extract archive, etc.
+    * Fast keyboard navigation with mnemonics.
 
 Installation
 ************

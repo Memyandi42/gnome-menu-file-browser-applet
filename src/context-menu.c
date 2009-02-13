@@ -85,7 +85,7 @@ tree_set_sensitive (GtkWidget *menu_item, gboolean sensitive) {
 /* Stolen from menu.c from the gnome-panel */
 static void
 restore_grabs (GtkWidget *w, gpointer data) {
-g_printf ("In %s\n", __FUNCTION__);
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
     GtkWidget *menu_item = data;
     GtkMenu *menu = GTK_MENU(menu_item->parent); 
@@ -136,7 +136,7 @@ g_printf ("In %s\n", __FUNCTION__);
 /******************************************************************************/
 static void
 close_menu_browser (GtkWidget *menu) {
-g_printf ("In %s\n", __FUNCTION__);
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GtkWidget *browser = g_object_get_data (G_OBJECT (menu), "menu_browser");
 	GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (browser));
@@ -145,7 +145,7 @@ g_printf ("In %s\n", __FUNCTION__);
 /******************************************************************************/
 static void
 context_menu_clean_up (GtkWidget *menu) {
-g_printf ("In %s\n", __FUNCTION__);
+	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
     gtk_widget_destroy (menu);
     garbage_empty (&garbage, FALSE);

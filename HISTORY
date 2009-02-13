@@ -1,7 +1,9 @@
 Version 0.6.1
 *************
 	* Added mnemonic keyboard shortcut to menus for faster keyboard navigation.
-    * fixed bugs #43, 44, 45, 49.
+    * Added recent documents' support.
+    * Improved menu browser focus after context menu close.
+    * Fixed bugs #43, 44, 45, 49, 51, 56, 59, 60, 62.
 
 Version 0.6.0
 *************
@@ -18,7 +20,6 @@ Version 0.6.0
 Version 0.5.9
 *************
 	* Fixed a few bugs in the build system (thanks Serkan Kaba).
-
 
 Version 0.5.8
 *************

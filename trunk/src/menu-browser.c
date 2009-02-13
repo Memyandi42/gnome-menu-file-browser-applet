@@ -162,7 +162,7 @@ menu_browser_on_item_button_release (GtkWidget *menu_item,
 	else if (event->button == 3) {
         /* Sigh! Have to set the event button to 0 because the menu items in
          * the "open with" sub menu in the context menu aren't activated
-         * otherwise. This bug appeared when "button_press_event" was changes
+         * otherwise. This bug appeared when "button_press_event" was changed
          * to "button_release_event" in all the mouse clicks on the menu items
          * of the main menu. */
         event->button = 0;

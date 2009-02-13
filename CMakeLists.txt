@@ -39,9 +39,13 @@ ENDIF(NOT DEFINED CMAKE_INSTALL_GLADEUI_DIR)
 MESSAGE (STATUS "Using CMAKE_INSTALL_GLADEUI_DIR=${CMAKE_INSTALL_GLADEUI_DIR}\n")
 ################################################################################
 
-SUBDIRS (src
-		 data
-		 pixmaps)
+# compile time options
+SET (ENABLE_CONTEXT_MENU TRUE)
+#SET (ENABLE_HELP_DOC TRUE)
+
+ADD_SUBDIRECTORY (data)
+ADD_SUBDIRECTORY (pixmaps)
+ADD_SUBDIRECTORY (src)
 
 #uninstall target
 CONFIGURE_FILE ("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
@@ -77,6 +81,7 @@ SET (CPACK_SOURCE_IGNORE_FILES
 	 "po"
 	 "progress.make"
 	 ".svn"
+     "build"
 	 "doc")
 INCLUDE (CPack)
 
@@ -114,4 +119,4 @@ ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   data/GNOME_FileBrowserApplet_Factory.server
 									   data/Makefile) 
 
-ADD_CUSTOM_TARGET (xgettext xgettext src/*.c --output-dir=po --from-code="UTF-8" -C --keyword="_")
+ADD_CUSTOM_TARGET (xgettext xgettext ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c --output-dir=${CMAKE_CURRENT_SOURCE_DIR}/po --from-code="UTF-8" -C --keyword="_")

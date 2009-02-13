@@ -40,7 +40,7 @@
 
 /******************************************************************************/
 #define PANEL_MENU_BAR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TYPE_PANEL_MENU_BAR, PanelMenuBarPrivate))
-#define TOOLTIP_TEXT		"Browse and open files in your home directory"
+#define TOOLTIP_TEXT		_("Browse and open files in your home directory")
 /******************************************************************************/
 struct _PanelMenuBarPrivate {
 	PanelApplet			*applet;

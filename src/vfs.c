@@ -161,8 +161,6 @@ vfs_get_icon_for_file (const gchar *file_name) {
 											  NULL);	
 
 		GIcon *icon = g_file_info_get_icon (file_info);
-/*g_printf ("is an emblemed icon? %d\n", G_IS_EMBLEMED_ICON (icon));*/
-/*g_printf ("is an emblem? %d\n", G_IS_EMBLEM (icon));*/
 		icon_widget = gtk_image_new_from_gicon (icon, GTK_ICON_SIZE_MENU);
 		g_object_unref (file);
 		g_object_unref (file_info);

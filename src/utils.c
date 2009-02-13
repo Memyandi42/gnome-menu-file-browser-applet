@@ -32,14 +32,19 @@
 void
 garbage_init (Garbage *garabage) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
-	GPtrArray **_garbage = (GPtrArray**)garabage;
-	*_garbage = g_ptr_array_new();
+    
+    if (*garabage == NULL) {
+    	GPtrArray **_garbage = (GPtrArray**)garabage;
+	    *_garbage = g_ptr_array_new();
+    }
 }
 /******************************************************************************/
 void
 garbage_empty (Garbage *garabage, gboolean reuse) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
+
+    if (*garabage == NULL)
+        return;
 
 	GPtrArray **_garbage = (GPtrArray**)garabage;
 
@@ -52,8 +57,10 @@ void
 garbage_add_item (Garbage garabage, gpointer item) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
-	GPtrArray *_garbage = (GPtrArray*)garabage;
-	g_ptr_array_add (_garbage, item);
+	if (garabage) {
+		GPtrArray *_garbage = (GPtrArray*)garabage;
+		g_ptr_array_add (_garbage, item);
+	}
 }
 /******************************************************************************/
 gboolean

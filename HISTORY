@@ -1,6 +1,10 @@
+Version 0.6.2
+*************
+    * Added DnD dragging out of applet. Move is the default behaviour.
+    * Some code cleanups and plugged memory leaks.
 Version 0.6.1
 *************
-	* Added mnemonic keyboard shortcut to menus for faster keyboard navigation.
+    * Added mnemonic keyboard shortcut to menus for faster keyboard navigation.
     * Added recent documents' support.
     * Improved menu browser focus after context menu close.
     * Fixed bugs #43, 44, 45, 49, 51, 56, 59, 60, 62.

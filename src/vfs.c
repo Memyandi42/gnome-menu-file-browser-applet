@@ -127,7 +127,7 @@ vfs_get_desktop_app_name (const gchar *file_name) {
 }
 /******************************************************************************/
 void
-vfs_file_trash (gchar *file_name) {
+vfs_file_trash (const gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	GError *error = NULL;
@@ -138,7 +138,6 @@ vfs_file_trash (gchar *file_name) {
 
 	/* Let the user know if we failed. */
 	utils_gerror_ok (&error, TRUE);
-	g_free (file_name);
 }
 /******************************************************************************/
 GtkWidget *

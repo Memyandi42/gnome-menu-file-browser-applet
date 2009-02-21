@@ -55,7 +55,7 @@ GtkWidget*	vfs_get_icon_for_file		(const gchar *file_name);
 
 gboolean	vfs_launch_application		(const gchar *const*args);
 gboolean	vfs_file_do_default_action	(const gchar *file_name);
-void	 	vfs_file_trash				(gchar *file_name);
+void	 	vfs_file_trash				(const gchar *file_name);
 /******************************************************************************/
 
 #endif

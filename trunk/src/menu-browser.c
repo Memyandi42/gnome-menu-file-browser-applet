@@ -46,6 +46,10 @@ enum  {
 	MENU_BROWSER_DUMMY_PROPERTY
 };
 /******************************************************************************/
+static GtkTargetEntry menu_item_target[] = {
+    { "text/uri-list", GTK_TARGET_OTHER_APP, 0 }
+};
+/******************************************************************************/
 static gpointer menu_browser_parent_class = NULL;
 static void menu_browser_dispose (GObject * obj);
 static void menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self);
@@ -221,6 +225,93 @@ menu_browser_on_menu_key_release (GtkWidget *menu,
 	return FALSE;
 }
 /******************************************************************************/
+/*static void*/
+/*on_drag_end (GtkWidget *widget,*/
+             /*GdkDragContext *context,*/
+             /*gpointer user_data) {*/
+    /*[> ??? <]*/
+/*}*/
+/******************************************************************************/
+static void
+on_drag_data_get (GtkWidget *widget,
+                  GdkDragContext *context,
+                  GtkSelectionData *selection_data,
+                  guint target_type,
+                  guint time,
+                  const char *uri) {
+
+    gtk_selection_data_set (selection_data,
+            				selection_data->target,
+                            8,
+                            (guchar *)uri,
+            				strlen(uri));
+}
+/******************************************************************************/
+static void
+on_drag_begin (GtkWidget *menu_item, GdkDragContext *context) {
+
+    GIcon *icon = NULL;
+    GtkIconSize size;
+    const gchar *icon_name = NULL;
+    gchar *tmp = NULL;
+
+    GtkWidget *image = gtk_image_menu_item_get_image (GTK_IMAGE_MENU_ITEM (menu_item));
+    gtk_image_get_gicon (GTK_IMAGE(image), &icon, &size);
+
+    if (G_IS_FILE_ICON(icon)) {
+        /* What do I do now!? */
+        GFile *file = g_file_icon_get_file(G_FILE_ICON(icon));
+        gchar *tmp1 = g_file_get_basename (file);
+        tmp = g_strndup (tmp1, strlen(tmp1) - 4);
+        icon_name = (const gchar*)tmp;
+        g_free(tmp1);
+    }
+    else if (G_IS_THEMED_ICON(icon)) {
+        /* ugly */
+        const char*const* icon_names = g_themed_icon_get_names (G_THEMED_ICON(icon));
+        icon_name = icon_names ? icon_names[0] : NULL;
+    }
+
+    if (icon_name) {
+        /* Sigh! gtk_drag_source_set_icon_name can't load drag icon from icon
+         * name inode-directory "i.e. folders". Since that will probably be the
+         * most common case, make sure it looks OK. */
+        if (strcmp(icon_name, "inode-directory") == 0)
+            icon_name = "folder";
+
+        gtk_drag_source_set_icon_name (menu_item, icon_name);
+    }
+    g_free(tmp);
+}
+/******************************************************************************/
+static void
+menu_browser_dnd_setup (GtkWidget *menu_item) {
+    gchar *file_name = g_object_get_data (G_OBJECT (menu_item), G_OBJECT_DATA_NAME);
+    gchar *uri = g_filename_to_uri(file_name, NULL, NULL);
+
+    gtk_drag_source_set (menu_item,
+                         GDK_BUTTON1_MASK,
+                         menu_item_target,
+                         1,
+                         GDK_ACTION_MOVE | GDK_ACTION_ASK);
+
+    g_signal_connect_data (menu_item,
+                           "drag_data_get",
+                           G_CALLBACK (on_drag_data_get),
+                           uri,
+                           (GClosureNotify)g_free,
+                            0);
+
+    g_signal_connect (menu_item,
+                      "drag_begin",
+                      G_CALLBACK (on_drag_begin),
+                      NULL);
+    /*g_signal_connect (menu_item,*/
+                      /*"drag_end",*/
+                      /*G_CALLBACK (on_drag_end),*/
+                      /*NULL);*/
+}
+/******************************************************************************/
 static void
 menu_browser_add_signals (GtkWidget *menu_item, MenuBrowser *self) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
@@ -236,6 +327,8 @@ menu_browser_add_signals (GtkWidget *menu_item, MenuBrowser *self) {
                       "activate",
                       G_CALLBACK (menu_browser_on_item_activate),
                       self);
+
+    menu_browser_dnd_setup (menu_item);
 }
 /******************************************************************************/
 static GtkWidget*
@@ -346,11 +439,11 @@ menu_browser_add_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
     GtkWidget *menu_item = menu_browser_entry_new (vfs_file_info, self);
     g_free (vfs_file_info);
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 
     menu_browser_add_signals (menu_item, self);
 
-	gtk_menu_shell_append (GTK_MENU_SHELL (menu),
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu),
 						   gtk_separator_menu_item_new());
 }
 /******************************************************************************/

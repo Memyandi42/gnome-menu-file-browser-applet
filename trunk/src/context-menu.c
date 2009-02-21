@@ -162,19 +162,17 @@ context_menu_setup_callback (const gchar *app,
 	args[ARG_APP]  = g_strdup (app);
 	args[ARG_FILE] = g_strdup (file);
 
-	g_signal_connect_swapped (menu_item,
-							  "activate",
-							  G_CALLBACK (vfs_launch_application),
-							  args);
+    g_signal_connect_data (GTK_MENU_ITEM (menu_item),
+                           "activate",
+                           G_CALLBACK (vfs_launch_application),
+                           args,
+                           (GClosureNotify)g_strfreev,
+                           G_CONNECT_SWAPPED);
 
     g_signal_connect_swapped (menu_item,
                               "activate",
                               G_CALLBACK (close_menu_browser),
                               menu);
-
-	garbage_add_item (garbage, args[ARG_APP]);
-	garbage_add_item (garbage, args[ARG_FILE]);
-	garbage_add_item (garbage, args);
 }
 /******************************************************************************/
 static void
@@ -361,14 +359,16 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 						  
 	GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Move to Trash"));
 	gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-														gtk_image_new_from_stock (GTK_STOCK_DELETE,
-																				  GTK_ICON_SIZE_MENU));
+                                                        gtk_image_new_from_icon_name ("user-trash-full",
+                                                                                      GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-	
-	g_signal_connect_swapped (G_OBJECT (menu_item),
-							  "activate",
-							  G_CALLBACK (vfs_file_trash),
-							  (gpointer) g_strdup (file_name));
+
+    g_signal_connect_data (GTK_MENU_ITEM (menu_item),
+                           "activate",
+                           G_CALLBACK (vfs_file_trash),
+                           g_strdup (file_name),
+                           (GClosureNotify)g_free,
+                           G_CONNECT_SWAPPED);
 
     g_signal_connect_swapped (menu_item,
                               "activate",

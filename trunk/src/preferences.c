@@ -988,20 +988,21 @@ applet_preferences_class_init (AppletPreferencesClass* klass) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
 	applet_preferences_parent_class = g_type_class_peek_parent (klass);
+	GObjectClass      *gobject_class   = (GObjectClass      *) klass;
 	g_type_class_add_private (klass, sizeof (AppletPreferencesPrivate));
 	G_OBJECT_CLASS (klass)->dispose = applet_preferences_dispose;
 
-	applet_preferences_signals [PREFS_CHANGED] =
-		g_signal_new ("prefs_changed",
-    	              G_TYPE_FROM_CLASS (klass),
-					  G_SIGNAL_RUN_LAST,
-            	      G_STRUCT_OFFSET (AppletPreferencesClass, prefs_changed),
-					  NULL,
-					  NULL,
-				      g_cclosure_marshal_VOID__INT,
-					  G_TYPE_NONE,
-					  1,
-					  G_TYPE_POINTER);
+    applet_preferences_signals [PREFS_CHANGED] =
+        g_signal_new ("prefs_changed",
+                      G_TYPE_FROM_CLASS (gobject_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (AppletPreferencesClass, prefs_changed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
 	/* NOTE!!! a dynamically allocated PrefsChangedSignalData structure is passed
 	 * to the callback function including 2 gchar pointers. The callback function
 	 * is responsible for freeing this memory. HOWEVER!!! make sure that the gchar*

@@ -217,8 +217,8 @@
                                 <child>
                                   <widget class="GtkButton" id="icon_button">
                                     <property name="visible">True</property>
-                                	<property name="tooltip" translatable="yes">Select the icon to show in the applet.</property>
                                     <property name="can_focus">True</property>
+                                    <property name="tooltip" translatable="yes">Select the icon to show in the applet.</property>
                                     <property name="response_id">0</property>
                                     <child>
                                       <widget class="GtkImage" id="image1">
@@ -395,6 +395,23 @@
         <property name="visible">True</property>
         <property name="spacing">2</property>
         <child>
+          <widget class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Create new Folder at</property>
+          </widget>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="current_path_label">
+            <property name="visible">True</property>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <widget class="GtkEntry" id="new_dir_entry">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -402,7 +419,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child internal-child="action_area">

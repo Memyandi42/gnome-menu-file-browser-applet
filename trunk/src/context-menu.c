@@ -31,8 +31,6 @@
 #include "utils.h"
 #include "config.h"
 
-static Garbage garbage = NULL;
-
 /******************************************************************************/
 static char *archive_mime_types[] = {
 	"application/x-ar",
@@ -148,7 +146,6 @@ context_menu_clean_up (GtkWidget *menu) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
     gtk_widget_destroy (menu);
-    garbage_empty (&garbage, FALSE);
 }
 /******************************************************************************/
 static void
@@ -190,6 +187,10 @@ context_menu_add_new_dir_callback (GtkWidget *menu_item, gchar *file_name) {
 
 	GtkWidget *new_dir_dialog = glade_xml_get_widget (xml, "new_dir_dialog");
 	GtkWidget *new_dir_entry  = glade_xml_get_widget (xml, "new_dir_entry");
+	GtkWidget *current_path_label  = glade_xml_get_widget (xml, "current_path_label");
+
+    gtk_label_set_text (GTK_LABEL (current_path_label),
+                        file_name);
 
 	if (gtk_dialog_run (GTK_DIALOG (new_dir_dialog)) == GTK_RESPONSE_ACCEPT) {
 		const gchar *entry_text = gtk_entry_get_text (GTK_ENTRY (new_dir_entry));
@@ -205,7 +206,6 @@ context_menu_add_new_dir_callback (GtkWidget *menu_item, gchar *file_name) {
 		}
 	}
 	gtk_widget_destroy (new_dir_dialog);
-	g_free (file_name);
 }
 /******************************************************************************/
 static void
@@ -220,10 +220,12 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
 								   							 GTK_ICON_SIZE_MENU));
 	gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
 
-	g_signal_connect (GTK_MENU_ITEM (menu_item),
-                      "activate",
-                      G_CALLBACK (context_menu_add_new_dir_callback),
-                      g_strdup (file_name));
+    g_signal_connect_data (GTK_MENU_ITEM (menu_item),
+                           "activate",
+                           G_CALLBACK (context_menu_add_new_dir_callback),
+                           g_strdup (file_name),
+                           (GClosureNotify)g_free,
+                           0);
 }
 /******************************************************************************/
 static void
@@ -408,8 +410,6 @@ context_menu_display (const gchar *file_name, GtkWidget *menu_item) {
 		event_button = 3;
 		event_time = gtk_get_current_event_time();
 	}
-
-	garbage_init (&garbage);
 
 	GtkWidget *menu = gtk_menu_new ();
 

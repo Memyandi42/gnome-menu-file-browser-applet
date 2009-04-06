@@ -2,6 +2,7 @@ Version 0.6.2
 *************
     * Added DnD dragging out of applet. Move is the default behaviour.
     * Some code cleanups and plugged memory leaks.
+    * Slightly improved "New Folder" dialog.
 Version 0.6.1
 *************
     * Added mnemonic keyboard shortcut to menus for faster keyboard navigation.

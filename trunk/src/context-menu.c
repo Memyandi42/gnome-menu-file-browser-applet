@@ -23,7 +23,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <glade/glade-xml.h>
 #include <glib/gprintf.h>
 
 #include "context-menu.h"
@@ -177,18 +176,20 @@ context_menu_add_new_dir_callback (GtkWidget *menu_item, gchar *file_name) {
 	if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
 
     GtkWidget *menu = gtk_widget_get_parent (menu_item);
-
     close_menu_browser (menu);
-
 	GError *error = NULL;
 
-	GladeXML* xml = glade_xml_new (GLADEUI_PATH, "new_dir_dialog", NULL);
-	g_return_if_fail (xml != NULL);
-
-	GtkWidget *new_dir_dialog = glade_xml_get_widget (xml, "new_dir_dialog");
-	GtkWidget *new_dir_entry  = glade_xml_get_widget (xml, "new_dir_entry");
-	GtkWidget *current_path_label  = glade_xml_get_widget (xml, "current_path_label");
-
+    GtkBuilder* builder = gtk_builder_new();
+    /*gtk_builder_add_from_file (builder, BUILDER_UI_PATH, &error);*/
+    gchar *toplevel = "new_dir_dialog";
+    gtk_builder_add_objects_from_file (builder, BUILDER_UI_PATH, &toplevel, &error);
+    if (!utils_gerror_ok(&error, TRUE)) {
+        return;
+    }
+    GtkWidget *new_dir_dialog = GTK_WIDGET (gtk_builder_get_object (builder, "new_dir_dialog"));
+    GtkWidget *new_dir_entry = GTK_WIDGET (gtk_builder_get_object (builder, "new_dir_entry"));
+    GtkWidget *current_path_label = GTK_WIDGET (gtk_builder_get_object (builder, "current_path_label"));
+    
     gtk_label_set_text (GTK_LABEL (current_path_label),
                         file_name);
 

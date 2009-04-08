@@ -33,10 +33,10 @@ IF (NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
 ENDIF(NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
 MESSAGE (STATUS "Using CMAKE_INSTALL_GCONF_SCHEMA_DIR=${CMAKE_INSTALL_GCONF_SCHEMA_DIR}")
 ################################################################################
-IF (NOT DEFINED CMAKE_INSTALL_GLADEUI_DIR)
-	SET(CMAKE_INSTALL_GLADEUI_DIR "${CMAKE_INSTALL_PREFIX}/share/${EXEC}/glade")
-ENDIF(NOT DEFINED CMAKE_INSTALL_GLADEUI_DIR)
-MESSAGE (STATUS "Using CMAKE_INSTALL_GLADEUI_DIR=${CMAKE_INSTALL_GLADEUI_DIR}\n")
+IF (NOT DEFINED CMAKE_INSTALL_BUILDER_UI_DIR)
+    SET(CMAKE_INSTALL_BUILDER_UI_DIR "${CMAKE_INSTALL_PREFIX}/share/${EXEC}/builder")
+ENDIF(NOT DEFINED CMAKE_INSTALL_BUILDER_UI_DIR)
+MESSAGE (STATUS "Using CMAKE_INSTALL_BUILDER_UI_DIR=${CMAKE_INSTALL_BUILDER_UI_DIR}\n")
 ################################################################################
 
 # compile time options
@@ -93,7 +93,7 @@ ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"
 									   --pkglicense="GPLv2"
 									   --maintainer="bertoldia@gmail.com"
 									   --pkggroup="GNOME Desktop Environment"
-									   --requires="libpanel-applet2-0, libglade2-0")
+									   --requires="libpanel-applet2-0")
 
 ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
 									   cmake_install.cmake

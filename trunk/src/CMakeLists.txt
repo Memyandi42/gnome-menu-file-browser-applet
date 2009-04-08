@@ -1,6 +1,6 @@
 INCLUDE (FindPkgConfig)
 
-PKG_CHECK_MODULES (DEPS REQUIRED gtk+-2.0>=2.14 gio-unix-2.0 libpanelapplet-2.0 libglade-2.0)
+PKG_CHECK_MODULES (DEPS REQUIRED gtk+-2.0>=2.14 gio-unix-2.0 libpanelapplet-2.0)
 
 INCLUDE_DIRECTORIES (${DEPS_INCLUDE_DIRS})
 LINK_DIRECTORIES (${DEPS_LIBRARY_DIRS})

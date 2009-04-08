@@ -24,7 +24,6 @@
  */
 
 #include <gtk/gtk.h>
-#include <glade/glade-xml.h>
 #include <glib/gprintf.h>
 #include <stdlib.h>
 
@@ -760,6 +759,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 
 	g_return_if_fail (IS_APPLET_PREFERENCES (self));
 
+    GError *error = NULL;
 	GtkWidget* window;
     GtkWidget* show_icon;
     GtkWidget* icon_button;
@@ -770,9 +770,12 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 	MenuBarPrefs* mb_prefs = self->menu_bar_prefs;
 
 	if (self->priv->window == NULL) {
-		GladeXML* xml = glade_xml_new (GLADEUI_PATH, NULL, NULL);
-		g_return_if_fail (xml != NULL);
-		window = glade_xml_get_widget (xml, "preferences_dialog");
+        GtkBuilder* builder = gtk_builder_new();
+        gtk_builder_add_from_file (builder, BUILDER_UI_PATH, &error);
+        if (!utils_gerror_ok(&error, TRUE)) {
+            return;
+        }
+        window = GTK_WIDGET (gtk_builder_get_object (builder, "preferences_dialog"));
 
 		g_signal_connect (G_OBJECT (GTK_DIALOG (window)),
 						  "response",
@@ -785,7 +788,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  self);
 
 		/***** terminal *****/
-		terminal = glade_xml_get_widget (xml, "terminal_entry");
+        terminal = GTK_WIDGET (gtk_builder_get_object (builder, "terminal_entry"));
 		gtk_entry_set_width_chars (GTK_ENTRY (terminal), 10);
 		gtk_entry_set_text (GTK_ENTRY (terminal),
 							mb_prefs->browser_prefs->terminal);
@@ -795,7 +798,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  self);
 
 		/***** editor *****/
-		editor = glade_xml_get_widget (xml, "editor_entry");
+        editor = GTK_WIDGET (gtk_builder_get_object (builder, "editor_entry"));
 		gtk_entry_set_width_chars (GTK_ENTRY (editor), 10);
 		gtk_entry_set_text (GTK_ENTRY (editor),
 							mb_prefs->browser_prefs->editor);
@@ -805,7 +808,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  self);
 
 		/***** show hidden *****/
-		show_hidden = glade_xml_get_widget (xml, "show_hidden_check");
+        show_hidden = GTK_WIDGET (gtk_builder_get_object (builder, "show_hidden_check"));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (show_hidden),
 									  mb_prefs->browser_prefs->show_hidden);
 		g_signal_connect (G_OBJECT (show_hidden),
@@ -814,7 +817,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  self);
 
 		/***** horizontal text *****/
-		horizontal_text = glade_xml_get_widget (xml, "horizontal_text_check");
+        horizontal_text = GTK_WIDGET (gtk_builder_get_object (builder, "horizontal_text_check"));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (horizontal_text),
 									  mb_prefs->horizontal_text);
 		g_signal_connect (G_OBJECT (horizontal_text),
@@ -823,7 +826,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  self);
 
 		/***** icon *****/
-		show_icon = glade_xml_get_widget (xml, "show_icon_check");
+        show_icon = GTK_WIDGET (gtk_builder_get_object (builder, "show_icon_check"));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (show_icon),
 									  mb_prefs->show_icon);
 		g_signal_connect (G_OBJECT (show_icon),
@@ -831,7 +834,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  G_CALLBACK (applet_preferences_on_show_icon_pressed),
 						  self);
 
-		icon_button = glade_xml_get_widget (xml, "icon_button");
+        icon_button = GTK_WIDGET (gtk_builder_get_object (builder, "icon_button"));
 		GtkWidget* icon = utils_get_scaled_image_from_file (mb_prefs->icon, ICON_BUTTON_SIZE);
 		if (icon == NULL) {
 			icon = gtk_image_new_from_icon_name ("user-home", GTK_ICON_SIZE_BUTTON);
@@ -843,15 +846,14 @@ applet_preferences_make_dialog (AppletPreferences* self) {
 						  self);
 
 		/***** dirs/labels **/
-		self->priv->tree_view = glade_xml_get_widget (xml, "directories_tree");
+        self->priv->tree_view = GTK_WIDGET (gtk_builder_get_object (builder, "directories_tree"));
 		applet_preferences_create_list_view (self);
 
 		/***** more buttons ******/
-		GtkWidget* add_button  = glade_xml_get_widget (xml, "directory_add_button");
-		GtkWidget* rem_button  = glade_xml_get_widget (xml, "directory_remove_button");
-		GtkWidget* up_button   = glade_xml_get_widget (xml, "move_up_button");
-		GtkWidget* down_button = glade_xml_get_widget (xml, "move_down_button");
-
+        GtkWidget *add_button  = GTK_WIDGET (gtk_builder_get_object (builder, "directory_add_button"));
+        GtkWidget *rem_button  = GTK_WIDGET (gtk_builder_get_object (builder, "directory_remove_button"));
+        GtkWidget *up_button   = GTK_WIDGET (gtk_builder_get_object (builder, "move_up_button"));
+        GtkWidget *down_button = GTK_WIDGET (gtk_builder_get_object (builder, "move_down_button"));
 
 		g_signal_connect (G_OBJECT (add_button),
 						  "released",

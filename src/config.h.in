@@ -30,7 +30,7 @@
 
 #define APP_NAME         "${EXEC}"
 #define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
-#define GLADEUI_PATH	 "${CMAKE_INSTALL_GLADEUI_DIR}/${EXEC}.glade"
+#define BUILDER_UI_PATH	 "${CMAKE_INSTALL_BUILDER_UI_DIR}/${EXEC}.ui"
 #define PIXMAP_PATH	     "${CMAKE_INSTALL_PREFIX}/share/pixmaps/"
 #define LOCALEDIR		 "${CMAKE_INSTALL_PREFIX}/share/locale/"
 

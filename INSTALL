@@ -9,7 +9,6 @@ dependencies) for the following packages installed to compile this program:
 gtk-2.0 >= 2.14
 gio-2.0
 libpanel-applet-2.0
-libglade-2.0
 
 Some of the context menu actions require File-roller, Brasero and Rubber. You
 can compile and run the applet without them though.
@@ -28,14 +27,14 @@ There are 6 configuration options available:
 	* CMAKE_INSTALL_LIB_EXEC_DIR
 	* CMAKE_INSTALL_BONOBO_DIR
 	* CMAKE_INSTALL_GCONF_SCHEMA_DIR
-	* CMAKE_INSTALL_GLADEUI_DIR
+	* CMAKE_INSTALL_BUILDER_UI_DIR
 	* ENABLE_GTK_HOTKEY
 
 CMAKE_INSTALL_PREFIX specifies the base installation prefix. The following
 other specific installation paths depend on this prefix:
  - CMAKE_INSTALL_LIB_PREFIX
  - CMAKE_INSTALL_GCONF_SCHEMA_DIR
- - CMAKE_INSTALL_GLADEUI_DIR
+ - CMAKE_INSTALL_BUILDER_UI_DIR
 NOTE!!! The default is /usr/local but should be /usr for the applet-loader to find the applet.
 
 CMAKE_INSTALL_LIB_PREFIX specifies the installation prefix of the binary
@@ -51,8 +50,8 @@ CMAKE_INSTALL_LIB_EXEC_DIR=CMAKE_INSTALL_LIB_PREFIX/file-browser-applet
 CMAKE_INSTALL_GCONF_SCHEMA_DIR specifies the installation prefix of the gconf schema
 file. The default is CMAKE_INSTALL_PREFIX/share/gconf/schemas
 
-CMAKE_INSTALL_GLADEUI_DIR specifies the installation prefix of the glade ui
-file. The default is CMAKE_INSTALL_PREFIX/share/file-browser-applet/glade
+CMAKE_INSTALL_BUILDER_UI_DIR specifies the installation prefix of the gtk+
+builder ui file. The default is CMAKE_INSTALL_PREFIX/share/file-browser-applet/builder
 
 CMAKE_INSTALL_BONOBO_DIR specifies the installation bonobo Server file. The
 default is CMAKE_INSTALL_LIB_PREFIX/bonobo/servers

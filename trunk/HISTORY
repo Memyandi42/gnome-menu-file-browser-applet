@@ -1,6 +1,6 @@
 Version 0.6.2
 *************
-    * Added DnD dragging out of applet. Move is the default behaviour.
+    * Added preliminary DnD dragging out of applet. MOVE is the default behaviour.
     * Some code cleanups and plugged memory leaks.
     * Slightly improved "New Folder" dialog.
     * Migrated to gtk+ builder from libglade.

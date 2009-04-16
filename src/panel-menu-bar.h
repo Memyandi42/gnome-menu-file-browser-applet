@@ -1,10 +1,10 @@
 /*
- * File:				panel-menu-bar.h
- * Created:				October 2007
- * Created by:			Axel von Bertoldi
- * Last Modified:		August 2008
- * Last Modified by:	Axel von Bertoldi
- * (C) 2005-2008		Axel von Bertoldi
+ * File:                panel-menu-bar.h
+ * Created:             October 2007
+ * Created by:          Axel von Bertoldi
+ * Last Modified:       August 2008
+ * Last Modified by:    Axel von Bertoldi
+ * (C) 2005-2008    Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -43,16 +43,16 @@ typedef struct _PanelMenuBarClass PanelMenuBarClass;
 typedef struct _PanelMenuBarPrivate PanelMenuBarPrivate;
 /******************************************************************************/
 struct _PanelMenuBar {
-	GtkMenuBar parent;
-	PanelMenuBarPrivate *priv;
+    GtkMenuBar parent;
+    PanelMenuBarPrivate *priv;
 };
 struct _PanelMenuBarClass {
-	GtkMenuBarClass parent;
+    GtkMenuBarClass parent;
 };
 /******************************************************************************/
 PanelMenuBar* panel_menu_bar_new (PanelApplet* applet);
-void		  panel_menu_bar_edit_prefs (PanelMenuBar *self);
-GType		  panel_menu_bar_get_type (void);
+void          panel_menu_bar_edit_prefs (PanelMenuBar *self);
+GType         panel_menu_bar_get_type (void);
 /******************************************************************************/
 
 G_END_DECLS

@@ -57,7 +57,7 @@
                             <child>
                               <widget class="GtkButton" id="move_down_button">
                                 <property name="visible">True</property>
-								<property name="tooltip" translatable="yes">Move the selected Folder down/right.</property>
+                                <property name="tooltip" translatable="yes">Move the selected Folder down/right.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-go-down</property>
                                 <property name="use_stock">True</property>
@@ -72,7 +72,7 @@
                             <child>
                               <widget class="GtkButton" id="move_up_button">
                                 <property name="visible">True</property>
-								<property name="tooltip" translatable="yes">Move the selected Folder up/left.</property>
+                                <property name="tooltip" translatable="yes">Move the selected Folder up/left.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-go-up</property>
                                 <property name="use_stock">True</property>
@@ -87,7 +87,7 @@
                             <child>
                               <widget class="GtkButton" id="directory_remove_button">
                                 <property name="visible">True</property>
-								<property name="tooltip" translatable="yes">Remove the selected Folder.</property>
+                                <property name="tooltip" translatable="yes">Remove the selected Folder.</property>
                                 <property name="can_focus">True</property>
                                 <property name="label">gtk-remove</property>
                                 <property name="use_stock">True</property>

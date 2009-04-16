@@ -9,27 +9,27 @@ SET (EXEC file-browser-applet)
 #install path options
 ################################################################################
 IF (NOT DEFINED CMAKE_INSTALL_PREFIX)
-	SET (CMAKE_INSTALL_PREFIX "/usr")
+    SET (CMAKE_INSTALL_PREFIX "/usr")
 ENDIF (NOT DEFINED CMAKE_INSTALL_PREFIX)
 MESSAGE (STATUS "Using CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 ################################################################################
 IF (NOT DEFINED CMAKE_INSTALL_LIB_PREFIX)
-	SET (CMAKE_INSTALL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib")
+    SET (CMAKE_INSTALL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib")
 ENDIF (NOT DEFINED CMAKE_INSTALL_LIB_PREFIX)
 MESSAGE (STATUS "Using CMAKE_INSTALL_LIB_PREFIX=${CMAKE_INSTALL_LIB_PREFIX}")
 ################################################################################
 IF (NOT DEFINED CMAKE_INSTALL_LIB_EXEC_DIR)
-	SET (CMAKE_INSTALL_LIB_EXEC_DIR "${CMAKE_INSTALL_LIB_PREFIX}/${EXEC}")
+    SET (CMAKE_INSTALL_LIB_EXEC_DIR "${CMAKE_INSTALL_LIB_PREFIX}/${EXEC}")
 ENDIF (NOT DEFINED CMAKE_INSTALL_LIB_EXEC_DIR)
 MESSAGE (STATUS "Using CMAKE_INSTALL_LIB_EXEC_DIR=${CMAKE_INSTALL_LIB_EXEC_DIR}")
 ################################################################################
 IF (NOT DEFINED CMAKE_INSTALL_BONOBO_DIR)
-	SET (CMAKE_INSTALL_BONOBO_DIR "${CMAKE_INSTALL_LIB_PREFIX}/bonobo/servers")
+    SET (CMAKE_INSTALL_BONOBO_DIR "${CMAKE_INSTALL_LIB_PREFIX}/bonobo/servers")
 ENDIF (NOT DEFINED CMAKE_INSTALL_BONOBO_DIR)
 MESSAGE (STATUS "Using CMAKE_INSTALL_BONOBO_DIR=${CMAKE_INSTALL_BONOBO_DIR}")
 ################################################################################
 IF (NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
-	SET(CMAKE_INSTALL_GCONF_SCHEMA_DIR "${CMAKE_INSTALL_PREFIX}/share/gconf/schemas")
+    SET(CMAKE_INSTALL_GCONF_SCHEMA_DIR "${CMAKE_INSTALL_PREFIX}/share/gconf/schemas")
 ENDIF(NOT DEFINED CMAKE_INSTALL_GCONF_SCHEMA_DIR)
 MESSAGE (STATUS "Using CMAKE_INSTALL_GCONF_SCHEMA_DIR=${CMAKE_INSTALL_GCONF_SCHEMA_DIR}")
 ################################################################################
@@ -49,11 +49,11 @@ ADD_SUBDIRECTORY (src)
 
 #uninstall target
 CONFIGURE_FILE ("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
-				"${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-				IMMEDIATE @ONLY)
+                "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+                IMMEDIATE @ONLY)
 ADD_CUSTOM_TARGET (uninstall
-				   "${CMAKE_COMMAND}" -P 
-				   "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+                   "${CMAKE_COMMAND}" -P 
+                   "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
 #target to generate a distribution-ready tarball
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "File Browser Applet")
@@ -65,58 +65,58 @@ SET (CPACK_PACKAGE_VERSION_MINOR 6)
 SET (CPACK_PACKAGE_VERSION_PATCH 2)
 SET (CPACK_GENERATOR TGZ)
 SET (CPACK_SOURCE_PACKAGE_FILE_NAME
-	"${EXEC}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+    "${EXEC}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET (CPACK_SOURCE_GENERATOR TGZ)
 SET (CPACK_SOURCE_IGNORE_FILES
-	 "CMakeCache.txt"
-	 #"cmake_install.cmake"
-	 "${CPACK_SOURCE_PACKAGE_FILE_NAME}"
-	 "*.tar.gz"
-	 "CPack*"
-	 #"cmake_uninstall.cmake"
-	 "CMakeFiles"
-	 "install_manifest.txt"
-	 "Makefile"
-	 "_CPack_Packages"
-	 "po"
-	 "progress.make"
-	 ".svn"
+     "CMakeCache.txt"
+     #"cmake_install.cmake"
+     "${CPACK_SOURCE_PACKAGE_FILE_NAME}"
+     "*.tar.gz"
+     "CPack*"
+     #"cmake_uninstall.cmake"
+     "CMakeFiles"
+     "install_manifest.txt"
+     "Makefile"
+     "_CPack_Packages"
+     "po"
+     "progress.make"
+     ".svn"
      "build"
-	 "doc")
+     "doc")
 INCLUDE (CPack)
 
 ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"
-									   --pkgversion="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
-									   --install=0
-									   --deldoc=1
-									   --backup=0
-									   --pkglicense="GPLv2"
-									   --maintainer="bertoldia@gmail.com"
-									   --pkggroup="GNOME Desktop Environment"
-									   --requires="libpanel-applet2-0")
+                                       --pkgversion="${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}"
+                                       --install=0
+                                       --deldoc=1
+                                       --backup=0
+                                       --pkglicense="GPLv2"
+                                       --maintainer="bertoldia@gmail.com"
+                                       --pkggroup="GNOME Desktop Environment"
+                                       --requires="libpanel-applet2-0")
 
 ADD_CUSTOM_TARGET (really-clean rm -fr CMakeCache.txt
-									   cmake_install.cmake
-									   ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz
-									   *.deb
-									   CPackConfig.cmake
-									   cmake_uninstall.cmake
-									   CMakeFiles
-									   CPackSourceConfig.cmake
-									   install_manifest.txt
-									   Makefile
-									   _CPack_Packages
-									   pixmaps/CMakeFiles
-									   pixmaps/cmake_install.cmake
-									   pixmaps/Makefile
-									   src/${EXEC}
-									   src/cmake_install.cmake
-									   src/config.h
-									   src/CMakeFiles
-									   src/Makefile
-									   data/CMakeFiles
-									   data/cmake_install.cmake
-									   data/GNOME_FileBrowserApplet_Factory.server
-									   data/Makefile) 
+                                       cmake_install.cmake
+                                       ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz
+                                       *.deb
+                                       CPackConfig.cmake
+                                       cmake_uninstall.cmake
+                                       CMakeFiles
+                                       CPackSourceConfig.cmake
+                                       install_manifest.txt
+                                       Makefile
+                                       _CPack_Packages
+                                       pixmaps/CMakeFiles
+                                       pixmaps/cmake_install.cmake
+                                       pixmaps/Makefile
+                                       src/${EXEC}
+                                       src/cmake_install.cmake
+                                       src/config.h
+                                       src/CMakeFiles
+                                       src/Makefile
+                                       data/CMakeFiles
+                                       data/cmake_install.cmake
+                                       data/GNOME_FileBrowserApplet_Factory.server
+                                       data/Makefile) 
 
 ADD_CUSTOM_TARGET (xgettext xgettext ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c --output-dir=${CMAKE_CURRENT_SOURCE_DIR}/po --from-code="UTF-8" -C --keyword="_")

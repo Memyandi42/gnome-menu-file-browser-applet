@@ -34,7 +34,7 @@
         </locale>
       </schema>
 
-	  <schema>
+      <schema>
         <key>/schemas/apps/file-browser-applet/prefs/terminal</key>
         <owner>file-browser-applet</owner>
         <type>string</type>
@@ -45,7 +45,7 @@
         </locale>
       </schema>
 
-	  <schema>
+      <schema>
         <key>/schemas/apps/file-browser-applet/prefs/editor</key>
         <owner>file-browser-applet</owner>
         <type>string</type>
@@ -71,7 +71,7 @@
         <key>/schemas/apps/file-browser-applet/prefs/labels</key>
         <owner>file-browser-applet</owner>
         <type>list</type>
-	<list_type>string</list_type>
+    <list_type>string</list_type>
         <default>[Home]</default>
         <locale name="C">
           <short>The labels to use for the directories</short>
@@ -79,11 +79,11 @@
         </locale>
       </schema>
       
-	  <schema>
+      <schema>
         <key>/schemas/apps/file-browser-applet/prefs/dirs</key>
         <owner>file-browser-applet</owner>
         <type>list</type>
-	<list_type>string</list_type>
+    <list_type>string</list_type>
         <default>[]</default>
         <locale name="C">
           <short>The directories to show in the menu bar</short>

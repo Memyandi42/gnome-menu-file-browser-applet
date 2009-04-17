@@ -111,6 +111,9 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
                   "logo-icon-name", APP_NAME,
                   "icon-name", APP_NAME,
                   NULL);
+    gtk_about_dialog_set_website (GTK_ABOUT_DIALOG (about_dialog),
+            "http://code.google.com/p/gnome-menu-file-browser-applet/");
+    gtk_about_dialog_set_website_label (GTK_ABOUT_DIALOG (about_dialog), "File Browser Applet Website");
     gtk_window_set_screen (GTK_WINDOW (about_dialog), gtk_widget_get_screen (widget));
     g_signal_connect (about_dialog, "destroy", G_CALLBACK (gtk_widget_destroyed), &about_dialog);
     g_signal_connect (about_dialog, "response", G_CALLBACK (gtk_widget_destroy), NULL);

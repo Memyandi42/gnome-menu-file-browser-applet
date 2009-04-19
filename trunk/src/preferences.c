@@ -904,7 +904,6 @@ applet_preferences_load_from_gconf (PanelApplet* applet) {
         panel_applet_gconf_set_bool (applet, KEY_HIDDEN_SHOW, mb_prefs->browser_prefs->show_hidden, &error);
         utils_gerror_ok (&error, TRUE);
     }
-
     /* terminal */
     mb_prefs->browser_prefs->terminal = panel_applet_gconf_get_string (applet, KEY_TERMINAL, &error);
     if (!utils_gerror_ok (&error, TRUE) || mb_prefs->browser_prefs->terminal == NULL) {
@@ -912,7 +911,6 @@ applet_preferences_load_from_gconf (PanelApplet* applet) {
         panel_applet_gconf_set_string (applet, KEY_TERMINAL, mb_prefs->browser_prefs->terminal, &error);
         utils_gerror_ok (&error, TRUE);
     }
-
     /* editor */
     mb_prefs->browser_prefs->editor = panel_applet_gconf_get_string (applet, KEY_EDITOR, &error);
     if (!utils_gerror_ok (&error, TRUE) || mb_prefs->browser_prefs->editor == NULL) {

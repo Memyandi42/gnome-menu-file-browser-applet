@@ -31,7 +31,7 @@
 
 #define APPLET_IID          "OAFIID:GNOME_FileBrowserApplet"
 #define APPLET_FACTORY_IID  "OAFIID:GNOME_FileBrowserApplet_Factory"
-#define VERSION             "0.6.2"
+#define VERSION             "0.6.3"
 
 /******************************************************************************/
 static const gchar file_browser_applet_menu_xml [] =

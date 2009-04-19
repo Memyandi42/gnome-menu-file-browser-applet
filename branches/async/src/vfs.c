@@ -116,7 +116,7 @@ vfs_get_dir_listings_async_cancel (GCancellable *cancellable) {
 g_printf ("In %s START	\n", __FUNCTION__);
 	if (G_IS_CANCELLABLE (cancellable)) {
 		g_cancellable_cancel (cancellable);
-		g_object_unref (cancellable);
+		/*g_object_unref (cancellable);*/
 	}	
 g_printf ("In %s END\n", __FUNCTION__);
 }
@@ -141,46 +141,55 @@ g_printf ("In %s START\n", __FUNCTION__);
 	GPtrArray		*dirs_array = g_ptr_array_new();
 	gchar			*error_msg = NULL;
 
+	if (g_cancellable_is_cancelled (enum_data->cancellable)) {
+		g_printf ("operation cancelled. bailing!!!!!!!!!!!!!!!!\n");
+		g_object_unref (enum_data->cancellable);
+	 	return;
+	}
+
 	GFileEnumerator	*enumerator = g_file_enumerate_children_finish (G_FILE (source_object),
 																	result,
 																	&error);
 
-	while ((file_info = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL) {
-	
-		/* bail if the operation was cancelled */
-		if (g_cancellable_is_cancelled (enum_data->cancellable)) {
-			break;
-		}	
-	
-		/* skip the file if it's hidden and we aren't showing hidden files */
-		if (g_file_info_get_is_hidden (file_info) && !enum_data->show_hidden) {
-			continue;
-		}
-		
-		VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
+	if (enumerator != NULL) {
+		while ((file_info = g_file_enumerator_next_file (enumerator, NULL, &error)) != NULL) {
 
-		vfs_file_info->file_name = g_strdup_printf ("%s/%s", enum_data->path, g_file_info_get_name (file_info));
-		vfs_file_info->is_desktop = vfs_file_is_desktop (vfs_file_info->file_name);
+			/* bail if the operation was cancelled */
+			if (g_cancellable_is_cancelled (enum_data->cancellable)) {
+				g_printf ("operation cancelled. bailing 2 !!!!!!!!!!!!!!!!\n");
+				break;
+			}	
 
-		/* get the file's human readable name, including if it's a desktop file */
-		if (vfs_file_info->is_desktop) {
-			vfs_file_info->display_name = vfs_get_desktop_app_name (vfs_file_info->file_name);
-		}
-		else {
-			vfs_file_info->display_name = g_strdup (g_file_info_get_display_name (file_info));
-		}
-		vfs_file_info->is_executable = g_file_info_get_attribute_boolean (file_info,
-																		  G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE) &&
-											(g_file_info_get_file_type (file_info) != G_FILE_TYPE_DIRECTORY);
-		/* get the icon */
-		vfs_file_info->icon = vfs_get_icon_for_file (vfs_file_info->file_name); 
+			/* skip the file if it's hidden and we aren't showing hidden files */
+			if (g_file_info_get_is_hidden (file_info) && !enum_data->show_hidden) {
+				continue;
+			}
+			
+			VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
 
-		/* add it to the array */
-		if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
-			g_ptr_array_add (dirs_array, (gpointer)vfs_file_info);
-		}
-		else {
-			g_ptr_array_add (files_array, (gpointer)vfs_file_info);
+			vfs_file_info->file_name = g_strdup_printf ("%s/%s", enum_data->path, g_file_info_get_name (file_info));
+			vfs_file_info->is_desktop = vfs_file_is_desktop (vfs_file_info->file_name);
+
+			/* get the file's human readable name, including if it's a desktop file */
+			if (vfs_file_info->is_desktop) {
+				vfs_file_info->display_name = vfs_get_desktop_app_name (vfs_file_info->file_name);
+			}
+			else {
+				vfs_file_info->display_name = g_strdup (g_file_info_get_display_name (file_info));
+			}
+			vfs_file_info->is_executable = g_file_info_get_attribute_boolean (file_info,
+																			  G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE) &&
+												(g_file_info_get_file_type (file_info) != G_FILE_TYPE_DIRECTORY);
+			/* get the icon */
+			vfs_file_info->icon = vfs_get_icon_for_file (vfs_file_info->file_name); 
+
+			/* add it to the array */
+			if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
+				g_ptr_array_add (dirs_array, (gpointer)vfs_file_info);
+			}
+			else {
+				g_ptr_array_add (files_array, (gpointer)vfs_file_info);
+			}
 		}
 	}
 
@@ -234,6 +243,7 @@ vfs_get_dir_listings_async (gchar *path,
 									 cancellable,
 									 vfs_enumerate_children_callback,
 									 (gpointer)enum_data);
+	g_object_unref (file);
 }
 /******************************************************************************/
 void

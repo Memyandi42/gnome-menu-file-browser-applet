@@ -1,10 +1,10 @@
 /*
- * File:				config.h
- * Created:				March 2008
- * Created by:			Axel von Bertoldi
- * Last Modified:		August 2008
- * Last Modified by:	Axel von Bertoldi
- * (C) 2005-2008		Axel von Bertoldi
+ * File:                config.h
+ * Created:             March 2008
+ * Created by:          Axel von Bertoldi
+ * Last Modified:       April 2009
+ * Last Modified by:    Axel von Bertoldi
+ * (C) 2005-2008        Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,13 +26,17 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define ICON_BUTTON_SIZE 24	/* Damn! Hard-coded pixels! */
-#define ICON_MENU_SIZE	 20	/* Damn! Hard-coded pixels! */
-#define GLADEUI_PATH	"${CMAKE_INSTALL_GLADEUI_DIR}/${EXEC}.glade"
+#include <glib/gi18n.h>
+
+#define APP_NAME         "${EXEC}"
+#define ICON_BUTTON_SIZE 24 /* Damn! Hard-coded pixels! */
+#define BUILDER_UI_PATH  "${CMAKE_INSTALL_BUILDER_UI_DIR}/${EXEC}.ui"
+#define PIXMAP_PATH      "${CMAKE_INSTALL_PREFIX}/share/pixmaps/"
+#define LOCALEDIR        "${CMAKE_INSTALL_PREFIX}/share/locale/"
 
 #define DEBUG 0
 #cmakedefine ENABLE_HELP_DOC
 #cmakedefine ENABLE_CONTEXT_MENU
-#cmakedefine ENABLE_GTK_HOTKEY
+#cmakedefine LIBGTKHOTKEY_FOUND
 
 #endif

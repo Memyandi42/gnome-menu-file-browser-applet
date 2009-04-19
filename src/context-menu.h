@@ -1,10 +1,10 @@
 /*
- * File:				context_menu.h
- * Created:				April 2008
- * Created by:			Axel von Bertoldi
- * Last Modified:		August 2008
- * Last Modified by:	Axel von Bertoldi
- * (C) 2005-2008		Axel von Bertoldi
+ * File:                context_menu.h
+ * Created:             April 2008
+ * Created by:          Axel von Bertoldi
+ * Last Modified:       August 2008
+ * Last Modified by:    Axel von Bertoldi
+ * (C) 2005-2008        Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,6 +28,6 @@
 
 #include <gtk/gtk.h>
 
-gboolean	context_menu_display	(const gchar *file_name, GtkWidget *menu_item);
+gboolean context_menu_display (const gchar *file_name, GtkWidget *menu_item);
 
 #endif

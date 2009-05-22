@@ -26,11 +26,9 @@
 #ifndef __MENU_BROWSER_H__
 #define __MENU_BROWSER_H__
 
-#include <glib-object.h>
 #include <gtk/gtk.h>
 
 #include "preferences.h"
-#include "config.h"
 
 G_BEGIN_DECLS
 
@@ -59,10 +57,9 @@ enum {
     EXEC_RUN
 };
 /******************************************************************************/
-GtkWidget*  menu_browser_new (const gchar *path, const gchar *label, BrowserPrefs *prefs);
-void        menu_browser_update (MenuBrowser *self, gchar *path, gchar *label);
-GType       menu_browser_get_type (void);
-void        menu_browser_populate_menu_async_callback (MenuBrowser *self, gchar *path, GtkWidget *menu, GPtrArray *dirs_array, GPtrArray *files_array, gchar *error_msg);
+GtkWidget* menu_browser_new (const gchar *path, const gchar *label, BrowserPrefs *prefs);
+void       menu_browser_update (MenuBrowser *self, const gchar *path, const gchar *label);
+GType      menu_browser_get_type (void);
 /******************************************************************************/
 
 G_END_DECLS

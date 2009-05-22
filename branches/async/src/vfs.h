@@ -1,10 +1,10 @@
 /*
- * File:				vfs.h
- * Created:				February 2008
- * Created by:			Axel von Bertoldi
- * Last Modified:		August 2008
- * Last Modified by:	Axel von Bertoldi
- * (C) 2005-2008		Axel von Bertoldi
+ * File:                vfs.h
+ * Created:             February 2008
+ * Created by:          Axel von Bertoldi
+ * Last Modified:       August 2008
+ * Last Modified by:    Axel von Bertoldi
+ * (C) 2005-2008        Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -26,49 +26,38 @@
 #ifndef __VFS_H__
 #define __VFS_H__
 
-#include <glib.h>
 #include <gtk/gtk.h>
-#include <gio/gio.h>
-
-#include "config.h"
-#include "menu-browser.h"
 
 /******************************************************************************/
-typedef struct _VfsFileInfo VfsFileInfo;
-typedef struct _EnumerateData EnumerateData;
-/******************************************************************************/
-/* hold all the info we need on a file to make a menu item */
-struct _VfsFileInfo {
-	gchar		*display_name;	/* need to free this */
-	gchar		*file_name;		/* need to free this */
-	GtkWidget	*icon;			/* don't need to free this */
-	gboolean	is_desktop;
-	gboolean	is_executable;
-};
-/* Data to pass to */
-struct _EnumerateData {
-	gchar *path;				/* free this??? */
-	GtkWidget *menu;			/* free this??? */
-	gboolean show_hidden;		/* free this??? */
-	MenuBrowser *menu_browser;	/* free this??? */
-	GCancellable *cancellable;	/* free this??? */
+enum {
+    ARG_APP,
+    ARG_FILE,
+    ARGS_SIZE,
 };
 /******************************************************************************/
-gboolean	vfs_file_is_executable	 (const gchar *file_name);
-gboolean	vfs_file_is_desktop		 (const gchar *file_name);
-gboolean	vfs_file_is_directory	 (const gchar *file_name);
-gboolean	vfs_file_exists			 (const gchar *file_name);
+typedef struct {
+    gchar       *display_name; /* need to free this */
+    gchar       *file_name;    /* need to free this */
+    GtkWidget   *icon;         /* don't need to free this */
+    gboolean    is_executable;
+} VfsFileInfo;
+/******************************************************************************/
+typedef void (*Callback)(GPtrArray*, GPtrArray*, gchar *msg, gpointer);
+/******************************************************************************/
+gboolean    vfs_file_is_executable   (const gchar *file_name);
+gboolean    vfs_file_is_desktop      (const gchar *file_name);
+gboolean    vfs_file_is_directory    (const gchar *file_name);
+gboolean    vfs_file_exists          (const gchar *file_name);
 
-void		vfs_get_dir_listings_async_cancel (GCancellable *cancellable);
-void		vfs_get_dir_listings_async (gchar *path, GtkWidget *menu, gboolean show_hidden, MenuBrowser *menu_browser, GCancellable *cancellable);
+gchar*      vfs_get_dir_listings        (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, const gchar *path);
+void        vfs_get_dir_listings_async (gchar *path, gboolean show_hidden, GCancellable *cancellable, Callback callback, gpointer data);
 
-void		vfs_launch_desktop_file	 (const gchar *file_name);
-void		vfs_edit_file			 (const gchar *file_name_and_path, gchar *editor_bin);
-void		vfs_launch_terminal		 (const gchar *path, const gchar *terminal_bin);
-void		vfs_open_file			 (const gchar *file_name_and_path, gint exec_action);
-void	 	vfs_trash_file			 (const gchar *file_name);
-GtkWidget*	vfs_get_icon_for_file	 (const gchar *file_name);
-gchar*		vfs_get_desktop_app_name (const gchar *file_name);
+GList*      vfs_get_all_mime_applications (const gchar *file_name);
+GtkWidget*  vfs_get_icon_for_file       (const gchar *file_name);
+
+gboolean    vfs_launch_application      (const gchar *const*args);
+gboolean    vfs_file_do_default_action  (const gchar *file_name);
+void        vfs_file_trash              (const gchar *file_name);
 /******************************************************************************/
 
 #endif

@@ -1,4 +1,4 @@
-            /*
+/*
  * File:                vfs.h
  * Created:             February 2008
  * Created by:          Axel von Bertoldi
@@ -41,13 +41,14 @@ struct _VfsFileInfo {
     gchar       *display_name; /* need to free this */
     gchar       *file_name; /* need to free this */
     GtkWidget   *icon; /* don't need to free this */
+    GtkWidget   *thumbnail; /* don't need to free this */
     gboolean    is_executable;
 };
 /******************************************************************************/
-gboolean    vfs_file_is_executable      (const gchar *file_name);
-gboolean    vfs_file_is_desktop         (const gchar *file_name);
-gboolean    vfs_file_is_directory       (const gchar *file_name);
-gboolean    vfs_file_exists             (const gchar *file_name);
+gboolean    vfs_file_is_executable   (const gchar *file_name);
+gboolean    vfs_file_is_desktop      (const gchar *file_name);
+gboolean    vfs_file_is_directory    (const gchar *file_name);
+gboolean    vfs_file_exists          (const gchar *file_name);
 
 gchar*      vfs_get_dir_listings        (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, const gchar *path);
 GList*      vfs_get_all_mime_applications (const gchar *file_name);

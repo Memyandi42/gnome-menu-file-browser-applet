@@ -300,7 +300,8 @@ vfs_get_dir_listings (GPtrArray *files,
                                                              "standard::is-hidden,"
                                                              "standard::name,"
                                                              "standard::display-name,"
-                                                             "access::can-execute",
+                                                             "access::can-execute,"
+                                                             "thumbnail::path",
                                                              0,
                                                              NULL,
                                                              &error);
@@ -319,6 +320,8 @@ vfs_get_dir_listings (GPtrArray *files,
             continue;
         }
         VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
+        vfs_file_info->thumbnail = NULL;
+        vfs_file_info->icon = NULL;
 
         vfs_file_info->file_name = g_strdup_printf ("%s/%s", path, g_file_info_get_name (file_info));
 
@@ -332,8 +335,15 @@ vfs_get_dir_listings (GPtrArray *files,
         vfs_file_info->is_executable = g_file_info_get_attribute_boolean (file_info,
                                                                           G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE) &&
                                             (g_file_info_get_file_type (file_info) != G_FILE_TYPE_DIRECTORY);
-        /* get the icon */
-        vfs_file_info->icon = vfs_get_icon_for_file (vfs_file_info->file_name); 
+
+        /* get the icon or thumbnail */
+        const gchar *thumbnail = g_file_info_get_attribute_byte_string (file_info, G_FILE_ATTRIBUTE_THUMBNAIL_PATH);
+        if (thumbnail) {
+            vfs_file_info->thumbnail = gtk_image_new_from_file (thumbnail);
+        }
+        else {
+            vfs_file_info->icon = vfs_get_icon_for_file (vfs_file_info->file_name); 
+        }
 
         /* add it to the array */
         if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {

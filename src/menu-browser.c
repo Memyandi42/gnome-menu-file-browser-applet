@@ -365,8 +365,16 @@ menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
     }
 
     /*stick the icon in the menu item, the menu item in the menu and show it all*/
-    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-                                   file_info->icon);
+
+    if (file_info->thumbnail) {
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                       file_info->thumbnail);
+    }
+    else {
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                       file_info->icon);
+    }
+
 
     garbage_add_item (self->priv->garbage, file_info->file_name);
     garbage_add_item (self->priv->garbage, file_info->display_name);

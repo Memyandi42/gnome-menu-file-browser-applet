@@ -373,10 +373,10 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
                            (GClosureNotify)g_free,
                            G_CONNECT_SWAPPED);
 
-    g_signal_connect_swapped (menu_item,
+    g_signal_connect_swapped (GTK_MENU_ITEM (menu_item),
                               "activate",
-                              G_CALLBACK (close_menu_browser),
-                              menu);
+                              G_CALLBACK (gtk_widget_destroy),
+                              g_object_get_data (G_OBJECT (menu), "menu_item"));
 }
 /******************************************************************************/
 static void

@@ -31,8 +31,6 @@
 /******************************************************************************/
 void
 garbage_init (Garbage *garabage) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-    
     if (*garabage == NULL) {
         GPtrArray **_garbage = (GPtrArray**)garabage;
         *_garbage = g_ptr_array_new();
@@ -41,8 +39,6 @@ garbage_init (Garbage *garabage) {
 /******************************************************************************/
 void
 garbage_empty (Garbage *garabage, gboolean reuse) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     if (*garabage == NULL)
         return;
 
@@ -55,8 +51,6 @@ garbage_empty (Garbage *garabage, gboolean reuse) {
 /******************************************************************************/
 void
 garbage_add_item (Garbage garabage, gpointer item) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     if (garabage) {
         GPtrArray *_garbage = (GPtrArray*)garabage;
         g_ptr_array_add (_garbage, item);
@@ -65,10 +59,8 @@ garbage_add_item (Garbage garabage, gpointer item) {
 /******************************************************************************/
 gboolean
 utils_gerror_ok (GError **error, gboolean show_error) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     if (*error) {
-        if (DEBUG) g_printf ("error: %s\n", (*error)->message);
+        g_printerr ("Error::%s\n", (*error)->message);
 
         if (show_error)
             utils_show_dialog (_("Error"), (*error)->message, GTK_MESSAGE_ERROR);
@@ -82,8 +74,6 @@ utils_gerror_ok (GError **error, gboolean show_error) {
 /******************************************************************************/
 void
 utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GtkWidget *dialog = gtk_message_dialog_new (NULL,
                                                 0,
                                                 type,
@@ -102,8 +92,6 @@ utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type
 /******************************************************************************/
 GtkWidget*
 utils_get_scaled_image_from_file (const gchar *file_name, int size) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GdkPixbuf *pixbuf   = gdk_pixbuf_new_from_file_at_size (file_name,
                                                             size,
                                                             size,
@@ -117,8 +105,6 @@ utils_get_scaled_image_from_file (const gchar *file_name, int size) {
 /******************************************************************************/
 GSList *
 g_slist_swap_data (GSList *list, guint index) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     gpointer tmp   = NULL;
     GSList *first  = g_slist_nth (list, index);
     GSList *second = first->next;

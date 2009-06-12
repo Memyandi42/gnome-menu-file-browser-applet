@@ -46,8 +46,6 @@ vfs_file_exists (const gchar *file_name) {
 /******************************************************************************/
 gboolean
 vfs_file_is_executable (const gchar *file_name) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GFile*     file = g_file_new_for_path (file_name);
     GFileInfo* file_info =  g_file_query_info (file,
                                                /*G_FILE_ATTRIBUTE_ACCESS_CAN_EXECUTE ,*/
@@ -68,8 +66,6 @@ vfs_file_is_executable (const gchar *file_name) {
 /******************************************************************************/
 gboolean
 vfs_file_is_directory (const gchar *file_name) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GFile*     file = g_file_new_for_path (file_name);
     GFileInfo* file_info =  g_file_query_info (file,
                                                G_FILE_ATTRIBUTE_STANDARD_TYPE,
@@ -85,8 +81,6 @@ vfs_file_is_directory (const gchar *file_name) {
 /******************************************************************************/
 gboolean
 vfs_file_is_desktop (const gchar *file_name) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GDesktopAppInfo *app_info = g_desktop_app_info_new_from_filename (file_name);
     gboolean ret = !(app_info == NULL);
     app_info ? g_object_unref (app_info) : NULL;
@@ -97,8 +91,6 @@ vfs_file_is_desktop (const gchar *file_name) {
  * file. The caller must free the returned value. */
 gchar*
 vfs_get_default_mime_application (const gchar *file_name) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GFile*     file = g_file_new_for_path (file_name);
     GFileInfo* file_info =  g_file_query_info (file,
                                                G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
@@ -128,8 +120,6 @@ vfs_get_desktop_app_name (const gchar *file_name) {
 /******************************************************************************/
 void
 vfs_file_trash (const gchar *file_name) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GError *error = NULL;
     GFile *file = g_file_new_for_path (file_name);
 
@@ -169,8 +159,6 @@ vfs_get_icon_for_file (const gchar *file_name) {
 /******************************************************************************/
 GList*
 vfs_get_all_mime_applications (const gchar *file_name) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GFile*     file = g_file_new_for_path (file_name);
     GFileInfo* file_info =  g_file_query_info (file,
                                                G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
@@ -288,8 +276,6 @@ vfs_get_dir_listings (GPtrArray *files,
                       GPtrArray *dirs,
                       gboolean show_hidden,
                       const gchar *path) {
-    if (DEBUG) g_printf ("In %s\n", __FUNCTION__);
-
     GError *error = NULL;
 
     GFile *file = g_file_new_for_path (path);

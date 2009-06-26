@@ -1,3 +1,9 @@
+Version 0.6.3
+*************
+    * Added displaying of thumbnails (if available) instead of icons.
+    * Usability improvements.
+    * Code cleanups.
+
 Version 0.6.2
 *************
     * Added preliminary DnD dragging out of applet. MOVE is the default behaviour.

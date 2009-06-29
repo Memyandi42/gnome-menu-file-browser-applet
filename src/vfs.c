@@ -275,22 +275,20 @@ gchar*
 vfs_get_dir_listings (GPtrArray *files,
                       GPtrArray *dirs,
                       gboolean show_hidden,
+                      gboolean show_thumbnail,
                       const gchar *path) {
     GError *error = NULL;
+    const gchar *_attributes = "standard::type,standard::is-hidden,standard::name,standard::display-name,access::can-execute";
+    gchar *attributes = show_thumbnail ? g_strdup_printf ("%s,thumbnail::path", _attributes) : g_strdup(_attributes);
 
     GFile *file = g_file_new_for_path (path);
     /* get ALL the info about the files */
     GFileEnumerator *enumerator = g_file_enumerate_children (file,
-                                                             /*"*",*/
-                                                             "standard::type,"
-                                                             "standard::is-hidden,"
-                                                             "standard::name,"
-                                                             "standard::display-name,"
-                                                             "access::can-execute,"
-                                                             "thumbnail::path",
+                                                             attributes,
                                                              0,
                                                              NULL,
                                                              &error);
+    g_free (attributes);
     /* did we read the dir correctly? */
     if (error) {
         gchar *error_msg = g_strdup (error->message);
@@ -306,7 +304,6 @@ vfs_get_dir_listings (GPtrArray *files,
             continue;
         }
         VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
-        vfs_file_info->thumbnail = NULL;
         vfs_file_info->icon = NULL;
 
         vfs_file_info->file_name = g_strdup_printf ("%s/%s", path, g_file_info_get_name (file_info));
@@ -323,9 +320,10 @@ vfs_get_dir_listings (GPtrArray *files,
                                             (g_file_info_get_file_type (file_info) != G_FILE_TYPE_DIRECTORY);
 
         /* get the icon or thumbnail */
+        /* FIXME: How expensive is this call? Should put it around an if (show_hidden) if it is expensive. */
         const gchar *thumbnail = g_file_info_get_attribute_byte_string (file_info, G_FILE_ATTRIBUTE_THUMBNAIL_PATH);
         if (thumbnail) {
-            vfs_file_info->thumbnail = gtk_image_new_from_file (thumbnail);
+            vfs_file_info->icon = gtk_image_new_from_file (thumbnail);
         }
         else {
             vfs_file_info->icon = vfs_get_icon_for_file (vfs_file_info->file_name); 

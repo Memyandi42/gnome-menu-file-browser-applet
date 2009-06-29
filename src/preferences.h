@@ -47,6 +47,7 @@ G_BEGIN_DECLS
 #define KEY_TERMINAL        "terminal"
 #define KEY_EDITOR          "editor"
 #define KEY_HORIZONTAL_TEXT "horizontal_text"
+#define KEY_SHOW_THUMBNAILS "show_thumbnail"
 
 /* default options */
 #define DEFAULT_ICON            "user-home"
@@ -57,6 +58,7 @@ G_BEGIN_DECLS
 #define DEFAULT_EDITOR          "gedit"
 #define DEFAULT_SHOW_HIDDEN     FALSE
 #define DEFAULT_HORIZONTAL_TEXT TRUE
+#define DEFAULT_SHOW_THUMBNAILS TRUE
 /******************************************************************************/
 typedef struct _BrowserPrefs BrowserPrefs;
 typedef struct _MenuBarPrefs MenuBarPrefs;
@@ -69,6 +71,7 @@ struct _BrowserPrefs {
     gchar       *terminal;
     gchar       *editor;
     gboolean    show_hidden;
+    gboolean    show_thumbnail;
 };
 struct _MenuBarPrefs {
     GSList          *dirs;
@@ -106,7 +109,8 @@ enum {
     PREFS_SIGNAL_DIR_MOVE_DOWN,
     PREFS_SIGNAL_DIR_ADD,
     PREFS_SIGNAL_DIR_DEL,
-    PREFS_SIGNAL_HORIZONTAL_TEXT
+    PREFS_SIGNAL_HORIZONTAL_TEXT,
+    PREFS_SIGNAL_SHOW_THUMBNAIL
 };
 /******************************************************************************/
 AppletPreferences*  applet_preferences_new (PanelApplet *applet);

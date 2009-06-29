@@ -92,6 +92,14 @@ applet_preferences_on_show_icon_pressed (GtkWidget* widget, AppletPreferences* s
 }
 /******************************************************************************/
 static void
+applet_preferences_on_show_thumbnail_toggled (GtkWidget* widget, AppletPreferences* self) {
+    g_assert (IS_APPLET_PREFERENCES (self));
+
+    self->menu_bar_prefs->browser_prefs->show_thumbnail =
+        gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+}
+/******************************************************************************/
+static void
 applet_preferences_on_horizontal_text_pressed (GtkWidget* widget, AppletPreferences* self) {
     g_assert (IS_APPLET_PREFERENCES (self));
 
@@ -238,6 +246,13 @@ applet_preferences_save_to_gconf (AppletPreferences *self) {
     panel_applet_gconf_set_bool (applet,
                                  KEY_HIDDEN_SHOW,
                                  self->menu_bar_prefs->browser_prefs->show_hidden,
+                                 &error);
+    utils_gerror_ok (&error, TRUE);
+
+    /* show thumbnails? */
+    panel_applet_gconf_set_bool (applet,
+                                 KEY_SHOW_THUMBNAILS,
+                                 self->menu_bar_prefs->browser_prefs->show_thumbnail,
                                  &error);
     utils_gerror_ok (&error, TRUE);
 
@@ -732,6 +747,7 @@ applet_preferences_make_dialog (AppletPreferences* self) {
     GtkWidget* show_icon;
     GtkWidget* icon_button;
     GtkWidget* show_hidden;
+    GtkWidget* show_thumbnail;
     GtkWidget* terminal;
     GtkWidget* editor;
     GtkWidget* horizontal_text;
@@ -782,6 +798,15 @@ applet_preferences_make_dialog (AppletPreferences* self) {
         g_signal_connect (G_OBJECT (show_hidden),
                           "toggled",
                           G_CALLBACK (applet_preferences_on_show_hidden_pressed),
+                          self);
+        
+        /***** show thumbnail *****/
+        show_thumbnail = GTK_WIDGET (gtk_builder_get_object (builder, "show_thumbnail"));
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (show_thumbnail),
+                                      mb_prefs->browser_prefs->show_thumbnail);
+        g_signal_connect (G_OBJECT (show_thumbnail),
+                          "toggled",
+                          G_CALLBACK (applet_preferences_on_show_thumbnail_toggled),
                           self);
 
         /***** horizontal text *****/
@@ -868,6 +893,13 @@ applet_preferences_load_from_gconf (PanelApplet* applet) {
     if (!utils_gerror_ok (&error, TRUE)) {
         mb_prefs->browser_prefs->show_hidden = DEFAULT_SHOW_HIDDEN;
         panel_applet_gconf_set_bool (applet, KEY_HIDDEN_SHOW, mb_prefs->browser_prefs->show_hidden, &error);
+        utils_gerror_ok (&error, TRUE);
+    }
+    /* show hidden files? */
+    mb_prefs->browser_prefs->show_thumbnail = panel_applet_gconf_get_bool (applet, KEY_SHOW_THUMBNAILS, &error);
+    if (!utils_gerror_ok (&error, TRUE)) {
+        mb_prefs->browser_prefs->show_thumbnail = DEFAULT_SHOW_THUMBNAILS;
+        panel_applet_gconf_set_bool (applet, KEY_SHOW_THUMBNAILS, mb_prefs->browser_prefs->show_thumbnail, &error);
         utils_gerror_ok (&error, TRUE);
     }
     /* terminal */

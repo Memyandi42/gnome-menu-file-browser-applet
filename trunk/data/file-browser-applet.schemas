@@ -13,6 +13,17 @@
       </schema>
 
       <schema>
+        <key>/schemas/apps/file-browser-applet/prefs/show_thumbnail</key>
+        <owner>file-browser-applet</owner>
+        <type>bool</type>
+        <default>TRUE</default>
+        <locale name="C">
+          <short>Show image and document thumbnails if they exists</short>
+          <long>Show image and document thumbnails if the exists</long>
+        </locale>
+      </schema>
+
+      <schema>
         <key>/schemas/apps/file-browser-applet/prefs/horizontal_text</key>
         <owner>file-browser-applet</owner>
         <type>bool</type>

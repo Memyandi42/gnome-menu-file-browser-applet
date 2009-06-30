@@ -1,3 +1,7 @@
+Version 0.6.4
+*************
+    * Made displaying of thumbnails a configuration option.
+
 Version 0.6.3
 *************
     * Added displaying of thumbnails (if available) instead of icons.

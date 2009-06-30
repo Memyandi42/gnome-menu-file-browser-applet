@@ -1,4 +1,4 @@
-File Browser Applet 0.6.3
+File Browser Applet 0.6.4
 ******************************
 File Browser Applet is an applet for the GNOME Panel. It lets you browse and
 open files in your home directory from the gnome panel, without having to open
@@ -25,7 +25,7 @@ Features
     * Fast keyboard navigation with mnemonics.
     * Drag 'n Drop from applet to Nautilus or Desktop to MOVE files.
     * Opened files added to "Recent Documents" list.
-    * Displays file's thumbnail if it exist.
+    * Option to display a file's thumbnail if it exist.
 
 Installation
 ************

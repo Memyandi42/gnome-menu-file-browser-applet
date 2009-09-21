@@ -170,8 +170,8 @@ context_menu_add_new_dir_callback (GtkWidget *menu_item, gchar *file_name) {
 
     GtkBuilder* builder = gtk_builder_new();
     /*gtk_builder_add_from_file (builder, BUILDER_UI_PATH, &error);*/
-    gchar *toplevel = "new_dir_dialog";
-    gtk_builder_add_objects_from_file (builder, BUILDER_UI_PATH, &toplevel, &error);
+    gchar *toplevel[] = {"new_dir_dialog", NULL};
+    gtk_builder_add_objects_from_file (builder, BUILDER_UI_PATH, toplevel, &error);
     if (!utils_gerror_ok(&error, TRUE)) {
         return;
     }

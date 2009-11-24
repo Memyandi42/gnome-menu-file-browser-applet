@@ -1,3 +1,8 @@
+Version 0.6.5
+*************
+    * Fixed bug #69 (thanks to Ivan Baldo for report and fix).
+    * Fixed bug #71
+
 Version 0.6.4
 *************
     * Made displaying of thumbnails a configuration option.

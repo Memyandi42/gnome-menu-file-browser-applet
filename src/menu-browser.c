@@ -347,7 +347,6 @@ menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    file_info->icon);
 
-
     garbage_add_item (self->priv->garbage, file_info->file_name);
     garbage_add_item (self->priv->garbage, file_info->display_name);
 
@@ -392,11 +391,12 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser *self) {
                           G_CALLBACK (menu_browser_populate_menu),
                           self);
 
-        g_signal_connect (GTK_WIDGET (menu_item),
-                          "button_press_event",
-                          G_CALLBACK (menu_browser_on_item_button_release),
-                          self);
-
+        /* This code is responsible for bug #71.
+         * See http://code.google.com/p/gnome-menu-file-browser-applet/issues/detail?id=71 */
+        /*g_signal_connect (GTK_WIDGET (menu_item),*/
+                          /*"button_press_event",*/
+                          /*G_CALLBACK (menu_browser_on_item_button_release),*/
+                          /*self);*/
     }
 }
 /******************************************************************************/

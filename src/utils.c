@@ -2,9 +2,9 @@
  * File:                utils.c
  * Created:             August 2007
  * Created by:          Axel von Bertoldi
- * Last Modified:       January 2008
+ * Last Modified:       November 2009
  * Last Modified by:    Axel von Bertoldi
- * (C) 2005-2008        Axel von Bertoldi
+ * (C) 2005-2009        Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free

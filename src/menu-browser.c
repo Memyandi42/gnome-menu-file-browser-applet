@@ -2,9 +2,9 @@
  * File:                menu-browser.c
  * Created:             September 2005
  * Created by:          Axel von Bertoldi
- * Last Modified:       August 2008
+ * Last Modified:       November 2009
  * Last Modified by:    Axel von Bertoldi
- * (C) 2005-2008        Axel von Bertoldi
+ * (C) 2005-2009        Axel von Bertoldi
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -445,7 +445,7 @@ menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
     g_signal_connect (current_menu,
                       "key_release_event",
                       G_CALLBACK (menu_browser_on_menu_key_release),
-                      self),
+                      self);
 
     /* add the dir name and events */
     menu_browser_add_menu_header (current_menu, current_path, self);

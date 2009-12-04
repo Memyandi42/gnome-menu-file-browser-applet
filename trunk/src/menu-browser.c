@@ -565,7 +565,7 @@ menu_browser_activate_main_menu (MenuBrowser *self) {
     menu_browser_populate_menu (GTK_WIDGET (self), self);
 
     gtk_menu_shell_select_first (GTK_MENU_SHELL (menu), FALSE);
-    gtk_menu_reposition (GTK_MENU (menu));
+    /*gtk_menu_reposition (GTK_MENU (menu));*/
     return TRUE;
 }
 /******************************************************************************/
@@ -604,6 +604,8 @@ menu_browser_new (const gchar* path,
                               /*"deselect",*/
                               /*G_CALLBACK (menu_browser_clean_up),*/
                               /*self);*/
+
+    menu_browser_populate_menu (GTK_WIDGET (self), self);
 
     return GTK_WIDGET (self);
 }

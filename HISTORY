@@ -1,7 +1,8 @@
 Version 0.6.5
 *************
     * Fixed bug #69 (thanks to Ivan Baldo for report and fix).
-    * Fixed bug #71
+    * Fixed bug #71.
+    * Fixed issue described by pedrib in bug #48 (but is not actually bug #48).
 
 Version 0.6.4
 *************

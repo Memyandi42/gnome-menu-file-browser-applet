@@ -68,21 +68,12 @@ SET (CPACK_SOURCE_PACKAGE_FILE_NAME
     "${EXEC}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 SET (CPACK_SOURCE_GENERATOR TGZ)
 SET (CPACK_SOURCE_IGNORE_FILES
-     "CMakeCache.txt"
-     #"cmake_install.cmake"
-     "${CPACK_SOURCE_PACKAGE_FILE_NAME}"
-     "*.tar.gz"
-     "CPack*"
-     #"cmake_uninstall.cmake"
-     "CMakeFiles"
-     "install_manifest.txt"
-     "Makefile"
-     "_CPack_Packages"
-     "po"
-     "progress.make"
+     "GNOME_FileBrowserApplet_Factory.server$"
+     "config.h$"
      ".svn"
      "build"
-     "doc")
+     "doc"
+     "po")
 INCLUDE (CPack)
 
 ADD_CUSTOM_TARGET (deb checkinstall -D --pkgname="${EXEC}"

@@ -38,10 +38,11 @@ enum {
 typedef struct _VfsFileInfo VfsFileInfo;
 /******************************************************************************/
 struct _VfsFileInfo {
-    gchar       *display_name; /* need to free this */
-    gchar       *file_name; /* need to free this */
-    GtkWidget   *icon; /* don't need to free this */
+    gchar       *display_name;  /* DO need to free this */
+    gchar       *file_name;     /* DO need to free this */
+    GtkWidget   *icon;          /* Don't need to free this */
     gboolean    is_executable;
+    gchar       *size;          /* DO need to free this */
 };
 /******************************************************************************/
 gboolean    vfs_file_is_executable   (const gchar *file_name);

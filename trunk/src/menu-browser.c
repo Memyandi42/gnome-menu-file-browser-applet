@@ -331,9 +331,12 @@ menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
         gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);    
         gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
     }
-    if (strlen (file_info->display_name) > MAX_FILE_NAME_LENGTH) {
-        gtk_widget_set_tooltip_text (menu_item, file_info->display_name);
-    }
+    gchar *tooltip = g_strdup_printf ("<span weight=\"bold\">Name:</span> %s\n"
+                                      "<span weight=\"bold\">Size:</span> %s",
+                                      file_info->display_name,
+                                      file_info->size);
+    gtk_widget_set_tooltip_markup (menu_item, tooltip);
+    g_free (tooltip);
 
     /* bold executable files */
     if (file_info->is_executable) {
@@ -349,6 +352,7 @@ menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
 
     garbage_add_item (self->priv->garbage, file_info->file_name);
     garbage_add_item (self->priv->garbage, file_info->display_name);
+    garbage_add_item (self->priv->garbage, file_info->size);
 
     g_object_set_data (G_OBJECT (menu_item),
                        G_OBJECT_DATA_NAME,

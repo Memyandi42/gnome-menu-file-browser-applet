@@ -33,6 +33,23 @@
 #include "config.h"
 
 /******************************************************************************/
+const gchar *size_units[] = {"bytes","KB","MB","GB","TB","HUGE",NULL};
+/******************************************************************************/
+/* Caller must free return value. */
+static inline gchar * vfs_human_file_size (guint64 size) {
+    int order_of_magnitude = 0;
+    double _size = size;
+    while (_size > 1024){
+        _size = _size / 1024;
+        order_of_magnitude++;
+    }
+    gchar *human_size = g_strdup_printf ("%.1f %s", _size,
+                                         (order_of_magnitude <= 5 ?
+                                          size_units[order_of_magnitude] :
+                                          size_units[5]));
+    return human_size;
+}
+/******************************************************************************/
 /* sort the structures based on the file's display_name */
 static inline gint
 vfs_sort_array (const VfsFileInfo **i1, const VfsFileInfo **i2) {
@@ -278,7 +295,7 @@ vfs_get_dir_listings (GPtrArray *files,
                       gboolean show_thumbnail,
                       const gchar *path) {
     GError *error = NULL;
-    const gchar *_attributes = "standard::type,standard::is-hidden,standard::name,standard::display-name,access::can-execute";
+    const gchar *_attributes = "standard::type,standard::is-hidden,standard::name,standard::display-name,access::can-execute,standard::size";
     gchar *attributes = show_thumbnail ? g_strdup_printf ("%s,thumbnail::path", _attributes) : g_strdup(_attributes);
 
     GFile *file = g_file_new_for_path (path);
@@ -328,6 +345,8 @@ vfs_get_dir_listings (GPtrArray *files,
         else {
             vfs_file_info->icon = vfs_get_icon_for_file (vfs_file_info->file_name); 
         }
+
+        vfs_file_info->size = vfs_human_file_size (g_file_info_get_size (file_info));
 
         /* add it to the array */
         if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {

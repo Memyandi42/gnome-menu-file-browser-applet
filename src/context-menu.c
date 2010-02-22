@@ -365,7 +365,49 @@ context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
 }
 /******************************************************************************/
 static void
-context_menu_populate (const gchar *file_name, GtkWidget *menu) {
+context_menu_add_open_terminal (const gchar *file_name,
+                                GtkWidget *menu,
+                                ContextMenuPrefs prefs) {
+    if (!vfs_file_is_directory (file_name)) return;
+
+    GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open _Terminal Here"));
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                   gtk_image_new_from_icon_name ("gnome-terminal",
+                                                                 GTK_ICON_SIZE_MENU));
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+    context_menu_setup_callback (prefs.terminal,
+                                 file_name,
+                                 GTK_MENU_ITEM (menu_item),
+                                 GTK_MENU (menu));
+}
+/******************************************************************************/
+static void
+context_menu_add_edit_file (const gchar *file_name,
+                            GtkWidget *menu,
+                            ContextMenuPrefs prefs) {
+    if (vfs_file_is_directory (file_name)) return;
+
+    GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Edit File"));
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                   gtk_image_new_from_stock (GTK_STOCK_EDIT,
+                                                             GTK_ICON_SIZE_MENU));
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+    context_menu_setup_callback (prefs.editor,
+                                 file_name,
+                                 GTK_MENU_ITEM (menu_item),
+                                 GTK_MENU (menu));
+}
+/******************************************************************************/
+static void
+context_menu_populate (const gchar *file_name,
+                       GtkWidget *menu,
+                       ContextMenuPrefs prefs) {
+
+    context_menu_add_open_terminal (file_name, menu, prefs);
+    context_menu_add_edit_file (file_name, menu, prefs);
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), gtk_separator_menu_item_new());
     context_menu_add_open_with_item (file_name, menu);
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), gtk_separator_menu_item_new());
     context_menu_add_new_dir (file_name, menu);
@@ -379,7 +421,9 @@ context_menu_populate (const gchar *file_name, GtkWidget *menu) {
 }
 /******************************************************************************/
 gboolean
-context_menu_display (const gchar *file_name, GtkWidget *parent_menu_item) {
+context_menu_display (const gchar *file_name,
+                      GtkWidget *parent_menu_item,
+                      ContextMenuPrefs prefs) {
     int event_button;
     int event_time;
 
@@ -410,7 +454,7 @@ context_menu_display (const gchar *file_name, GtkWidget *parent_menu_item) {
                       G_CALLBACK (restore_grabs),
                       parent_menu_item);
 
-    context_menu_populate (file_name, menu);
+    context_menu_populate (file_name, menu, prefs);
 
     /* disable the menu browser to get around the focus bug */
     tree_set_sensitive (parent_menu_item, FALSE);

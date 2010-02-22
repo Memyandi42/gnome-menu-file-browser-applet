@@ -24,7 +24,7 @@
         <oaf_attribute name="name" type="string" value="File Browser"/>
         <oaf_attribute name="description" type="string" value="File browser applet for the GNOME2 panel"/>
         <oaf_attribute name="panel:category" type="string" value="Utilities"/>
-        <oaf_attribute name="panel:icon" type="string" value="${EXEC}.png"/>
+        <oaf_attribute name="panel:icon" type="string" value="${CMAKE_INSTALL_PREFIX}/share/pixmaps/${EXEC}.png"/>
     </oaf_server>
 
 </oaf_info>

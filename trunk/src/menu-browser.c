@@ -99,9 +99,15 @@ menu_browser_on_file_middle_click (const gchar *file_name_and_path, MenuBrowser 
 }
 /******************************************************************************/
 static gboolean
-menu_browser_on_file_right_click (const gchar *file_name_and_path, GtkWidget *menu_item) {
+menu_browser_on_file_right_click (const gchar *file_name_and_path,
+                                  GtkWidget *menu_item,
+                                  MenuBrowser *self) {
+    g_assert (IS_MENU_BROWSER (self));
 #ifdef ENABLE_CONTEXT_MENU
-    return context_menu_display (file_name_and_path, menu_item);
+    ContextMenuPrefs prefs;
+    prefs.terminal = self->prefs->terminal; 
+    prefs.editor = self->prefs->editor;
+    return context_menu_display (file_name_and_path, menu_item, prefs);
 #else
     utils_show_dialog (_("Error"),
                        _("Right-click on file action not yet implemented."),
@@ -158,7 +164,7 @@ menu_browser_on_item_button_release (GtkWidget *menu_item,
 
         g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
         g_object_set_data (G_OBJECT (menu_item), "button_event", event);
-        return menu_browser_on_file_right_click (path, menu_item);
+        return menu_browser_on_file_right_click (path, menu_item, self);
     }
 
     return FALSE;
@@ -203,7 +209,7 @@ menu_browser_on_menu_key_release (GtkWidget *menu,
              (event->state & gtk_accelerator_get_default_mod_mask ()) == GDK_SHIFT_MASK)){
         g_object_set_data (G_OBJECT (menu_item), "menu_browser", self);
         g_object_set_data (G_OBJECT (menu_item), "button_event", event);
-        return menu_browser_on_file_right_click (path, menu_item);
+        return menu_browser_on_file_right_click (path, menu_item, self);
     }
     return FALSE;
 }
@@ -331,8 +337,7 @@ menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
         gtk_label_set_max_width_chars (GTK_LABEL (label), MAX_FILE_NAME_LENGTH);    
         gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_MIDDLE);
     }
-    gchar *tooltip = g_strdup_printf ("<span weight=\"bold\">Name:</span> %s\n"
-                                      "<span weight=\"bold\">Size:</span> %s",
+    gchar *tooltip = g_strdup_printf ("%s - %s",
                                       file_info->display_name,
                                       file_info->size);
     gtk_widget_set_tooltip_markup (menu_item, tooltip);
@@ -404,7 +409,7 @@ menu_browser_add_folders (GtkWidget *menu, GPtrArray *dirs, MenuBrowser *self) {
     }
 }
 /******************************************************************************/
-static void
+static GtkWidget*
 menu_browser_add_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
     g_assert (IS_MENU_BROWSER (self));
 
@@ -423,6 +428,7 @@ menu_browser_add_menu_header (GtkWidget *menu, gchar *path, MenuBrowser *self) {
 
     gtk_menu_shell_append (GTK_MENU_SHELL (menu),
                            gtk_separator_menu_item_new());
+    return menu_item;
 }
 /******************************************************************************/
 static void
@@ -452,14 +458,21 @@ menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
                       self);
 
     /* add the dir name and events */
-    menu_browser_add_menu_header (current_menu, current_path, self);
+    GtkWidget *menu_header = menu_browser_add_menu_header (current_menu, current_path, self);
 
     /* read the contents of the dir. */
-    error = vfs_get_dir_listings (files,
-                                  dirs,
+    error = vfs_get_dir_listings (files, dirs,
                                   self->prefs->show_hidden,
                                   self->prefs->show_thumbnail,
                                   current_path);
+
+    gchar *display_name  = g_strdup (g_path_get_basename(current_path));
+    gchar *tooltip = g_strdup_printf ("%s - %d item%s", display_name, files->len + dirs->len,
+                                      ((dirs->len + files->len) > 1 ? "s" : ""));
+    gtk_widget_set_tooltip_text (parent_menu_item, tooltip);
+    gtk_widget_set_tooltip_text (menu_header, tooltip);
+    g_free (tooltip);
+    g_free (display_name);
 
     /* add the folders*/
     menu_browser_add_folders (current_menu, dirs, self);

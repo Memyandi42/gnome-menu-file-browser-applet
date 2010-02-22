@@ -28,6 +28,14 @@
 
 #include <gtk/gtk.h>
 
-gboolean context_menu_display (const gchar *file_name, GtkWidget *menu_item);
+/******************************************************************************/
+typedef struct _ContextMenuPrefs ContextMenuPrefs;
+/******************************************************************************/
+struct _ContextMenuPrefs {
+    gchar       *terminal;
+    gchar       *editor;
+};
+/******************************************************************************/
+gboolean context_menu_display (const gchar *file_name, GtkWidget *menu_item, ContextMenuPrefs prefs);
 
 #endif

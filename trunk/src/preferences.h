@@ -44,6 +44,7 @@ G_BEGIN_DECLS
 #define KEY_ICON_NAME       "icon"
 #define KEY_ICON_SHOW       "show_icon"
 #define KEY_HIDDEN_SHOW     "show_hidden"
+#define KEY_HIDE_FILES      "hide_files"
 #define KEY_TERMINAL        "terminal"
 #define KEY_EDITOR          "editor"
 #define KEY_HORIZONTAL_TEXT "horizontal_text"
@@ -57,6 +58,7 @@ G_BEGIN_DECLS
 #define DEFAULT_TERMINAL        "gnome-terminal"
 #define DEFAULT_EDITOR          "gedit"
 #define DEFAULT_SHOW_HIDDEN     FALSE
+#define DEFAULT_HIDE_FILES      FALSE
 #define DEFAULT_HORIZONTAL_TEXT TRUE
 #define DEFAULT_SHOW_THUMBNAILS TRUE
 /******************************************************************************/
@@ -71,6 +73,7 @@ struct _BrowserPrefs {
     gchar       *terminal;
     gchar       *editor;
     gboolean    show_hidden;
+    gboolean    hide_files;
     gboolean    show_thumbnail;
 };
 struct _MenuBarPrefs {

@@ -60,10 +60,6 @@ enum
 };
 /******************************************************************************/
 static guint applet_preferences_signals[LAST_SIGNAL] = { 0 };
-/* this is bad, but I need to get at the button from all over the file to
- * update it's state. The other option is make it private member. */
-/*static GtkWidget *revert_button = NULL;*/
-/******************************************************************************/
 static gpointer applet_preferences_parent_class = NULL;
 static void applet_preferences_dispose (GObject* obj);
 /******************************************************************************/
@@ -85,10 +81,6 @@ applet_preferences_on_show_icon_pressed (GtkWidget* widget, AppletPreferences* s
                    applet_preferences_signals [PREFS_CHANGED],
                    0,
                    signal_data);
-
-    /* update the state of the revert button. A pref has changed so the button
-     * should now be sensitive  */
-    /*gtk_widget_set_sensitive (revert_button, TRUE);*/
 }
 /******************************************************************************/
 static void
@@ -127,10 +119,15 @@ applet_preferences_on_show_hidden_pressed (GtkWidget* widget, AppletPreferences*
     /* get the new state from the widget and update the prefs structure. No
      * need to let the menu bar or browser object know */
     self->menu_bar_prefs->browser_prefs->show_hidden = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+}
+/******************************************************************************/
+static void
+applet_preferences_on_hide_files_pressed (GtkWidget* widget, AppletPreferences* self) {
+    g_assert (IS_APPLET_PREFERENCES (self));
 
-    /* update the state of the revert button. A pref has changed so the button
-     * should now be sensitive  */
-    /*gtk_widget_set_sensitive (revert_button, TRUE);*/
+    /* get the new state from the widget and update the prefs structure. No
+     * need to let the menu bar or browser object know */
+    self->menu_bar_prefs->browser_prefs->hide_files = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
 }
 /******************************************************************************/
 static void
@@ -144,10 +141,6 @@ applet_preferences_on_terminal_changed (GtkWidget* widget, AppletPreferences* se
     tmp = self->menu_bar_prefs->browser_prefs->terminal;
     g_free (tmp);
     self->menu_bar_prefs->browser_prefs->terminal = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-
-    /* update the state of the revert button. A pref has changed so the button
-     * should now be sensitive  */
-    /*gtk_widget_set_sensitive (revert_button, TRUE);*/
 }
 /******************************************************************************/
 static void
@@ -161,10 +154,6 @@ applet_preferences_on_editor_changed (GtkWidget* widget, AppletPreferences* self
     tmp = self->menu_bar_prefs->browser_prefs->editor;
     g_free (tmp);
     self->menu_bar_prefs->browser_prefs->editor = g_strdup (gtk_entry_get_text (GTK_ENTRY (widget)));
-
-    /* update the state of the revert button. A pref has changed so the button
-     * should now be sensitive  */
-    /*gtk_widget_set_sensitive (revert_button, TRUE);*/
 }
 /******************************************************************************/
 static void
@@ -222,7 +211,6 @@ applet_preferences_on_icon_select (GtkWidget* button, AppletPreferences* self) {
                            applet_preferences_signals [PREFS_CHANGED],
                            0,
                            signal_data);
-            /*gtk_widget_set_sensitive (revert_button, TRUE);*/
         }
         else {
             /* they chose the same icon again! */
@@ -230,8 +218,7 @@ applet_preferences_on_icon_select (GtkWidget* button, AppletPreferences* self) {
         }
 
     }
-    /* clean up and update the state of the revert button. A pref has changed
-     * so the button should now be sensitive  */
+
     gtk_widget_destroy (file_chooser_dialog);
 }
 /******************************************************************************/
@@ -314,20 +301,14 @@ applet_preferences_dialog_response (GtkWidget* window, gint response, AppletPref
 
     /* figure out what button closed the dialog and take the appropriate action */
     switch (response) {
-        case RESPONSE_REVERT:
-            /* revert to the saved config */
-            /*gtk_widget_set_sensitive (revert_button, FALSE);*/
-            break;
-
         case GTK_RESPONSE_CLOSE:
             /* save the current configuration */
             applet_preferences_save_to_gconf (self);
-            /*gtk_widget_set_sensitive (revert_button, FALSE);*/
             gtk_widget_hide (window);
             break;
 
         case GTK_RESPONSE_DELETE_EVENT:
-            /* neither save nor revert */
+            /* don't save it */
             gtk_widget_hide (window);
             break;
     }
@@ -374,9 +355,6 @@ applet_preferences_label_cell_edited (GtkCellRenderer   *cell,
                    applet_preferences_signals [PREFS_CHANGED],
                    0,
                    signal_data);
-
-    /* update the revert button*/
-    /*gtk_widget_set_sensitive (revert_button, TRUE);*/
 }
 /******************************************************************************/
 static void
@@ -444,9 +422,6 @@ applet_preferences_path_cell_activated (GtkTreeView       *tree_view,
                            applet_preferences_signals [PREFS_CHANGED],
                            0,
                            signal_data);
-
-            /* update the revert button*/
-            /*gtk_widget_set_sensitive (revert_button, TRUE);*/
         }
     }
     gtk_widget_destroy (file_chooser_dialog);
@@ -506,9 +481,6 @@ applet_preferences_on_add_dir_clicked (GtkWidget* widget, AppletPreferences* sel
                        applet_preferences_signals [PREFS_CHANGED],
                        0,
                        signal_data);
-
-        /* update the revert button*/
-        /*gtk_widget_set_sensitive (revert_button, TRUE);*/
     }
     gtk_widget_destroy (file_chooser_dialog);
 }
@@ -556,9 +528,6 @@ applet_preferences_on_rem_dir_clicked (GtkWidget* widget, AppletPreferences* sel
                 applet_preferences_signals [PREFS_CHANGED],
                 0,
                 signal_data);
-
-        /* update the revert button*/
-        /*gtk_widget_set_sensitive (revert_button, TRUE);*/
     }
 }
 /******************************************************************************/
@@ -603,9 +572,6 @@ applet_preferences_on_down_dir_clicked (GtkWidget* widget, AppletPreferences* se
                            applet_preferences_signals [PREFS_CHANGED],
                            0,
                            signal_data);
-
-            /* update the revert button*/
-            /*gtk_widget_set_sensitive (revert_button, TRUE);*/
         }
     }
 }
@@ -656,9 +622,6 @@ applet_preferences_on_up_dir_clicked (GtkWidget* widget, AppletPreferences* self
                            applet_preferences_signals [PREFS_CHANGED],
                            0,
                            signal_data);
-
-            /* update the revert button*/
-            /*gtk_widget_set_sensitive (revert_button, TRUE);*/
         }
         gtk_tree_path_free (path);
     }
@@ -798,6 +761,15 @@ applet_preferences_make_dialog (AppletPreferences* self) {
         g_signal_connect (G_OBJECT (show_hidden),
                           "toggled",
                           G_CALLBACK (applet_preferences_on_show_hidden_pressed),
+                          self);
+
+        /***** hide files *****/
+        GtkWidget *hide_files = GTK_WIDGET (gtk_builder_get_object (builder, "hide_files_check"));
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hide_files),
+                                      mb_prefs->browser_prefs->hide_files);
+        g_signal_connect (G_OBJECT (hide_files),
+                          "toggled",
+                          G_CALLBACK (applet_preferences_on_hide_files_pressed),
                           self);
         
         /***** show thumbnail *****/

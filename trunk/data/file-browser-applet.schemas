@@ -79,6 +79,17 @@
       </schema>
 
       <schema>
+        <key>/schemas/apps/file-browser-applet/prefs/hide_files</key>
+        <owner>file-browser-applet</owner>
+        <type>bool</type>
+        <default>FALSE</default>
+        <locale name="C">
+          <short>Don't show files when displaying a folder's contents.</short>
+          <long>Don't show files when displaying a folder's contents.</long>
+        </locale>
+      </schema>
+
+      <schema>
         <key>/schemas/apps/file-browser-applet/prefs/labels</key>
         <owner>file-browser-applet</owner>
         <type>list</type>

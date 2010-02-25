@@ -33,6 +33,7 @@
 #define BUILDER_UI_PATH  "${CMAKE_INSTALL_BUILDER_UI_DIR}/${EXEC}.ui"
 #define PIXMAP_PATH      "${CMAKE_INSTALL_PREFIX}/share/pixmaps/"
 #define LOCALEDIR        "${CMAKE_INSTALL_PREFIX}/share/locale/"
+#define VERSION          "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
 
 #define DEBUG 0
 #cmakedefine ENABLE_HELP_DOC

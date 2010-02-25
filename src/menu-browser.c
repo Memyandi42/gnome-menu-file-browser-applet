@@ -464,6 +464,7 @@ menu_browser_populate_menu (GtkWidget *parent_menu_item, MenuBrowser *self) {
     error = vfs_get_dir_listings (files, dirs,
                                   self->prefs->show_hidden,
                                   self->prefs->show_thumbnail,
+                                  self->prefs->hide_files,
                                   current_path);
 
     gchar *display_name  = g_strdup (g_path_get_basename(current_path));

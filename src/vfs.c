@@ -293,6 +293,7 @@ vfs_get_dir_listings (GPtrArray *files,
                       GPtrArray *dirs,
                       gboolean show_hidden,
                       gboolean show_thumbnail,
+                      gboolean hide_files,
                       const gchar *path) {
     GError *error = NULL;
     const gchar *_attributes = "standard::type,standard::is-hidden,standard::name,standard::display-name,access::can-execute,standard::size";
@@ -320,6 +321,11 @@ vfs_get_dir_listings (GPtrArray *files,
             g_object_unref (file_info);
             continue;
         }
+        if (g_file_info_get_file_type (file_info) != G_FILE_TYPE_DIRECTORY && hide_files) {
+            g_object_unref (file_info);
+            continue;
+        }
+
         VfsFileInfo *vfs_file_info = g_new0 (VfsFileInfo ,1);
         vfs_file_info->icon = NULL;
 

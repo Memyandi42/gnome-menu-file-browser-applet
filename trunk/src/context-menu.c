@@ -380,6 +380,21 @@ context_menu_add_open_terminal (const gchar *file_name,
                                  file_name,
                                  GTK_MENU_ITEM (menu_item),
                                  GTK_MENU (menu));
+
+    menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open Terminal As _Root"));
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                   gtk_image_new_from_icon_name ("gksu-root-terminal",
+                                                                 GTK_ICON_SIZE_MENU));
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+    gchar *cmd = g_strdup_printf ("gksu %s", prefs.terminal);
+
+    context_menu_setup_callback (cmd,
+                                 file_name,
+                                 GTK_MENU_ITEM (menu_item),
+                                 GTK_MENU (menu));
+    g_free (cmd);
+
 }
 /******************************************************************************/
 static void
@@ -398,6 +413,39 @@ context_menu_add_edit_file (const gchar *file_name,
                                  file_name,
                                  GTK_MENU_ITEM (menu_item),
                                  GTK_MENU (menu));
+
+
+    menu_item = gtk_image_menu_item_new_with_mnemonic (_("Edit File As _Root"));
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                   gtk_image_new_from_icon_name (GTK_STOCK_EDIT,
+                                                                 GTK_ICON_SIZE_MENU));
+    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+    gchar *cmd = g_strdup_printf ("gksu %s", prefs.editor);
+
+    context_menu_setup_callback (cmd,
+                                 file_name,
+                                 GTK_MENU_ITEM (menu_item),
+                                 GTK_MENU (menu));
+    g_free (cmd);
+
+
+    if (vfs_file_is_executable (file_name)) {
+        menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Run As Root"));
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                       gtk_image_new_from_icon_name ("gksu-root-terminal",
+                                                                     GTK_ICON_SIZE_MENU));
+        gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+
+        gchar *cmd = g_strdup_printf ("gksu %s", file_name);
+
+        context_menu_setup_callback (cmd,
+                                     NULL,
+                                     GTK_MENU_ITEM (menu_item),
+                                     GTK_MENU (menu));
+        g_free (cmd);
+    }
+
 }
 /******************************************************************************/
 static void

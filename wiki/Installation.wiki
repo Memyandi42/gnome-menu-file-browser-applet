@@ -1,6 +1,8 @@
 #labels Phase-Deploy
 Instructions for installing menu-file-browser-applet
 
+*NOTE 1: From now on .Deb packages will be created and hosted [https://launchpad.net/~file-browser-applet-dev/+archive/ppa here]*
+
 =Dependencies=
 You will need to have the binary and development files (and all their dependencies) for the following packages installed to compile this program:
 
@@ -49,24 +51,26 @@ The default is CMAKE_INSTALL_PREFIX/share/file-browser-applet/builder
 CMAKE_INSTALL_BONOBO_DIR specifies the installation bonobo Server file.
 The default is CMAKE_INSTALL_LIB_PREFIX/bonobo/servers
 
-To configure using the defaults, run the following command at the project root folder:
+"Out of source" builds are recommended. To configure using the defaults, run the following command at the project root folder:
 {{{
-cmake .
+mkdir build
+cd build
+cmake ../
 }}}
 
-To specify an option, run (with the trailing period):
+To specify an option, run:
 {{{
-cmake -D CMAKE_OPTION=/new/option/value .
+cmake -D CMAKE_OPTION=/new/option/value ../
 }}}
 
 =Compiling=
-To compile, at the project's root directory, execute:
+To compile execute:
 {{{
 make
 }}}
 
 =Installing/Uninstalling=
-To install, at the project's root directory, with root privileges execute:
+To install, with root privileges execute:
 {{{
 make install
 }}}

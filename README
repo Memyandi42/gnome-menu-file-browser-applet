@@ -21,7 +21,7 @@ Features
     * Keyboard activation (a.k.a. hotkey) of root menu (via libgtkhotkey).
       Currently set as <Super>h.
     * Context menu with some useful actions such as open-with, new folder here,
-      delete file/folder, create/extract archive, etc.
+      delete file/folder, create/extract archive, open/edit/run as root, etc.
     * Fast keyboard navigation with mnemonics.
     * Drag 'n Drop from applet to Nautilus or Desktop to MOVE files.
     * Opened files added to "Recent Documents" list.

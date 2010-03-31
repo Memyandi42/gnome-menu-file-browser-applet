@@ -369,32 +369,42 @@ context_menu_add_open_terminal (const gchar *file_name,
                                 GtkWidget *menu,
                                 ContextMenuPrefs prefs) {
     if (!vfs_file_is_directory (file_name)) return;
-
-    GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open _Terminal Here"));
-    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-                                   gtk_image_new_from_icon_name ("gnome-terminal",
-                                                                 GTK_ICON_SIZE_MENU));
-    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-
-    context_menu_setup_callback (prefs.terminal,
-                                 file_name,
-                                 GTK_MENU_ITEM (menu_item),
-                                 GTK_MENU (menu));
-
-    menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open Terminal As _Root"));
-    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
-                                   gtk_image_new_from_icon_name ("gksu-root-terminal",
-                                                                 GTK_ICON_SIZE_MENU));
-    gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
-
-    gchar *cmd = g_strdup_printf ("gksu %s", prefs.terminal);
-
-    context_menu_setup_callback (cmd,
-                                 file_name,
-                                 GTK_MENU_ITEM (menu_item),
-                                 GTK_MENU (menu));
-    g_free (cmd);
-
+    {
+        GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open _Terminal Here"));
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                       gtk_image_new_from_icon_name ("gnome-terminal",
+                                                                     GTK_ICON_SIZE_MENU));
+        gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+        context_menu_setup_callback (prefs.terminal, file_name,
+                                     GTK_MENU_ITEM (menu_item),
+                                     GTK_MENU (menu));
+    }
+    {
+        GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Open As Root"));
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                       gtk_image_new_from_icon_name ("file-manager",
+                                                                     GTK_ICON_SIZE_MENU));
+        gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+        gchar *exec = vfs_get_default_mime_application (file_name);
+        gchar *cmd = g_strdup_printf ("gksu %s", exec);
+        context_menu_setup_callback (cmd, file_name,
+                                     GTK_MENU_ITEM (menu_item),
+                                     GTK_MENU (menu));
+        g_free (cmd);
+        g_free (exec);
+    }
+    {
+        GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open Terminal As _Root"));
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
+                                       gtk_image_new_from_icon_name ("gksu-root-terminal",
+                                                                     GTK_ICON_SIZE_MENU));
+        gtk_menu_shell_append (GTK_MENU_SHELL (menu), menu_item);
+        gchar *cmd = g_strdup_printf ("gksu %s", prefs.terminal);
+        context_menu_setup_callback (cmd, file_name,
+                                     GTK_MENU_ITEM (menu_item),
+                                     GTK_MENU (menu));
+        g_free (cmd);
+    }
 }
 /******************************************************************************/
 static void

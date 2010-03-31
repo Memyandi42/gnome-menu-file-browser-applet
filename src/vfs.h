@@ -53,6 +53,7 @@ gboolean    vfs_file_exists          (const gchar *file_name);
 gchar*      vfs_get_dir_listings        (GPtrArray *files, GPtrArray *dirs, gboolean show_hidden, gboolean show_thumbnail, gboolean hide_files, const gchar *path);
 GList*      vfs_get_all_mime_applications (const gchar *file_name);
 GtkWidget*  vfs_get_icon_for_file       (const gchar *file_name);
+gchar*      vfs_get_default_mime_application (const gchar *file_name);
 
 gboolean    vfs_launch_application      (const gchar *const*args);
 gboolean    vfs_file_do_default_action  (const gchar *file_name);

@@ -1,9 +1,10 @@
 Version 0.6.6
 *************
     * Added improved tooltips.
-    * Added three new context menu actions for files ("Edit File", "Edit As Root" and "Execute As Root").
-    * Added three new context menu actions for folders ("Open As Root" and "Open In Terminal", Open In Terminal As Root").
-    * Added "hide files" configuration option.
+    * Fixed bug #76 (Added "Edit File", "Edit File As Root", "Execute File as
+      As Root", "Open Folder As Root", "Open Folder In Terminal" and " Open
+      Folder In Terminal As Root" context menu actions).
+    * Fixed bug #75 ("hide files" configuration option).
 
 Version 0.6.5
 *************

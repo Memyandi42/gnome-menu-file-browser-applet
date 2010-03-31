@@ -1,0 +1,45 @@
+/*
+ * File:                utils.h
+ * Created:             August 2007
+ * Created by:          Axel von Bertoldi
+ * Last Modified:       November 2009
+ * Last Modified by:    Axel von Bertoldi
+ * (C) 2005-2009        Axel von Bertoldi
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to:
+ * The Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor
+ * Boston, MA 02110-1301, USA.
+ */
+
+#ifndef UTILS_H
+#define UTILS_H
+
+#include <gtk/gtk.h>
+
+/******************************************************************************/
+typedef GPtrArray *Garbage;
+/******************************************************************************/
+void        garbage_empty (Garbage *garabage, gboolean reuse);
+void        garbage_init  (Garbage *garabage);
+void        garbage_add_item (Garbage garabage, gpointer item);
+/******************************************************************************/
+gboolean    utils_gerror_ok (GError **error, gboolean show_error);
+void        utils_show_dialog (const gchar *title, const gchar *message, GtkMessageType type);
+GtkWidget*  utils_get_scaled_image_from_file (const gchar *file_name, int size);
+gchar*      utils_escape_str (const gchar *str, const gchar *old_token, const gchar *new_token);
+GSList*     g_slist_swap_data (GSList *list, guint index);
+gchar**     g_strv_new (guint size);
+/******************************************************************************/
+#endif

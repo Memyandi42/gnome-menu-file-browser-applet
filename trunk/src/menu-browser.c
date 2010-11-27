@@ -328,6 +328,7 @@ menu_browser_entry_new (VfsFileInfo *file_info, MenuBrowser *self) {
     gchar *tmp_str = utils_escape_str (file_info->display_name, "_", "__");
     gchar *escaped_str = g_strdup_printf ("_%s", tmp_str);
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (escaped_str);
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     g_free (escaped_str);
     g_free (tmp_str);
 
@@ -603,6 +604,7 @@ menu_browser_new (const gchar* path,
 
     garbage_init(&(self->priv->garbage));
 
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (self), TRUE);
     GtkWidget *item_label = gtk_label_new (label);
     gtk_misc_set_alignment (GTK_MISC (item_label), 0.0, 0.5);
     gtk_container_add (GTK_CONTAINER (self), item_label);

@@ -203,6 +203,7 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
     if (!vfs_file_is_directory (file_name)) return;
 
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_New Folder Here"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_stock (GTK_STOCK_NEW,
                                                              GTK_ICON_SIZE_MENU));
@@ -219,6 +220,7 @@ context_menu_add_new_dir (const gchar *file_name, GtkWidget *menu) {
 static void
 context_menu_add_burn (const gchar *file_name, GtkWidget *menu) {
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Create CD/DVD"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_icon_name ("nautilus-cd-burner",
                                                                  GTK_ICON_SIZE_MENU));
@@ -235,6 +237,7 @@ context_menu_add_compile_tex (const gchar *file_name, GtkWidget *menu) {
     if (!g_str_has_suffix (file_name, "tex")) return;
 
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Build Latex Document"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_icon_name ("build",
                                                                  GTK_ICON_SIZE_MENU));
@@ -286,6 +289,7 @@ context_menu_add_archive_action (const gchar *file_name, GtkWidget *menu) {
     }
 
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (archive_label);
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_icon_name ("package",
                                                                  GTK_ICON_SIZE_MENU));
@@ -305,6 +309,7 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
     g_return_if_fail (root != NULL);
 
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Open With"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_stock (GTK_STOCK_OPEN,
                                                              GTK_ICON_SIZE_MENU));
@@ -316,6 +321,7 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 
     while (apps != NULL) {
         menu_item = gtk_image_menu_item_new_with_label (g_app_info_get_name (apps->data));
+        gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                        gtk_image_new_from_gicon (g_app_info_get_icon (apps->data),
                                                                  GTK_ICON_SIZE_MENU));
@@ -336,6 +342,7 @@ context_menu_add_open_with_item (const gchar *file_name, GtkWidget *menu) {
 static void
 context_menu_add_trash_item (const gchar *file_name, GtkWidget *menu) {
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Move to Trash"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                                         gtk_image_new_from_icon_name ("user-trash-full",
                                                                                       GTK_ICON_SIZE_MENU));
@@ -371,6 +378,7 @@ context_menu_add_open_terminal (const gchar *file_name,
     if (!vfs_file_is_directory (file_name)) return;
     {
         GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open _Terminal Here"));
+        gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                        gtk_image_new_from_icon_name ("gnome-terminal",
                                                                      GTK_ICON_SIZE_MENU));
@@ -381,6 +389,7 @@ context_menu_add_open_terminal (const gchar *file_name,
     }
     {
         GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Open As Root"));
+        gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                        gtk_image_new_from_icon_name ("file-manager",
                                                                      GTK_ICON_SIZE_MENU));
@@ -395,6 +404,7 @@ context_menu_add_open_terminal (const gchar *file_name,
     }
     {
         GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("Open Terminal As _Root"));
+        gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                        gtk_image_new_from_icon_name ("gksu-root-terminal",
                                                                      GTK_ICON_SIZE_MENU));
@@ -414,6 +424,7 @@ context_menu_add_edit_file (const gchar *file_name,
     if (vfs_file_is_directory (file_name)) return;
 
     GtkWidget *menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Edit File"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_stock (GTK_STOCK_EDIT,
                                                              GTK_ICON_SIZE_MENU));
@@ -426,6 +437,7 @@ context_menu_add_edit_file (const gchar *file_name,
 
 
     menu_item = gtk_image_menu_item_new_with_mnemonic (_("Edit File As _Root"));
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                    gtk_image_new_from_icon_name (GTK_STOCK_EDIT,
                                                                  GTK_ICON_SIZE_MENU));
@@ -442,6 +454,7 @@ context_menu_add_edit_file (const gchar *file_name,
 
     if (vfs_file_is_executable (file_name)) {
         menu_item = gtk_image_menu_item_new_with_mnemonic (_("_Run As Root"));
+        gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (menu_item), TRUE);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (menu_item),
                                        gtk_image_new_from_icon_name ("gksu-root-terminal",
                                                                      GTK_ICON_SIZE_MENU));

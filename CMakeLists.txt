@@ -10,7 +10,7 @@ SET (EXEC file-browser-applet)
 ################################################################################
 SET (VERSION_MAJOR 0)
 SET (VERSION_MINOR 6)
-SET (VERSION_PATCH 6)
+SET (VERSION_PATCH 7)
 
 # Install path options
 ################################################################################

@@ -103,7 +103,7 @@ file_browser_applet_display_about_dialog (GtkWidget *widget) {
     g_object_set (about_dialog, 
                   "name", _("File Browser Applet"),
                   "version", VERSION,
-                  "copyright", _("Copyright \xc2\xa9 2006-2009 Axel von Bertoldi."),
+                  "copyright", _("Copyright \xc2\xa9 2006-2010 Axel von Bertoldi."),
                   "comments", _("Browse and open files in your home directory from the panel"),
                   "authors", authors,
                   "documenters", documenters,
